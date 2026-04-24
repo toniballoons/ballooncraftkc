@@ -1,0 +1,389 @@
+// ============================================================
+// BalloonCraft — SEO Utility Functions
+// Pure functions — no side effects, no imports from React or Supabase
+// ============================================================
+
+// ── Controlled vocabulary ────────────────────────────────────
+
+export const SERVICE_TYPES = [
+  'Balloon Arch',
+  'Balloon Garland',
+  'Balloon Column',
+  'Balloon Wall',
+  'Photo Backdrop',
+  'Balloon Sculpture',
+  'Balloon Bouquet',
+  'Balloon Ceiling',
+  'Marquee Letters',
+  'Custom Installation',
+];
+
+export const EVENT_TYPES = [
+  'Wedding',
+  'Birthday',
+  'Corporate',
+  'Baby Shower',
+  'Graduation',
+  'Office Party',
+  'Community Event',
+  'Gala',
+  'Brand Activation',
+  'Holiday',
+];
+
+export const GEO_CITIES = [
+  'Kansas City',
+  'Overland Park',
+  'Olathe',
+  "Lee's Summit",
+  'Independence',
+  'Lenexa',
+  'Shawnee',
+  'Prairie Village',
+  'Leawood',
+  'Other',
+];
+
+// ── Slug utilities ───────────────────────────────────────────
+
+/**
+ * Convert a title string to a URL-safe slug.
+ * e.g. "Pink Balloon Arch — Wedding!" → "pink-balloon-arch-wedding"
+ */
+export function generateSlug(title) {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Sanitize a manually entered slug: lowercase + spaces → hyphens.
+ * Idempotent: sanitizeSlug(sanitizeSlug(s)) === sanitizeSlug(s)
+ */
+export function sanitizeSlug(raw) {
+  if (!raw) return '';
+  return raw
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Ensure a slug is unique within a set of existing slugs.
+ * Appends -2, -3, etc. until unique.
+ * @param {string} base - The desired slug
+ * @param {string[]} existingSlugs - All slugs currently in use
+ * @param {string} [currentId] - ID of the post being edited (excluded from collision check)
+ */
+export function resolveUniqueSlug(base, existingSlugs, currentId) {
+  const others = existingSlugs.filter(s => s !== base || currentId === undefined);
+  if (!others.includes(base)) return base;
+  let counter = 2;
+  while (others.includes(`${base}-${counter}`)) counter++;
+  return `${base}-${counter}`;
+}
+
+// ── Text utilities ───────────────────────────────────────────
+
+/**
+ * Strip HTML tags and common Markdown markers from a string.
+ */
+export function stripHtml(html) {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]*>/g, '')           // HTML tags
+    .replace(/#{1,6}\s/g, '')          // Markdown headings
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold
+    .replace(/\*([^*]+)\*/g, '$1')     // Italic
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Links
+    .replace(/^\s*[-*+]\s/gm, '')      // List markers
+    .replace(/^\s*\d+\.\s/gm, '')      // Ordered list markers
+    .trim();
+}
+
+/**
+ * Truncate a string to max characters.
+ */
+export function truncate(str, max) {
+  if (!str) return '';
+  return str.slice(0, max);
+}
+
+// ── SEO auto-fill ────────────────────────────────────────────
+
+/**
+ * Auto-fill empty SEO fields from post content.
+ * Returns { filled: updatedForm, didFill: boolean }
+ */
+export function autoFillSeoFields(form) {
+  const filled = { ...form };
+  let didFill = false;
+
+  if (!filled.meta_title && filled.title) {
+    filled.meta_title = truncate(filled.title, 60);
+    didFill = true;
+  }
+
+  if (!filled.meta_description) {
+    if (filled.excerpt) {
+      filled.meta_description = truncate(filled.excerpt, 160);
+      didFill = true;
+    } else if (filled.content) {
+      filled.meta_description = truncate(stripHtml(filled.content), 160);
+      didFill = true;
+    }
+  }
+
+  if (!filled.og_image) {
+    if (filled.featured_image) {
+      filled.og_image = filled.featured_image;
+      didFill = true;
+    } else {
+      const firstMeta = Array.isArray(filled.gallery_images_meta) && filled.gallery_images_meta[0]?.url;
+      const firstPlain = Array.isArray(filled.gallery_images) && filled.gallery_images[0];
+      if (firstMeta) {
+        filled.og_image = firstMeta;
+        didFill = true;
+      } else if (firstPlain) {
+        filled.og_image = firstPlain;
+        didFill = true;
+      }
+    }
+  }
+
+  return { filled, didFill };
+}
+
+// ── OG image resolution ──────────────────────────────────────
+
+/**
+ * Resolve the best OG image for a post using a waterfall fallback.
+ */
+export function resolveOgImage(post, siteDefaultOg = '') {
+  if (post.og_image) return post.og_image;
+  if (post.featured_image) return post.featured_image;
+  if (Array.isArray(post.gallery_images_meta) && post.gallery_images_meta[0]?.url) {
+    return post.gallery_images_meta[0].url;
+  }
+  if (Array.isArray(post.gallery_images) && post.gallery_images[0]) {
+    return post.gallery_images[0];
+  }
+  return siteDefaultOg;
+}
+
+// ── JSON-LD structured data ──────────────────────────────────
+
+/**
+ * Build a BlogPosting + LocalBusiness JSON-LD object for a post page.
+ */
+export function buildJsonLd(post, siteContent = {}) {
+  const businessName = siteContent?.navbar?.brand || 'BalloonCraft';
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://ballooncraft.com';
+  const locality = post.geo_city || 'Kansas City';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title || '',
+    description: post.meta_description || post.excerpt || '',
+    image: resolveOgImage(post),
+    datePublished: post.publish_date || post.created_at || '',
+    dateModified: post.updated_at || post.created_at || '',
+    author: {
+      '@type': 'Person',
+      name: post.author || businessName,
+    },
+    publisher: {
+      '@type': 'LocalBusiness',
+      name: businessName,
+      '@id': siteUrl,
+      url: siteUrl,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: locality,
+        addressRegion: 'MO',
+        addressCountry: 'US',
+      },
+    },
+  };
+}
+
+// ── SEO score ────────────────────────────────────────────────
+
+/**
+ * Compute a 0–4 SEO score for a post based on focus keyword presence.
+ * Returns { score: number, checks: [inTitle, inMetaDesc, inContent, inSlug] }
+ */
+export function computeSeoScore(keyword, post) {
+  if (!keyword) return { score: 0, checks: [false, false, false, false] };
+  const kw = keyword.toLowerCase();
+  const checks = [
+    (post.title || '').toLowerCase().includes(kw),
+    (post.meta_description || '').toLowerCase().includes(kw),
+    stripHtml(post.content || '').toLowerCase().includes(kw),
+    (post.slug || '').toLowerCase().includes(kw),
+  ];
+  return { score: checks.filter(Boolean).length, checks };
+}
+
+// ── Related posts ────────────────────────────────────────────
+
+/**
+ * Find up to 3 related published posts for a given post.
+ * Scoring: +2 per shared service_type, +1 per shared event_type.
+ * Falls back to most recent posts.
+ */
+export function computeRelatedPosts(current, candidates) {
+  const pool = candidates.filter(
+    p => p.id !== current.id && p.status === 'published'
+  );
+
+  const scored = pool.map(p => {
+    let score = 0;
+    const currentServices = current.service_types || [];
+    const currentEvents = current.event_types || [];
+    (p.service_types || []).forEach(s => { if (currentServices.includes(s)) score += 2; });
+    (p.event_types || []).forEach(e => { if (currentEvents.includes(e)) score += 1; });
+    return { post: p, score };
+  });
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return new Date(b.post.created_at) - new Date(a.post.created_at);
+  });
+
+  return scored.slice(0, 3).map(s => s.post);
+}
+
+// ── Dashboard stat helpers ───────────────────────────────────
+
+/**
+ * Count messages received in the last 7 days.
+ */
+export function computeWeeklyMessageCount(messages) {
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return messages.filter(m => new Date(m.created_at).getTime() >= cutoff).length;
+}
+
+/**
+ * Count projects by status.
+ */
+export function computeStatusCounts(projects) {
+  return projects.reduce(
+    (acc, p) => {
+      if (p.status === 'published') acc.published++;
+      else if (p.status === 'draft') acc.draft++;
+      else if (p.status === 'archived') acc.archived++;
+      return acc;
+    },
+    { published: 0, draft: 0, archived: 0 }
+  );
+}
+
+/**
+ * Count published posts missing critical SEO fields.
+ */
+export function computeSeoHealthCounts(projects) {
+  const published = projects.filter(p => p.status === 'published');
+  return {
+    missingMeta: published.filter(p => !p.meta_description).length,
+    missingKeyword: published.filter(p => !p.focus_keyword).length,
+    missingImage: published.filter(p => !p.featured_image).length,
+  };
+}
+
+// ── URL utilities ────────────────────────────────────────────
+
+/**
+ * Build a canonical URL with no double slashes.
+ */
+export function formatCanonicalUrl(domain, path) {
+  const base = domain.replace(/\/$/, '');
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return `https://${base}${p}`;
+}
+
+/**
+ * Append geo city to a meta title if not already present.
+ * Idempotent: calling twice produces the same result.
+ */
+export function appendGeoToTitle(metaTitle, geoCity) {
+  if (!geoCity || !metaTitle) return metaTitle || '';
+  if (metaTitle.includes(geoCity)) return metaTitle;
+  return `${metaTitle} | ${geoCity}`;
+}
+
+// ── Sitemap builder ──────────────────────────────────────────
+
+const STATIC_PAGES = ['/', '/about', '/projects', '/testimonials', '/contact'];
+
+/**
+ * Generate a sitemap XML string from published posts and static pages.
+ */
+export function generateSitemapXml(posts, domain) {
+  const urls = [
+    ...STATIC_PAGES.map(path => ({
+      loc: formatCanonicalUrl(domain, path),
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'weekly',
+    })),
+    ...posts.map(p => ({
+      loc: formatCanonicalUrl(domain, `/projects/${p.slug}`),
+      lastmod: (p.updated_at || p.created_at || new Date().toISOString()).split('T')[0],
+      changefreq: 'monthly',
+    })),
+  ];
+
+  const urlEntries = urls
+    .map(
+      u => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n  </url>`
+    )
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries}\n</urlset>`;
+}
+
+// ── Duplicate post helper ────────────────────────────────────
+
+/**
+ * Create a duplicate post object ready for the editor.
+ */
+export function duplicatePost(post) {
+  const { id, created_at, updated_at, ...rest } = post;
+  return {
+    ...rest,
+    title: `Copy of ${post.title}`,
+    status: 'draft',
+    slug: '',
+  };
+}
+
+// ── Bulk status update helper ────────────────────────────────
+
+/**
+ * Apply a new status to all posts whose IDs are in selectedIds.
+ * Returns a new array — does not mutate the input.
+ */
+export function applyBulkStatus(posts, selectedIds, newStatus) {
+  return posts.map(p =>
+    selectedIds.includes(p.id) ? { ...p, status: newStatus } : p
+  );
+}
+
+// ── Character counter color ──────────────────────────────────
+
+/**
+ * Return the color class for a character counter.
+ * @param {number} length - Current character count
+ * @param {number} max - Maximum allowed characters
+ * @param {number} [optimalMin] - Start of optimal range
+ */
+export function getCounterColor(length, max, optimalMin) {
+  if (length > max) return 'red';
+  if (optimalMin !== undefined && length >= optimalMin && length <= max) return 'green';
+  return 'gray';
+}

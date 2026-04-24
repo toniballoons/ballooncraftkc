@@ -1,0 +1,22 @@
+const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://db.com/logo_v2.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>BalloonCraft | Stunning Balloon Decorations for Events</title>
+    <meta name="description" content="BalloonCraft creates magical balloon structures and decorations for weddings, birthdays, corporate events, and celebrations. Transform your event with stunning balloon artistry." />
+    <meta name="keywords" content="balloon decorations, event decorations, balloon arch, balloon artist, wedding balloons, birthday balloons, corporate event decorations, balloon sculptures" />
+    <meta property="og:title" content="BalloonCraft | Stunning Balloon Decorations for Events" />
+    <meta property="og:description" content="Transform your events into unforgettable celebrations with stunning balloon structures and decorations." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
