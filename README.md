@@ -1,42 +1,44 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
+# BalloonCraft KC
 
-**Welcome to your Base44 project** 
+Balloon decoration website for the Kansas City metro area. Built with React + Vite, Supabase, Resend, and deployed on Vercel.
 
-**About**
+## Stack
 
-View and Edit  your app on [db.com](http://db.com) 
+- **Frontend**: React 18, Vite, Tailwind CSS, shadcn/ui
+- **Database / Auth / Storage**: Supabase
+- **Email**: Resend (via Vercel serverless function)
+- **Hosting**: Vercel
+- **Version control**: Git / GitHub
 
-This project contains everything you need to run your app locally.
+## Getting Started
 
-**Edit the code in your local development environment**
+1. Clone the repo
+2. Install dependencies: `npm install`
+3. Copy `.env.example` to `.env` and fill in your values
+4. Run the dev server: `npm run dev`
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+## Environment Variables
 
-**Prerequisites:** 
+See `.env.example` for all required variables:
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+| Variable | Description |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) |
+| `RESEND_API_KEY` | Resend API key for contact form emails |
+| `CONTACT_EMAIL_TO` | Email address to receive contact form submissions |
+| `CONTACT_EMAIL_FROM` | Verified sender address in Resend |
 
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
+## Database Setup
 
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.db.app
-```
+Run the SQL migrations in order against your Supabase project:
 
-Run the app: `npm run dev`
+1. `supabase/migrations/001_initial_schema.sql` — creates all tables and RLS policies
+2. `supabase/migrations/002_seo_improvements.sql` — adds SEO and content columns
 
-**Publish your changes**
+Also create a **public** storage bucket named `site-assets` in your Supabase project.
 
-Open [db.com](http://db.com) and click on Publish.
+## Deployment
 
-**Docs & Support**
-
-Documentation: [https://docs.db.com/Integrations/Using-GitHub](https://docs.db.com/Integrations/Using-GitHub)
-
-Support: [https://app.db.com/support](https://app.db.com/support)
-# ballooncraftkc
+Connect this repo to Vercel. Add the environment variables above in your Vercel project settings. Every push to `main` deploys automatically.
