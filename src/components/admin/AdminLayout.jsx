@@ -89,16 +89,16 @@ export default function AdminLayout() {
               <div className="flex items-center gap-1 ml-2 pl-2 border-l" style={{ borderColor: `${theme?.nav?.textColor || '#1a1a1a'}30` }}>
                 <Link
                   to="/admin"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-                  style={{ background: logoColor, color: '#fff' }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border"
+                  style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
                   Admin
                 </Link>
                 <button
                   onClick={logout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80"
-                  style={{ color: theme?.nav?.textColor || '#1a1a1a', background: `${theme?.nav?.textColor || '#1a1a1a'}15` }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80 border"
+                  style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Sign Out
