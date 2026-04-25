@@ -2,13 +2,13 @@
 
 export const DEFAULT_CONTENT = {
   hero: {
-    headline: "Creating Magic with Balloons",
-    subheadline: "Transforming your events into unforgettable celebrations with stunning balloon structures and decorations",
+    headline: "Kansas City's Balloon Decoration Experts",
+    subheadline: "Transforming events into unforgettable celebrations with stunning balloon structures across Kansas City, Overland Park, Olathe, Lee's Summit and the KC metro area.",
     cta_text: "See Our Work",
     cta_link: "/projects",
     cta2_text: "Get a Quote",
     cta2_link: "/contact",
-    image: "https://media.db.com/images/public/69ea839296574eaf6d2fe6b6/070e49cb1_generated_5f608202.png",
+    image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop',
     show_floating_balloons: true,
   },
   about: {
@@ -25,7 +25,7 @@ export const DEFAULT_CONTENT = {
       { title: "Passion", description: "Our love for balloon art shines through in every installation we create." },
       { title: "Reliability", description: "On-time delivery and setup, every single time. Your event is our priority." }
     ],
-    image: "https://media.db.com/images/public/69ea839296574eaf6d2fe6b6/ef22e633b_generated_ba84fa6d.png",
+    image: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&auto=format&fit=crop',
     team_title: "Meet Our Team",
     team: [
       { name: "Creative Director", role: "Lead Balloon Artist", bio: "With over 10 years of experience in balloon artistry, our creative director leads every major installation." },
@@ -36,11 +36,11 @@ export const DEFAULT_CONTENT = {
   contact: {
     title: "Let's Create Something Amazing",
     subtitle: "Ready to transform your event with stunning balloon decorations? We'd love to hear about your vision!",
-    email: "hello@ballooncraft.com",
-    phone: "(555) 123-4567",
-    address: "123 Celebration Lane, Party City, ST 12345",
+    email: "hello@ballooncraftkc.com",
+    phone: "(816) 555-0123",
+    address: "Kansas City, MO Metro Area",
     hours: "Mon-Fri: 9am-6pm | Sat: 10am-4pm",
-    image: "https://media.db.com/images/public/69ea839296574eaf6d2fe6b6/24f53bbda_generated_5a536d82.png",
+    image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&auto=format&fit=crop',
     form_success_message: "Thank you for reaching out! We'll get back to you within 24 hours.",
     social_links: {
       instagram: "#",
@@ -52,7 +52,7 @@ export const DEFAULT_CONTENT = {
   testimonials: {
     title: "What Our Clients Say",
     subtitle: "Don't just take our word for it — hear from the people who've experienced the magic!",
-    bg_image: "https://media.db.com/images/public/69ea839296574eaf6d2fe6b6/27aab0f25_generated_b7998316.png",
+    bg_image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&auto=format&fit=crop',
   },
   projects: {
     title: "Our Projects",
@@ -166,9 +166,9 @@ export const DEFAULT_CONTENT = {
     ]
   },
   footer: {
-    company_name: "BalloonCraft",
-    tagline: "Creating magical balloon experiences for every celebration",
-    copyright: "© 2026 BalloonCraft. All rights reserved.",
+    company_name: "BalloonCraft KC",
+    tagline: "Creating magical balloon experiences for every celebration across the Kansas City metro area.",
+    copyright: "© 2026 BalloonCraft KC. All rights reserved.",
     links: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },

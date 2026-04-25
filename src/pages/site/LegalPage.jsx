@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { motion } from 'framer-motion';
@@ -6,11 +7,12 @@ import { motion } from 'framer-motion';
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
 
 export default function LegalPage({ pageKey }) {
-  const urlPath = window.location.pathname.replace('/', '');
-  const key = pageKey || urlPath || 'privacy';
+  const location = useLocation();
+  const urlKey = location.pathname.replace('/', '').split('/')[0];
+  const key = pageKey || urlKey || 'privacy';
   const { content } = useSiteContent(key);
   const { theme } = useTheme();
-  const heroBg = theme?.nav?.bg || '#f5f5f5';
+  const heroBg = theme?.nav?.bg || '#1a1a2e';
 
   return (
     <>
