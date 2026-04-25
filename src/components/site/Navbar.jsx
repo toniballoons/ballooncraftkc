@@ -32,8 +32,8 @@ export default function Navbar() {
         {/* Navbar height increased to h-24 to fit logo */}
         <div className="flex items-center justify-between h-24">
 
-          {/* Logo + site name */}
-          <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+          {/* Logo + tagline bubble */}
+          <Link to="/" className="flex flex-col items-center gap-1 flex-shrink-0">
             <img
               src="/logo.png"
               alt={content.logo_text || 'BalloonCraft KC'}
@@ -41,10 +41,14 @@ export default function Navbar() {
               style={{ maxWidth: '180px' }}
             />
             <span
-              className="font-display text-xl tracking-wide leading-tight hidden sm:block"
-              style={{ color: logoColor }}
+              className="text-[10px] font-bold tracking-wide px-3 py-0.5 rounded-full whitespace-nowrap"
+              style={{
+                background: logoColor,
+                color: '#fff',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              }}
             >
-              {content.logo_text || 'BalloonCraft KC'}
+              Custom Balloon Decor
             </span>
           </Link>
 
