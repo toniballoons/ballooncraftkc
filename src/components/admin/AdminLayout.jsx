@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Mail, Settings, Menu, X, Star, Shield, Palette, Image } from 'lucide-react';
+import { LayoutDashboard, FileText, Mail, Settings, Menu, X, Star, Shield, Palette, Image, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Page Editor', href: '/admin/pages', icon: Settings },
-  { label: 'Projects', href: '/admin/projects', icon: FileText },
+  { label: 'Portfolio / Blog', href: '/admin/projects', icon: FileText },
   { label: 'Testimonials', href: '/admin/testimonials', icon: Star },
   { label: 'Messages', href: '/admin/messages', icon: Mail },
   { label: 'Theme', href: '/admin/theme', icon: Palette },
   { label: 'Site Assets', href: '/admin/site', icon: Image },
+  { label: 'Help', href: '/admin/help', icon: HelpCircle },
 ];
 
 export default function AdminLayout() {

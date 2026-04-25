@@ -27,6 +27,7 @@ import MessagesAdmin from '@/pages/admin/MessagesAdmin';
 import ThemeSettings from '@/pages/admin/ThemeSettings';
 import SiteAssets from '@/pages/admin/SiteAssets';
 import Login from '@/pages/admin/Login';
+import Help from '@/pages/admin/Help';
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
                   <Route path="messages" element={<MessagesAdmin />} />
                   <Route path="theme" element={<ThemeSettings />} />
                   <Route path="site" element={<SiteAssets />} />
+                  <Route path="help" element={<Help />} />
                 </Route>
               </Route>
 
