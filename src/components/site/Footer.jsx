@@ -85,6 +85,18 @@ export default function Footer() {
         <div className="border-t mt-8 pt-6 text-center text-sm opacity-40" style={{ borderColor: `${footerText}20` }}>
           {content.copyright}
         </div>
+        <div className="mt-6 pt-4 text-center text-xs opacity-50" style={{ borderTop: `1px solid ${footerText}10` }}>
+          Site created by:{' '}
+          <a
+            href="http://www.facebook.com/scorptonic"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-100 transition-opacity font-semibold"
+            style={{ color: footerAccent }}
+          >
+            ScorpTonic
+          </a>
+        </div>
       </div>
     </footer>
   );
