@@ -40,17 +40,17 @@ export default function Navbar() {
               className="h-16 w-auto object-contain"
               style={{ maxWidth: '180px' }}
             />
-            <span
-              className="text-[10px] font-bold tracking-wide px-3 py-0.5 rounded-full whitespace-nowrap"
-              style={{
-                background: logoColor,
-                color: '#fff',
-                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.35), 0 0 0 1.5px rgba(255,255,255,0.25)',
-              }}
-            >
-              Custom Balloon Decor
-            </span>
+              <span
+                className="text-[10px] font-black tracking-wide px-3 py-0.5 rounded-full whitespace-nowrap"
+                style={{
+                  background: '#000',
+                  color: '#fff',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 0 1.5px rgba(255,255,255,0.3)',
+                }}
+              >
+                Custom Balloon Decor
+              </span>
           </Link>
 
           {/* Desktop Nav */}
