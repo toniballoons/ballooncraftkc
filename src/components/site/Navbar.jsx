@@ -45,7 +45,8 @@ export default function Navbar() {
               style={{
                 background: logoColor,
                 color: '#fff',
-                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                boxShadow: `0 2px 8px rgba(0,0,0,0.35), 0 0 0 1.5px rgba(255,255,255,0.25)`,
               }}
             >
               Custom Balloon Decor
