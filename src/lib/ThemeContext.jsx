@@ -86,6 +86,12 @@ export function ThemeProvider({ children }) {
     applyThemeCssVars(t);
     setCachedThemeId(id);
     setThemeMutation.mutate(id);
+    // Trigger Vercel redeploy if a deploy hook is configured
+    // This bakes the theme into the next build so new visitors never see a flash
+    const deployHook = import.meta.env.VITE_VERCEL_DEPLOY_HOOK;
+    if (deployHook) {
+      fetch(deployHook, { method: 'POST' }).catch(() => {});
+    }
   };
 
   return (
