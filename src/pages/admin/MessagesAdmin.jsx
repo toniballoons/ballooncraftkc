@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import {
   Trash2, Mail, Phone, Calendar, Eye, Printer, Download,
-  Reply, X, Send, ExternalLink,
+  Reply, Send,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -87,20 +87,40 @@ function downloadMessage(m) {
 // ── Message detail dialog ─────────────────────────────────────
 function MessageDialog({ message: m, onClose, onStatusChange, onDelete }) {
   const [replyBody, setReplyBody] = useState('');
+  const [replySending, setReplySending] = useState(false);
   const [replySent, setReplySent] = useState(false);
+  const [replyError, setReplyError] = useState('');
 
   if (!m) return null;
 
-  const handleReply = () => {
-    // Opens the user's default email client with pre-filled reply
-    const subject = encodeURIComponent(`Re: Your inquiry — BalloonCraft KC`);
-    const body = encodeURIComponent(
-      `Hi ${m.name},\n\nThank you for reaching out to BalloonCraft KC!\n\n${replyBody}\n\nBest regards,\nToni\nBalloonCraft KC`
-    );
-    window.open(`mailto:${m.email}?subject=${subject}&body=${body}`, '_blank');
-    onStatusChange(m.id, 'replied');
-    setReplySent(true);
-    toast.success('Email client opened — mark as Replied when done.');
+  const handleReply = async () => {
+    if (!replyBody.trim()) return;
+    setReplySending(true);
+    setReplyError('');
+    try {
+      const res = await fetch('/api/send-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to_name: m.name,
+          to_email: m.email,
+          reply_body: replyBody,
+          original_message: m.message,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to send');
+      }
+      onStatusChange(m.id, 'replied');
+      setReplySent(true);
+      toast.success(`Reply sent to ${m.email}`);
+    } catch (err) {
+      setReplyError(err.message);
+      toast.error('Failed to send reply: ' + err.message);
+    } finally {
+      setReplySending(false);
+    }
   };
 
   return (
@@ -158,28 +178,36 @@ function MessageDialog({ message: m, onClose, onStatusChange, onDelete }) {
           {/* Reply composer */}
           <div className="border rounded-xl p-4 space-y-3">
             <p className="text-sm font-semibold flex items-center gap-2"><Reply className="w-4 h-4" /> Reply to {m.name}</p>
-            <Textarea
-              rows={4}
-              value={replyBody}
-              onChange={e => setReplyBody(e.target.value)}
-              placeholder={`Hi ${m.name},\n\nThank you for reaching out...`}
-              className="text-sm"
-            />
-            <div className="flex gap-2">
-              <Button onClick={handleReply} disabled={!replyBody.trim()} className="flex-1">
-                <Send className="w-4 h-4 mr-2" /> Open in Email App
-              </Button>
-              <a
-                href={`mailto:${m.email}?subject=${encodeURIComponent('Re: Your inquiry — BalloonCraft KC')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" size="icon" title="Open email directly">
-                  <ExternalLink className="w-4 h-4" />
+            {replySent ? (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                <p className="text-green-700 font-semibold">✓ Reply sent to {m.email}</p>
+                <button onClick={() => { setReplySent(false); setReplyBody(''); }} className="text-xs text-green-600 underline mt-2">Send another reply</button>
+              </div>
+            ) : (
+              <>
+                <Textarea
+                  rows={5}
+                  value={replyBody}
+                  onChange={e => setReplyBody(e.target.value)}
+                  placeholder={`Hi ${m.name},\n\nThank you for reaching out to BalloonCraft KC!\n\n`}
+                  className="text-sm"
+                />
+                {replyError && <p className="text-xs text-red-500">{replyError}</p>}
+                <Button
+                  onClick={handleReply}
+                  disabled={!replyBody.trim() || replySending}
+                  className="w-full"
+                >
+                  {replySending
+                    ? <><span className="animate-spin mr-2">⏳</span> Sending...</>
+                    : <><Send className="w-4 h-4 mr-2" /> Send Reply to {m.email}</>
+                  }
                 </Button>
-              </a>
-            </div>
-            {replySent && <p className="text-xs text-green-600">✓ Email client opened. Status updated to Replied.</p>}
+                <p className="text-xs text-muted-foreground text-center">
+                  The reply will be sent directly from BalloonCraft KC — no email app needed.
+                </p>
+              </>
+            )}
           </div>
 
           {/* Actions */}
