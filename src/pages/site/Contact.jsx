@@ -80,7 +80,8 @@ export default function Contact() {
 
       <section className="py-20 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          {/* Force dark text on white background regardless of active theme */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start text-gray-900 [&_label]:text-gray-700 [&_input]:text-gray-900 [&_input]:placeholder:text-gray-400 [&_textarea]:text-gray-900 [&_textarea]:placeholder:text-gray-400 [&_h2]:text-gray-900 [&_p]:text-gray-600">
           {/* Form */}
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
             {submitted ? (
