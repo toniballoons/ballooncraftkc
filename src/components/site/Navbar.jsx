@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
-import { Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/AuthContext';
+import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { content } = useSiteContent('navbar');
   const { theme } = useTheme();
+  const { isAuthenticated, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
@@ -29,7 +30,6 @@ export default function Navbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Navbar height increased to h-24 to fit logo */}
         <div className="flex items-center justify-between h-24">
 
           {/* Logo + tagline bubble */}
@@ -46,7 +46,7 @@ export default function Navbar() {
                 background: logoColor,
                 color: '#fff',
                 textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-                boxShadow: `0 2px 8px rgba(0,0,0,0.35), 0 0 0 1.5px rgba(255,255,255,0.25)`,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.35), 0 0 0 1.5px rgba(255,255,255,0.25)',
               }}
             >
               Custom Balloon Decor
@@ -75,6 +75,28 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Admin controls — only shown when logged in */}
+            {isAuthenticated && (
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l" style={{ borderColor: `${textColor}30` }}>
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                  style={{ background: logoColor, color: '#fff' }}
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  Admin
+                </Link>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all hover:opacity-80"
+                  style={{ color: textColor, background: `${textColor}15` }}
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -108,6 +130,28 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+
+          {/* Mobile admin controls */}
+          {isAuthenticated && (
+            <>
+              <div className="mx-6 my-2 border-t" style={{ borderColor: `${textColor}20` }} />
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-sm"
+                style={{ color: logoColor }}
+              >
+                <LayoutDashboard className="w-4 h-4" /> Admin Panel
+              </Link>
+              <button
+                onClick={() => { setOpen(false); logout(); }}
+                className="flex items-center gap-2 px-6 py-3 font-semibold text-sm w-full text-left"
+                style={{ color: textColor }}
+              >
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+            </>
+          )}
         </div>
       )}
     </nav>
