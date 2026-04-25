@@ -13,10 +13,11 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.DEVELOPER_EMAIL_TO || process.env.CONTACT_EMAIL_TO;
-  const from = process.env.CONTACT_EMAIL_FROM;
+  // Fall back to Resend's onboarding address if custom from isn't verified yet
+  const from = process.env.CONTACT_EMAIL_FROM || 'onboarding@resend.dev';
 
-  if (!apiKey || !to || !from) {
-    console.error('Missing email environment variables for developer support');
+  if (!apiKey || !to) {
+    console.error('Missing RESEND_API_KEY or DEVELOPER_EMAIL_TO / CONTACT_EMAIL_TO');
     return res.status(500).json({ error: 'Email service not configured' });
   }
 
