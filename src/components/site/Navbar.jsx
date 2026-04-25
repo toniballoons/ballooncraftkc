@@ -16,7 +16,6 @@ export default function Navbar() {
   const logoColor = theme?.nav?.logoColor || '#e91e63';
   const navStyle = theme?.nav?.style || 'default';
 
-  // Glass/transparent override styles
   const isGlass = navStyle === 'glassmorphism' || navStyle === 'transparent-elegant';
 
   return (
@@ -30,9 +29,23 @@ export default function Navbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="font-display text-2xl tracking-wide" style={{ color: logoColor }}>
-            {content.logo_text || 'BalloonCraft'}
+        {/* Navbar height increased to h-20 to fit logo */}
+        <div className="flex items-center justify-between h-20">
+
+          {/* Logo + site name */}
+          <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+            <img
+              src="/logo.png"
+              alt={content.logo_text || 'BalloonCraft KC'}
+              className="h-12 w-auto object-contain"
+              style={{ maxWidth: '140px' }}
+            />
+            <span
+              className="font-display text-xl tracking-wide leading-tight hidden sm:block"
+              style={{ color: logoColor }}
+            >
+              {content.logo_text || 'BalloonCraft KC'}
+            </span>
           </Link>
 
           {/* Desktop Nav */}
@@ -47,7 +60,9 @@ export default function Navbar() {
                   style={{
                     color: isActive ? (navStyle === 'pill' ? '#fff' : logoColor) : textColor,
                     background: isActive ? `${logoColor}22` : 'transparent',
-                    borderBottom: navStyle === 'serif-bar' || navStyle === 'deco' ? (isActive ? `2px solid ${logoColor}` : '2px solid transparent') : undefined,
+                    borderBottom: navStyle === 'serif-bar' || navStyle === 'deco'
+                      ? (isActive ? `2px solid ${logoColor}` : '2px solid transparent')
+                      : undefined,
                     borderRadius: navStyle === 'serif-bar' || navStyle === 'deco' ? 0 : undefined,
                   }}
                 >
@@ -58,7 +73,11 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Toggle */}
-          <button className="md:hidden p-2 rounded-lg" style={{ color: textColor }} onClick={() => setOpen(!open)}>
+          <button
+            className="md:hidden p-2 rounded-lg"
+            style={{ color: textColor }}
+            onClick={() => setOpen(!open)}
+          >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -66,7 +85,10 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden border-t pb-4" style={{ background: navBg, borderColor: `${textColor}18` }}>
+        <div
+          className="md:hidden border-t pb-4"
+          style={{ background: navBg, borderColor: `${textColor}18` }}
+        >
           {(content.links || []).map((link, i) => (
             <Link
               key={i}
