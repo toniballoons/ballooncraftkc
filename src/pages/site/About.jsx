@@ -91,13 +91,13 @@ export default function About() {
         <section className="py-20 bg-white content-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="font-display text-4xl text-center mb-16">{content.team_title}</motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-wrap justify-center gap-8 max-w-5xl mx-auto">
               {content.team.map((member, i) => (
                 <motion.div
                   key={i}
                   initial="hidden" whileInView="visible" viewport={{ once: true }}
                   variants={fadeUp} transition={{ duration: 0.6, delay: i * 0.15 }}
-                  className="text-center p-8 rounded-3xl bg-muted/30 border border-border/50"
+                  className="text-center p-8 rounded-3xl bg-muted/30 border border-border/50 w-full max-w-xs"
                 >
                   {member.photo ? (
                     <img src={member.photo} alt={member.name} className="w-24 h-24 rounded-full object-cover mx-auto mb-5 shadow-lg" />
