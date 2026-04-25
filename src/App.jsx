@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ThemeProvider } from '@/lib/ThemeContext';
+import ScrollToTop from '@/components/ScrollToTop';
 
 // Site pages
 import SiteLayout from '@/components/site/SiteLayout';
@@ -35,6 +36,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <ThemeProvider>
           <Router>
+            <ScrollToTop />
             <Routes>
               {/* Public site */}
               <Route element={<SiteLayout />}>
