@@ -21,7 +21,7 @@ export default function SiteLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-20 bg-transparent overflow-hidden">
+      <main className="flex-1 pt-24 bg-transparent overflow-hidden">
         <Outlet />
       </main>
       <Footer />

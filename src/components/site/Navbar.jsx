@@ -29,16 +29,16 @@ export default function Navbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Navbar height increased to h-20 to fit logo */}
-        <div className="flex items-center justify-between h-20">
+        {/* Navbar height increased to h-24 to fit logo */}
+        <div className="flex items-center justify-between h-24">
 
           {/* Logo + site name */}
           <Link to="/" className="flex items-center gap-3 flex-shrink-0">
             <img
               src="/logo.png"
               alt={content.logo_text || 'BalloonCraft KC'}
-              className="h-12 w-auto object-contain"
-              style={{ maxWidth: '140px' }}
+              className="h-16 w-auto object-contain"
+              style={{ maxWidth: '180px' }}
             />
             <span
               className="font-display text-xl tracking-wide leading-tight hidden sm:block"
