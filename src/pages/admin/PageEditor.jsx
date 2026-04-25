@@ -70,6 +70,13 @@ export default function PageEditor() {
   const [showCode, setShowCode] = useState(false);
   const [content, setContent] = useState(DEFAULT_CONTENT[activePageKey] || {});
   const [dbRecordId, setDbRecordId] = useState(null);
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Wrap setContent to track unsaved changes
+  const handleContentChange = (newContent) => {
+    setContent(newContent);
+    setIsDirty(true);
+  };
 
   const { data: allContent = [] } = useQuery({
     queryKey: ['admin-site-content'],
@@ -86,6 +93,7 @@ export default function PageEditor() {
       setDbRecordId(null);
     }
     setShowCode(false);
+    setIsDirty(false);
   }, [activePageKey, allContent]);
 
   const saveMutation = useMutation({
@@ -101,12 +109,14 @@ export default function PageEditor() {
       queryClient.invalidateQueries({ queryKey: ['admin-site-content'] });
       queryClient.invalidateQueries({ queryKey: ['site-content'] });
       queryClient.invalidateQueries({ queryKey: ['site-content-all'] });
+      setIsDirty(false);
       toast.success('Saved!');
     },
   });
 
   const handleReset = () => {
     setContent(DEFAULT_CONTENT[activePageKey] || {});
+    setIsDirty(false);
     toast.info('Reset to defaults — save to persist');
   };
 
@@ -121,11 +131,23 @@ export default function PageEditor() {
           <Button variant="outline" size="sm" onClick={() => setShowCode(s => !s)}>
             <Code className="w-4 h-4 mr-1" /> {showCode ? 'Visual' : 'JSON'}
           </Button>
-          <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-            <Save className="w-4 h-4 mr-1" /> {saveMutation.isPending ? 'Saving...' : 'Save'}
+          <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
+            className={isDirty ? 'animate-pulse bg-orange-500 hover:bg-orange-600' : ''}
+          >
+            <Save className="w-4 h-4 mr-1" /> {saveMutation.isPending ? 'Saving...' : isDirty ? 'Save Changes ●' : 'Save'}
           </Button>
         </div>
       </div>
+
+      {/* Unsaved changes banner */}
+      {isDirty && (
+        <div className="mb-4 px-4 py-2.5 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-between text-sm">
+          <span className="text-orange-700 font-semibold">⚠️ You have unsaved changes — click Save to apply them to your website.</span>
+          <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Save className="w-3.5 h-3.5 mr-1" /> {saveMutation.isPending ? 'Saving...' : 'Save Now'}
+          </Button>
+        </div>
+      )}
 
       {/* Page tabs */}
       <div className="mb-6 overflow-x-auto">
@@ -156,9 +178,9 @@ export default function PageEditor() {
           </CardHeader>
           <CardContent>
             {showCode ? (
-              <JsonEditor value={content} onChange={setContent} />
+              <JsonEditor value={content} onChange={handleContentChange} />
             ) : (
-              <EditorForPage pageKey={activePageKey} content={content} setContent={setContent} />
+              <EditorForPage pageKey={activePageKey} content={content} setContent={handleContentChange} />
             )}
           </CardContent>
         </Card>
