@@ -106,6 +106,52 @@
   .font-body {
     font-family: var(--font-body);
   }
+
+  /* ── Theme-safe content sections ──────────────────────────────
+     Any section with a white or light background must always show
+     dark text regardless of the active theme's CSS variables.
+     These rules target bg-white, bg-muted, and bg-background sections.
+  ─────────────────────────────────────────────────────────────── */
+  .content-section,
+  section.bg-white,
+  section.bg-muted\/30,
+  section.bg-muted\/50,
+  section.py-20.bg-white,
+  section.py-12.bg-white,
+  section.py-16.bg-white {
+    --foreground: 222 47% 11%;
+    --card-foreground: 222 47% 11%;
+    --muted-foreground: 215 16% 47%;
+    --popover-foreground: 222 47% 11%;
+    color: hsl(222 47% 11%);
+  }
+
+  section.bg-white h1, section.bg-white h2, section.bg-white h3,
+  section.bg-white h4, section.bg-white h5, section.bg-white h6,
+  .content-section h1, .content-section h2, .content-section h3 {
+    color: hsl(222 47% 11%);
+  }
+
+  section.bg-white p:not([class*="text-white"]):not([class*="text-primary"]),
+  section.bg-white span:not([class*="text-white"]):not([class*="text-primary"]):not([class*="badge"]),
+  .content-section p:not([class*="text-white"]):not([class*="text-primary"]) {
+    color: hsl(215 16% 47%);
+  }
+
+  section.bg-white label, .content-section label {
+    color: hsl(222 47% 20%);
+  }
+
+  section.bg-white input, section.bg-white textarea, section.bg-white select,
+  .content-section input, .content-section textarea, .content-section select {
+    color: hsl(222 47% 11%) !important;
+    background-color: #fff !important;
+  }
+
+  section.bg-white input::placeholder, section.bg-white textarea::placeholder,
+  .content-section input::placeholder, .content-section textarea::placeholder {
+    color: hsl(215 16% 65%) !important;
+  }
 }
 
 /* Balloon float animation */

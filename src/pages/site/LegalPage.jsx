@@ -27,7 +27,7 @@ export default function LegalPage({ pageKey }) {
         </div>
       </section>
 
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white content-section">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {content.content && (
             <div className="prose prose-lg max-w-none prose-headings:font-display prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground" dangerouslySetInnerHTML={{ __html: content.content }} />

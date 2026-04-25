@@ -144,7 +144,7 @@ export default function ProjectDetail() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 content-section">
         <Button asChild variant="ghost" size="sm" className="mb-6">
           <Link to="/projects"><ArrowLeft className="w-4 h-4 mr-2" /> Back to Portfolio</Link>
         </Button>

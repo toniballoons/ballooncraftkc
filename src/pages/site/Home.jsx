@@ -76,7 +76,7 @@ function ServicesSection() {
   ];
 
   return (
-    <section className="py-20 bg-background">
+    <section className="py-20 bg-white content-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center mb-16">
           <h2 className="font-display text-4xl mb-4">What We Do</h2>
@@ -109,7 +109,7 @@ function FeaturedProjectsSection() {
   if (projects.length === 0) return null;
 
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-20 bg-gray-50 content-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center mb-16">
           <h2 className="font-display text-4xl mb-4">Featured Projects</h2>
@@ -155,7 +155,7 @@ function TestimonialsPreview() {
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="py-20 bg-background">
+    <section className="py-20 bg-white content-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center mb-16">
           <h2 className="font-display text-4xl mb-4">Happy Clients</h2>

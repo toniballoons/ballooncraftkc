@@ -43,7 +43,7 @@ export default function About() {
       </section>
 
       {/* Intro + Image */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white content-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
             <p className="text-lg text-muted-foreground leading-relaxed mb-8">{content.intro}</p>
@@ -61,7 +61,7 @@ export default function About() {
       </section>
 
       {/* Values */}
-      <section className="py-20 bg-muted/30 relative overflow-hidden">
+      <section className="py-20 bg-muted/30 content-section relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="font-display text-4xl text-center mb-16">Our Values</motion.h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -88,7 +88,7 @@ export default function About() {
 
       {/* Team */}
       {content.team && content.team.length > 0 && (
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-white content-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="font-display text-4xl text-center mb-16">{content.team_title}</motion.h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
