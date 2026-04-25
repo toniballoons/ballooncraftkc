@@ -14,6 +14,19 @@
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
+    <!-- Apply cached theme CSS vars before React mounts to prevent flash -->
+    <script>
+      try {
+        var css = localStorage.getItem('ballooncraftkc_theme_css');
+        var radius = localStorage.getItem('ballooncraftkc_theme_radius');
+        if (css) {
+          var vars = JSON.parse(css);
+          var root = document.documentElement;
+          Object.keys(vars).forEach(function(k) { root.style.setProperty(k, vars[k]); });
+          if (radius) root.style.setProperty('--radius', radius);
+        }
+      } catch(e) {}
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

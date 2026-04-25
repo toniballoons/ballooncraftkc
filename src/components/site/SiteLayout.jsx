@@ -1,23 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import { useTheme } from '@/lib/ThemeContext';
 
+// ThemeContext now handles CSS var application — no need to do it here too
 export default function SiteLayout() {
-  const { theme } = useTheme();
-
-  // Apply theme CSS variables to :root when theme changes
-  useEffect(() => {
-    if (!theme?.css) return;
-    const root = document.documentElement;
-    Object.entries(theme.css).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-    // Also store borderRadius
-    if (theme.borderRadius) root.style.setProperty('--radius', theme.borderRadius);
-  }, [theme]);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
