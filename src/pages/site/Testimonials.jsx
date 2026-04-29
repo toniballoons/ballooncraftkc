@@ -4,6 +4,7 @@ import * as Testimonial from '@/entities/Testimonial';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { formatCanonicalUrl } from '@/lib/seo';
+import { getHeroTextStyles } from '@/lib/accessibility';
 import { Star, Quote } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -13,6 +14,7 @@ export default function Testimonials() {
   const { content } = useSiteContent('testimonials');
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #fd79a8, #a29bfe)';
+  const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
   const domain = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraft.com';
 
   useEffect(() => {
@@ -41,9 +43,9 @@ export default function Testimonials() {
     <>
       <section className="relative py-24 overflow-hidden" style={{ background: heroBg }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7 }}>
-            <h1 className="font-display text-5xl sm:text-6xl mb-4 text-white drop-shadow-lg">{content.title}</h1>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto">{content.subtitle}</p>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7 }} className="rounded-[2rem] px-6 py-8 sm:px-10 inline-block max-w-4xl" style={panelStyle}>
+            <h1 className="font-display text-5xl sm:text-6xl mb-4 drop-shadow-lg" style={{ color: textColor }}>{content.title}</h1>
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: mutedTextColor }}>{content.subtitle}</p>
           </motion.div>
         </div>
       </section>
@@ -51,9 +53,9 @@ export default function Testimonials() {
       <section className="py-20 bg-white content-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading testimonials...</div>
+            <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">Loading testimonials...</div>
           ) : testimonials.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No testimonials yet. Check back soon!</div>
+            <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">No testimonials yet. Check back soon!</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {testimonials.map((t, i) => (
@@ -63,13 +65,13 @@ export default function Testimonials() {
                   variants={fadeUp} transition={{ duration: 0.5, delay: (i % 3) * 0.1 }}
                   className="relative bg-gradient-to-br from-muted/30 to-white rounded-3xl p-8 shadow-lg border border-border/30 hover:shadow-xl transition-shadow"
                 >
-                  <Quote className="w-8 h-8 text-primary/20 absolute top-6 right-6" />
-                  <div className="flex gap-1 mb-4">
+                  <Quote className="w-8 h-8 text-primary/20 absolute top-6 right-6" aria-hidden="true" />
+                  <div className="flex gap-1 mb-4" aria-label={`${t.rating || 5} out of 5 stars`}>
                     {Array.from({ length: 5 }).map((_, j) => (
-                      <Star key={j} className={`w-4 h-4 ${j < (t.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
+                      <Star key={j} className={`w-4 h-4 ${j < (t.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} aria-hidden="true" />
                     ))}
                   </div>
-                  <p className="text-muted-foreground leading-relaxed mb-6 italic">"{t.quote}"</p>
+                  <blockquote className="text-muted-foreground leading-relaxed mb-6 italic">"{t.quote}"</blockquote>
                   <div className="flex items-center gap-3">
                     {t.avatar_url ? (
                       <img src={t.avatar_url} alt={t.name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />

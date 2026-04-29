@@ -19,7 +19,7 @@ function applyThemeCss(theme) {
 function ThemeCard({ theme, isActive, onApply }) {
   return (
     <div
-      className={`relative rounded-2xl overflow-hidden cursor-pointer border-4 transition-all duration-200
+      className={`relative rounded-2xl overflow-hidden border-4 transition-all duration-200
         ${isActive
           ? 'border-primary shadow-xl scale-[1.02]'
           : 'border-transparent hover:border-primary/40 hover:shadow-lg hover:scale-[1.01]'
@@ -82,6 +82,7 @@ function ThemeCard({ theme, isActive, onApply }) {
           </Badge>
           {!isActive ? (
             <button
+              type="button"
               onClick={(e) => { e.stopPropagation(); onApply(theme.id); }}
               className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-1"
             >
@@ -141,8 +142,10 @@ export default function ThemeSettings() {
 
       {/* Search */}
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <label htmlFor="theme-search" className="sr-only">Search themes</label>
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
         <Input
+          id="theme-search"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search themes..."
@@ -155,7 +158,9 @@ export default function ThemeSettings() {
         {THEME_CATEGORIES.map(cat => (
           <button
             key={cat.id}
+            type="button"
             onClick={() => setActiveCategory(cat.id)}
+            aria-pressed={activeCategory === cat.id}
             className={`text-xs px-3 py-1.5 rounded-full font-semibold transition-colors border whitespace-nowrap
               ${activeCategory === cat.id
                 ? 'bg-primary text-white border-primary'

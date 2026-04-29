@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { uploadFile } from '@/lib/uploadFile';
 
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, GripVertical, Image } from 'lucide-react';
+import { Plus, Pencil, Trash2, Image } from 'lucide-react';
 import { toast } from 'sonner';
 
 const emptyMember = { name: '', role: '', bio: '', photo: '' };
@@ -17,6 +17,7 @@ export default function TeamEditor({ team = [], onChange }) {
   const [editIndex, setEditIndex] = useState(null);
   const [form, setForm] = useState(emptyMember);
   const [uploading, setUploading] = useState(false);
+  const photoInputRef = useRef(null);
 
   const openNew = () => { setForm(emptyMember); setEditIndex(null); setEditOpen(true); };
   const openEdit = (i) => { setForm({ ...emptyMember, ...team[i] }); setEditIndex(i); setEditOpen(true); };
@@ -63,6 +64,7 @@ export default function TeamEditor({ team = [], onChange }) {
       setUploading(false);
     }
   };
+  const openPhotoPicker = () => photoInputRef.current?.click();
 
   return (
     <div className="space-y-3">
@@ -83,8 +85,8 @@ export default function TeamEditor({ team = [], onChange }) {
             <Card key={i}>
               <CardContent className="p-3 flex items-center gap-3">
                 <div className="flex flex-col gap-0.5">
-                  <button onClick={() => moveUp(i)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 leading-none">▲</button>
-                  <button onClick={() => moveDown(i)} disabled={i === team.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 leading-none">▼</button>
+                  <button type="button" onClick={() => moveUp(i)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 leading-none" aria-label={`Move ${member.name || 'team member'} up`}>▲</button>
+                  <button type="button" onClick={() => moveDown(i)} disabled={i === team.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 leading-none" aria-label={`Move ${member.name || 'team member'} down`}>▼</button>
                 </div>
                 {member.photo ? (
                   <img src={member.photo} alt={member.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
@@ -98,8 +100,8 @@ export default function TeamEditor({ team = [], onChange }) {
                   <p className="text-xs text-muted-foreground truncate">{member.role}</p>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(i)}><Pencil className="w-3 h-3" /></Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(i)}><Trash2 className="w-3 h-3 text-destructive" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(i)} aria-label={`Edit ${member.name || 'team member'}`}><Pencil className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(i)} aria-label={`Delete ${member.name || 'team member'}`}><Trash2 className="w-3 h-3 text-destructive" /></Button>
                 </div>
               </CardContent>
             </Card>
@@ -129,9 +131,18 @@ export default function TeamEditor({ team = [], onChange }) {
               <Label>Photo</Label>
               <div className="flex items-center gap-3">
                 {form.photo && <img src={form.photo} alt="" className="w-14 h-14 rounded-full object-cover" />}
-                <label className="cursor-pointer bg-muted hover:bg-muted/80 rounded-lg px-3 py-2 text-sm flex items-center gap-2 transition-colors">
+                <label
+                  className="cursor-pointer bg-muted hover:bg-muted/80 rounded-lg px-3 py-2 text-sm flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      openPhotoPicker();
+                    }
+                  }}
+                >
                   <Image className="w-4 h-4" /> {uploading ? 'Uploading...' : 'Upload Photo'}
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} disabled={uploading} />
+                  <input type="file" accept="image/*" className="sr-only" onChange={handlePhoto} disabled={uploading} ref={photoInputRef} />
                 </label>
               </div>
               <Input

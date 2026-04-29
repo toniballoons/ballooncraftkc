@@ -1,5 +1,5 @@
 import React from 'react';
-import { Palette, Eye, Sparkles, Check } from 'lucide-react';
+import { Palette, Eye, Sparkles } from 'lucide-react';
 
 export default function HelpTheme() {
   return (

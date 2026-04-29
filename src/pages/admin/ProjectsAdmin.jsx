@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Project from '@/entities/Project';
 import { uploadFile } from '@/lib/uploadFile';
@@ -52,6 +52,7 @@ export default function ProjectsAdmin() {
   const [slugError, setSlugError] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('published');
+  const featuredImageInputRef = useRef(null);
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['admin-projects'],
@@ -212,7 +213,7 @@ export default function ProjectsAdmin() {
         <div className="grid gap-4">
           {/* Select All header */}
           <div className="flex items-center gap-3 px-1">
-            <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} />
+            <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} aria-label="Select all posts" />
             <span className="text-xs text-muted-foreground">Select all</span>
           </div>
 
@@ -222,6 +223,7 @@ export default function ProjectsAdmin() {
                 <Checkbox
                   checked={selectedIds.includes(p.id)}
                   onCheckedChange={() => toggleSelectOne(p.id)}
+                  aria-label={`Select post ${p.title}`}
                 />
                 {p.featured_image && (
                   <img src={p.featured_image} alt={p.title} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
@@ -238,9 +240,9 @@ export default function ProjectsAdmin() {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <Button variant="outline" size="icon" title="Duplicate" onClick={() => handleDuplicate(p)}><Copy className="w-4 h-4" /></Button>
-                  <Button variant="outline" size="icon" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
-                  <Button variant="outline" size="icon" onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button variant="outline" size="icon" title="Duplicate" aria-label={`Duplicate ${p.title}`} onClick={() => handleDuplicate(p)}><Copy className="w-4 h-4" /></Button>
+                  <Button variant="outline" size="icon" aria-label={`Edit ${p.title}`} onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
+                  <Button variant="outline" size="icon" aria-label={`Delete ${p.title}`} onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </div>
               </CardContent>
             </Card>
@@ -265,7 +267,7 @@ export default function ProjectsAdmin() {
                     }
                   }}
                 >
-                  <ExternalLink className="w-3.5 h-3.5 mr-1" /> Preview
+                  <ExternalLink className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Preview
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
                 <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
@@ -311,9 +313,18 @@ export default function ProjectsAdmin() {
               <Label>Featured Image</Label>
               <div className="flex items-center gap-4">
                 {form.featured_image && <img src={form.featured_image} alt="" className="w-32 h-24 rounded-xl object-cover" />}
-                <label className="cursor-pointer bg-muted rounded-xl px-4 py-2 text-sm font-semibold hover:bg-muted/80 flex items-center gap-2">
+                <label
+                  className="cursor-pointer bg-muted rounded-xl px-4 py-2 text-sm font-semibold hover:bg-muted/80 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      featuredImageInputRef.current?.click();
+                    }
+                  }}
+                >
                   <Image className="w-4 h-4" /> Upload
-                  <input type="file" accept="image/*" className="hidden" onChange={handleFeaturedImageUpload} />
+                  <input type="file" accept="image/*" className="sr-only" onChange={handleFeaturedImageUpload} ref={featuredImageInputRef} />
                 </label>
               </div>
             </div>
@@ -406,6 +417,7 @@ export default function ProjectsAdmin() {
                       key={s}
                       type="button"
                       onClick={() => toggleMulti('service_types', s)}
+                      aria-pressed={(form.service_types || []).includes(s)}
                       className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                         (form.service_types || []).includes(s)
                           ? 'bg-primary text-primary-foreground border-primary'
@@ -426,6 +438,7 @@ export default function ProjectsAdmin() {
                       key={e}
                       type="button"
                       onClick={() => toggleMulti('event_types', e)}
+                      aria-pressed={(form.event_types || []).includes(e)}
                       className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                         (form.event_types || []).includes(e)
                           ? 'bg-primary text-primary-foreground border-primary'

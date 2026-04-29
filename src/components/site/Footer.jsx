@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
+import { ensureAccessibleColor } from '@/lib/accessibility';
 
 const SOCIAL_ICONS = {
   instagram: ({ className }) => (
@@ -36,34 +37,40 @@ export default function Footer() {
   const footerText = theme?.footer?.textColor || '#fff';
   const footerAccent = theme?.footer?.accent || '#feca57';
   const decorations = theme?.decorations || ['🎈'];
+  const safeFooterText = ensureAccessibleColor(footerText, footerBg);
+  const safeFooterAccent = ensureAccessibleColor(footerAccent, footerBg, {
+    fallbackDark: safeFooterText,
+    fallbackLight: safeFooterText,
+    minRatio: 3,
+  });
 
   return (
-    <footer className="relative overflow-hidden" style={{ background: footerBg, color: footerText }}>
+    <footer className="relative overflow-hidden" style={{ background: footerBg, color: safeFooterText }}>
       {/* Theme decorations strip */}
-      <div className="flex justify-center gap-3 py-4 opacity-30 text-2xl select-none pointer-events-none">
+      <div className="flex justify-center gap-3 py-4 opacity-30 text-2xl select-none pointer-events-none" aria-hidden="true">
         {decorations.concat(decorations).map((d, i) => <span key={i}>{d}</span>)}
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-display text-2xl mb-3" style={{ color: footerAccent }}>{content.company_name}</h3>
+            <h3 className="font-display text-2xl mb-3" style={{ color: safeFooterAccent }}>{content.company_name}</h3>
             <p className="text-sm leading-relaxed opacity-70">{content.tagline}</p>
           </div>
           <div>
-            <h4 className="font-bold mb-3" style={{ color: footerAccent }}>Quick Links</h4>
-            <div className="flex flex-col gap-2">
+            <h4 className="font-bold mb-3" style={{ color: safeFooterAccent }}>Quick Links</h4>
+            <nav aria-label="Footer" className="flex flex-col gap-2">
               {(content.links || []).map((link, i) => (
-                <Link key={i} to={link.href} className="text-sm transition-colors opacity-70 hover:opacity-100" style={{ color: footerText }}>
+                <Link key={i} to={link.href} className="text-sm transition-colors opacity-70 hover:opacity-100" style={{ color: safeFooterText }}>
                   {link.label}
                 </Link>
               ))}
-            </div>
+            </nav>
           </div>
           <div>
-            <h4 className="font-bold mb-3" style={{ color: footerAccent }}>Get in Touch</h4>
+            <h4 className="font-bold mb-3" style={{ color: safeFooterAccent }}>Get in Touch</h4>
             <div className="space-y-2 text-sm opacity-70">
-              {contact.email && <p>{contact.email}</p>}
-              {contact.phone && <p>{contact.phone}</p>}
+              {contact.email && <p><a href={`mailto:${contact.email}`} className="hover:opacity-100">{contact.email}</a></p>}
+              {contact.phone && <p><a href={`tel:${contact.phone}`} className="hover:opacity-100">{contact.phone}</a></p>}
               {contact.address && <p>{contact.address}</p>}
             </div>
             {contact.social_links && Object.keys(contact.social_links).some(k => contact.social_links[k] && contact.social_links[k] !== '#') && (
@@ -73,7 +80,15 @@ export default function Footer() {
                   const Icon = SOCIAL_ICONS[key];
                   if (!Icon) return null;
                   return (
-                    <a key={key} href={url} target="_blank" rel="noopener noreferrer" className="opacity-60 hover:opacity-100 transition-opacity" style={{ color: footerText }}>
+                    <a
+                      key={key}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-70 hover:opacity-100 transition-opacity"
+                      style={{ color: safeFooterText }}
+                      aria-label={`${key} (opens in a new tab)`}
+                    >
                       <Icon className="w-5 h-5" />
                     </a>
                   );
@@ -82,17 +97,18 @@ export default function Footer() {
             )}
           </div>
         </div>
-        <div className="border-t mt-8 pt-6 text-center text-sm opacity-40" style={{ borderColor: `${footerText}20` }}>
+        <div className="border-t mt-8 pt-6 text-center text-sm opacity-50" style={{ borderColor: `${safeFooterText}20` }}>
           {content.copyright}
         </div>
-        <div className="mt-6 pt-4 text-center text-xs opacity-50" style={{ borderTop: `1px solid ${footerText}10` }}>
+        <div className="mt-6 pt-4 text-center text-xs opacity-60" style={{ borderTop: `1px solid ${safeFooterText}10` }}>
           Site created by:{' '}
           <a
             href="http://www.facebook.com/scorptonic"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:opacity-100 transition-opacity font-semibold"
-            style={{ color: footerAccent }}
+            style={{ color: safeFooterAccent }}
+            aria-label="ScorpTonic on Facebook (opens in a new tab)"
           >
             ScorpTonic
           </a>

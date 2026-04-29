@@ -309,6 +309,15 @@ export default function MessagesAdmin() {
               key={m.id}
               className={`cursor-pointer hover:shadow-md transition-shadow ${m.status === 'new' ? 'border-green-300 bg-green-50/30' : ''}`}
               onClick={() => handleOpen(m)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  handleOpen(m);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open message from ${m.name}`}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -318,10 +327,10 @@ export default function MessagesAdmin() {
                       <Badge className={`${statusColors[m.status]} text-white text-xs flex-shrink-0`}>{m.status}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-2">
-                      <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {m.email}</span>
-                      {m.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {m.phone}</span>}
+                      <span className="flex items-center gap-1"><Mail className="w-3 h-3" aria-hidden="true" /> {m.email}</span>
+                      {m.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" aria-hidden="true" /> {m.phone}</span>}
                       {m.event_type && <span className="capitalize">{m.event_type.replace('_', ' ')}</span>}
-                      {m.event_date && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {m.event_date}</span>}
+                      {m.event_date && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" aria-hidden="true" /> {m.event_date}</span>}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2">{m.message}</p>
                   </div>
@@ -330,13 +339,13 @@ export default function MessagesAdmin() {
                       {m.created_at ? format(new Date(m.created_at), 'MMM d, p') : ''}
                     </p>
                     <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" title="View" onClick={() => handleOpen(m)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="View" aria-label={`View message from ${m.name}`} onClick={() => handleOpen(m)}>
                         <Eye className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Print" onClick={() => printMessage(m)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Print" aria-label={`Print message from ${m.name}`} onClick={() => printMessage(m)}>
                         <Printer className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Download" onClick={() => downloadMessage(m)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Download" aria-label={`Download message from ${m.name}`} onClick={() => downloadMessage(m)}>
                         <Download className="w-3.5 h-3.5" />
                       </Button>
                       <Button
@@ -344,6 +353,7 @@ export default function MessagesAdmin() {
                         size="icon"
                         className="h-7 w-7"
                         title="Delete"
+                        aria-label={`Delete message from ${m.name}`}
                         onClick={() => deleteMutation.mutate(m.id)}
                       >
                         <Trash2 className="w-3.5 h-3.5 text-destructive" />

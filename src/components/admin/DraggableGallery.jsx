@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { uploadFile } from '@/lib/uploadFile';
 import { GripVertical, X, Plus } from 'lucide-react';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 export default function DraggableGallery({ images = [], onChange }) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState([]);
+  const uploadInputRef = useRef(null);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -56,6 +57,7 @@ export default function DraggableGallery({ images = [], onChange }) {
     );
     onChange(updated);
   };
+  const openUploadPicker = () => uploadInputRef.current?.click();
 
   return (
     <div className="space-y-3">
@@ -75,20 +77,23 @@ export default function DraggableGallery({ images = [], onChange }) {
                       {...provided.draggableProps}
                       className={`relative group rounded-xl overflow-hidden border bg-muted w-28 h-28 flex-shrink-0 ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary' : ''}`}
                     >
-                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      <img src={img.url} alt={`Gallery image ${index + 1} preview`} className="w-full h-full object-cover" />
 
                       {/* Drag handle */}
                       <div
                         {...provided.dragHandleProps}
-                        className="absolute top-1 left-1 bg-black/50 rounded p-0.5 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 left-1 bg-black/50 rounded p-0.5 cursor-grab opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+                        aria-label={`Reorder gallery image ${index + 1}`}
                       >
                         <GripVertical className="w-3 h-3 text-white" />
                       </div>
 
                       {/* Remove button */}
                       <button
+                        type="button"
                         onClick={() => handleRemove(index)}
-                        className="absolute top-1 right-1 bg-black/50 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-black/50 rounded-full p-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+                        aria-label={`Remove gallery image ${index + 1}`}
                       >
                         <X className="w-3 h-3 text-white" />
                       </button>
@@ -96,13 +101,17 @@ export default function DraggableGallery({ images = [], onChange }) {
                       {/* Before/After toggle */}
                       <div className="absolute bottom-0 left-0 right-0 flex">
                         <button
+                          type="button"
                           onClick={() => handleLabelChange(index, 'before')}
+                          aria-pressed={img.label === 'before'}
                           className={`flex-1 text-[9px] font-bold py-0.5 transition-colors ${img.label === 'before' ? 'bg-blue-500 text-white' : 'bg-black/40 text-white/70 hover:bg-blue-400/70'}`}
                         >
                           Before
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleLabelChange(index, 'after')}
+                          aria-pressed={img.label === 'after'}
                           className={`flex-1 text-[9px] font-bold py-0.5 transition-colors ${img.label === 'after' ? 'bg-green-500 text-white' : 'bg-black/40 text-white/70 hover:bg-green-400/70'}`}
                         >
                           After
@@ -122,7 +131,16 @@ export default function DraggableGallery({ images = [], onChange }) {
               {provided.placeholder}
 
               {/* Upload button */}
-              <label className={`w-28 h-28 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-muted/70 transition-colors flex-shrink-0 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <label
+                className={`w-28 h-28 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-muted/70 transition-colors flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openUploadPicker();
+                  }
+                }}
+              >
                 <Plus className="w-5 h-5 text-muted-foreground mb-1" />
                 <span className="text-xs text-muted-foreground text-center px-1">
                   {uploading ? 'Uploading…' : 'Add photos'}
@@ -131,9 +149,10 @@ export default function DraggableGallery({ images = [], onChange }) {
                   type="file"
                   accept="image/*"
                   multiple
-                  className="hidden"
+                  className="sr-only"
                   onChange={handleFiles}
                   disabled={uploading}
+                  ref={uploadInputRef}
                 />
               </label>
             </div>

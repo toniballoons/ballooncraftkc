@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Plus, Image, Tag, MapPin, Star, Search, Eye, Copy, CheckSquare } from 'lucide-react';
+import { FileText, Plus, Eye, Copy, CheckSquare } from 'lucide-react';
 
 export default function HelpPortfolio() {
   return (

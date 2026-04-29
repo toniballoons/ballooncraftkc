@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Testimonial from '@/entities/Testimonial';
 import { uploadFile } from '@/lib/uploadFile';
@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Pencil, Trash2, Star, Image, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star, Image, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 const empty = { name: '', role: '', quote: '', rating: 5, avatar_url: '', featured: false, status: 'approved' };
@@ -22,6 +22,7 @@ export default function TestimonialsAdmin() {
   const [editOpen, setEditOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [editingId, setEditingId] = useState(null);
+  const avatarInputRef = useRef(null);
 
   const { data: testimonials = [] } = useQuery({
     queryKey: ['admin-testimonials'],
@@ -110,8 +111,8 @@ export default function TestimonialsAdmin() {
               <CardContent className="p-4 flex items-start gap-4">
                 {/* Reorder */}
                 <div className="flex flex-col gap-0.5 mt-1">
-                  <button onClick={() => moveUp(i)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronUp className="w-4 h-4" /></button>
-                  <button onClick={() => moveUp(i + 1)} disabled={i === testimonials.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronDown className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => moveUp(i)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={`Move ${t.name || 'testimonial'} up`}><ChevronUp className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => moveUp(i + 1)} disabled={i === testimonials.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={`Move ${t.name || 'testimonial'} down`}><ChevronDown className="w-4 h-4" /></button>
                 </div>
                 {t.avatar_url ? (
                   <img src={t.avatar_url} alt={t.name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
@@ -131,8 +132,8 @@ export default function TestimonialsAdmin() {
                   <p className="text-sm text-muted-foreground line-clamp-2">"{t.quote}"</p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <Button variant="outline" size="icon" onClick={() => openEdit(t)}><Pencil className="w-4 h-4" /></Button>
-                  <Button variant="outline" size="icon" onClick={() => deleteMutation.mutate(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button variant="outline" size="icon" onClick={() => openEdit(t)} aria-label={`Edit testimonial from ${t.name || 'client'}`}><Pencil className="w-4 h-4" /></Button>
+                  <Button variant="outline" size="icon" onClick={() => deleteMutation.mutate(t.id)} aria-label={`Delete testimonial from ${t.name || 'client'}`}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </div>
               </CardContent>
             </Card>
@@ -153,7 +154,7 @@ export default function TestimonialsAdmin() {
               <Label>Rating (1-5)</Label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map(n => (
-                  <button key={n} type="button" onClick={() => setForm({ ...form, rating: n })}>
+                  <button key={n} type="button" onClick={() => setForm({ ...form, rating: n })} aria-label={`Set rating to ${n} star${n === 1 ? '' : 's'}`} aria-pressed={form.rating === n}>
                     <Star className={`w-6 h-6 cursor-pointer ${n <= form.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
                   </button>
                 ))}
@@ -163,9 +164,18 @@ export default function TestimonialsAdmin() {
               <Label>Avatar</Label>
               <div className="flex items-center gap-3">
                 {form.avatar_url && <img src={form.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />}
-                <label className="cursor-pointer bg-muted rounded-lg px-3 py-1.5 text-sm flex items-center gap-2">
+                <label
+                  className="cursor-pointer bg-muted rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      avatarInputRef.current?.click();
+                    }
+                  }}
+                >
                   <Image className="w-4 h-4" /> Upload
-                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
+                  <input type="file" accept="image/*" className="sr-only" onChange={handleAvatar} ref={avatarInputRef} />
                 </label>
               </div>
             </div>

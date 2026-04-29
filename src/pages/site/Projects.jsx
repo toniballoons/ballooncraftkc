@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import * as Project from '@/entities/Project';
 import { SERVICE_TYPES, EVENT_TYPES, GEO_CITIES, formatCanonicalUrl } from '@/lib/seo';
+import { getHeroTextStyles } from '@/lib/accessibility';
 
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, MapPin, ArrowRight, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ export default function Projects() {
   const { content } = useSiteContent('projects');
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #00b894, #74b9ff)';
+  const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
 
   const [search, setSearch] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
@@ -78,9 +79,9 @@ export default function Projects() {
     <>
       <section className="relative py-24 overflow-hidden" style={{ background: heroBg }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7 }}>
-            <h1 className="font-display text-5xl sm:text-6xl mb-4 text-white drop-shadow-lg">{content.title}</h1>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto">{content.subtitle}</p>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7 }} className="rounded-[2rem] px-6 py-8 sm:px-10 inline-block max-w-4xl" style={panelStyle}>
+            <h1 className="font-display text-5xl sm:text-6xl mb-4 drop-shadow-lg" style={{ color: textColor }}>{content.title}</h1>
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: mutedTextColor }}>{content.subtitle}</p>
           </motion.div>
         </div>
       </section>
@@ -90,8 +91,10 @@ export default function Projects() {
 
           {/* Search */}
           <div className="relative max-w-md mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <label htmlFor="project-search" className="sr-only">Search portfolio</label>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
+              id="project-search"
               placeholder="Search portfolio..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -100,11 +103,13 @@ export default function Projects() {
           </div>
 
           {/* 9.1 — Service Type filter chips */}
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Service</p>
+          <fieldset className="mb-4">
+            <legend className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Service</legend>
             <div className="flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() => setServiceFilter('')}
+                aria-pressed={!serviceFilter}
                 className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${!serviceFilter ? 'bg-primary text-white border-primary' : 'bg-background border-border hover:border-primary text-muted-foreground'}`}
               >
                 All
@@ -112,21 +117,25 @@ export default function Projects() {
               {SERVICE_TYPES.map(s => (
                 <button
                   key={s}
+                  type="button"
                   onClick={() => setServiceFilter(serviceFilter === s ? '' : s)}
+                  aria-pressed={serviceFilter === s}
                   className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${serviceFilter === s ? 'bg-primary text-white border-primary' : 'bg-background border-border hover:border-primary text-muted-foreground'}`}
                 >
                   {s}
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* 9.1 — Event Type filter chips */}
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Event</p>
+          <fieldset className="mb-4">
+            <legend className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Event</legend>
             <div className="flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() => setEventFilter('')}
+                aria-pressed={!eventFilter}
                 className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${!eventFilter ? 'bg-primary text-white border-primary' : 'bg-background border-border hover:border-primary text-muted-foreground'}`}
               >
                 All
@@ -134,21 +143,23 @@ export default function Projects() {
               {EVENT_TYPES.map(e => (
                 <button
                   key={e}
+                  type="button"
                   onClick={() => setEventFilter(eventFilter === e ? '' : e)}
+                  aria-pressed={eventFilter === e}
                   className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${eventFilter === e ? 'bg-primary text-white border-primary' : 'bg-background border-border hover:border-primary text-muted-foreground'}`}
                 >
                   {e}
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* 9.2 — City filter */}
           <div className="flex items-center gap-4 mb-8">
             <div className="flex items-center gap-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">City</p>
+              <label htmlFor="city-filter" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">City</label>
               <Select value={cityFilter || 'all'} onValueChange={v => setCityFilter(v === 'all' ? '' : v)}>
-                <SelectTrigger className="w-44 h-8 text-sm rounded-full">
+                <SelectTrigger id="city-filter" aria-label="Filter by city" className="w-44 h-8 text-sm rounded-full">
                   <SelectValue placeholder="All Cities" />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,24 +171,24 @@ export default function Projects() {
               </Select>
             </div>
             {hasFilters && (
-              <button onClick={clearFilters} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                <X className="w-3 h-3" /> Clear filters
+              <button type="button" onClick={clearFilters} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                <X className="w-3 h-3" aria-hidden="true" /> Clear filters
               </button>
             )}
           </div>
 
           {/* Results count */}
-          <p className="text-sm text-muted-foreground mb-6">
+          <p className="text-sm text-muted-foreground mb-6" aria-live="polite">
             {filtered.length} {filtered.length === 1 ? 'post' : 'posts'}{hasFilters ? ' matching your filters' : ''}
           </p>
 
           {/* Grid */}
           {isLoading ? (
-            <div className="text-center py-20 text-muted-foreground">Loading portfolio...</div>
+            <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">Loading portfolio...</div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground">
+            <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">
               <p className="mb-3">No posts found matching your filters.</p>
-              {hasFilters && <button onClick={clearFilters} className="text-primary underline text-sm">Clear filters</button>}
+              {hasFilters && <button type="button" onClick={clearFilters} className="text-primary underline text-sm">Clear filters</button>}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -209,13 +220,13 @@ export default function Projects() {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           {project.event_date && (
                             <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
+                              <Calendar className="w-3 h-3" aria-hidden="true" />
                               {format(new Date(project.event_date), 'MMM d, yyyy')}
                             </span>
                           )}
                           {(project.geo_city || project.event_location) && (
                             <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
+                              <MapPin className="w-3 h-3" aria-hidden="true" />
                               {project.geo_city || project.event_location}
                             </span>
                           )}

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { formatCanonicalUrl } from '@/lib/seo';
+import { getHeroTextStyles } from '@/lib/accessibility';
 import { motion } from 'framer-motion';
 import { Heart, Award, Lightbulb, Clock } from 'lucide-react';
 
@@ -12,6 +13,7 @@ export default function About() {
   const { content } = useSiteContent('about');
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #a29bfe, #fd79a8)';
+  const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
   const domain = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraft.com';
 
   useEffect(() => {
@@ -35,9 +37,9 @@ export default function About() {
       {/* Hero */}
       <section className="relative py-24 overflow-hidden" style={{ background: heroBg }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7 }} className="text-center max-w-3xl mx-auto">
-            <h1 className="font-display text-5xl sm:text-6xl mb-4 text-white drop-shadow-lg">{content.title}</h1>
-            <p className="text-xl text-white/80">{content.subtitle}</p>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7 }} className="text-center max-w-3xl mx-auto rounded-[2rem] px-6 py-8 sm:px-10" style={panelStyle}>
+            <h1 className="font-display text-5xl sm:text-6xl mb-4 drop-shadow-lg" style={{ color: textColor }}>{content.title}</h1>
+            <p className="text-xl" style={{ color: mutedTextColor }}>{content.subtitle}</p>
           </motion.div>
         </div>
       </section>
@@ -75,7 +77,7 @@ export default function About() {
                   className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow text-center"
                 >
                   <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <Icon className="w-7 h-7 text-primary" />
+                    <Icon className="w-7 h-7 text-primary" aria-hidden="true" />
                   </div>
                   <h3 className="font-bold text-lg mb-2">{v.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{v.description}</p>

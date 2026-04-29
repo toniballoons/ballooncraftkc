@@ -53,7 +53,9 @@ export default function Help() {
             {SECTIONS.map(s => (
               <button
                 key={s.id}
+                type="button"
                 onClick={() => setActiveId(s.id)}
+                aria-pressed={activeId === s.id}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left ${
                   activeId === s.id
                     ? 'bg-primary text-primary-foreground'

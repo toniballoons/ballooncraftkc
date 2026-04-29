@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, TrendingUp, MapPin, FileText, Star, CheckCircle2 } from 'lucide-react';
+import { Search, TrendingUp, MapPin, CheckCircle2 } from 'lucide-react';
 
 export default function HelpSEO() {
   return (

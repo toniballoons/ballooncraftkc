@@ -44,7 +44,7 @@ export default function FooterEditor({ content, setContent }) {
               <CardContent className="p-3 flex items-center gap-2">
                 <Input value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} placeholder="Label" className="flex-1 h-8 text-sm" />
                 <Input value={link.href} onChange={e => updateLink(i, 'href', e.target.value)} placeholder="/page" className="flex-1 h-8 text-sm" />
-                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeLink(i)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeLink(i)} aria-label={`Remove ${link.label || 'footer link'}`}>
                   <Trash2 className="w-3.5 h-3.5 text-destructive" />
                 </Button>
               </CardContent>

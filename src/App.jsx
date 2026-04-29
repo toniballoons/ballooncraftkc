@@ -7,6 +7,7 @@ import { AuthProvider } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
+import { MotionConfig } from 'framer-motion';
 
 // Site pages
 import SiteLayout from '@/components/site/SiteLayout';
@@ -35,42 +36,44 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <ThemeProvider>
-          <Router>
-            <ScrollToTop />
-            <Routes>
-              {/* Public site */}
-              <Route element={<SiteLayout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/projects/:slug" element={<ProjectDetail />} />
-                <Route path="/testimonials" element={<Testimonials />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/privacy" element={<LegalPage />} />
-                <Route path="/terms" element={<LegalPage />} />
-                <Route path="/legal" element={<LegalPage />} />
-              </Route>
-
-              {/* Admin login — public */}
-              <Route path="/admin/login" element={<Login />} />
-
-              {/* Admin panel — protected */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="pages" element={<PageEditor />} />
-                  <Route path="projects" element={<ProjectsAdmin />} />
-                  <Route path="testimonials" element={<TestimonialsAdmin />} />
-                  <Route path="messages" element={<MessagesAdmin />} />
-                  <Route path="theme" element={<ThemeSettings />} />
-                  <Route path="site" element={<SiteAssets />} />
-                  <Route path="help" element={<Help />} />
+          <MotionConfig reducedMotion="user">
+            <Router>
+              <ScrollToTop />
+              <Routes>
+                {/* Public site */}
+                <Route element={<SiteLayout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:slug" element={<ProjectDetail />} />
+                  <Route path="/testimonials" element={<Testimonials />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/privacy" element={<LegalPage />} />
+                  <Route path="/terms" element={<LegalPage />} />
+                  <Route path="/legal" element={<LegalPage />} />
                 </Route>
-              </Route>
 
-              <Route path="*" element={<PageNotFound />} />
-            </Routes>
-          </Router>
+                {/* Admin login — public */}
+                <Route path="/admin/login" element={<Login />} />
+
+                {/* Admin panel — protected */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="pages" element={<PageEditor />} />
+                    <Route path="projects" element={<ProjectsAdmin />} />
+                    <Route path="testimonials" element={<TestimonialsAdmin />} />
+                    <Route path="messages" element={<MessagesAdmin />} />
+                    <Route path="theme" element={<ThemeSettings />} />
+                    <Route path="site" element={<SiteAssets />} />
+                    <Route path="help" element={<Help />} />
+                  </Route>
+                </Route>
+
+                <Route path="*" element={<PageNotFound />} />
+              </Routes>
+            </Router>
+          </MotionConfig>
           <Toaster />
         </ThemeProvider>
       </QueryClientProvider>

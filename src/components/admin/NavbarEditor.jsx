@@ -46,12 +46,12 @@ export default function NavbarEditor({ content, setContent }) {
             <Card key={i}>
               <CardContent className="p-3 flex items-center gap-2">
                 <div className="flex flex-col gap-0.5">
-                  <button onClick={() => moveUp(i)} disabled={i===0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs leading-none">▲</button>
-                  <button onClick={() => moveDown(i)} disabled={i===links.length-1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs leading-none">▼</button>
+                  <button type="button" onClick={() => moveUp(i)} disabled={i===0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs leading-none" aria-label={`Move ${link.label || 'navigation link'} up`}>▲</button>
+                  <button type="button" onClick={() => moveDown(i)} disabled={i===links.length-1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs leading-none" aria-label={`Move ${link.label || 'navigation link'} down`}>▼</button>
                 </div>
                 <Input value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} placeholder="Label" className="flex-1 h-8 text-sm" />
                 <Input value={link.href} onChange={e => updateLink(i, 'href', e.target.value)} placeholder="/page" className="flex-1 h-8 text-sm" />
-                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeLink(i)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeLink(i)} aria-label={`Remove ${link.label || 'navigation link'}`}>
                   <Trash2 className="w-3.5 h-3.5 text-destructive" />
                 </Button>
               </CardContent>

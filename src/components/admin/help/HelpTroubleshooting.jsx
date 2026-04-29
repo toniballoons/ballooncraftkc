@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { AlertTriangle, RefreshCw, HelpCircle, Send, CheckCircle2, Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +63,7 @@ function DeveloperSupportForm() {
   const [screenshots, setScreenshots] = useState([]); // { file, url, uploading }
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const screenshotInputRef = useRef(null);
 
   const handleFiles = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -124,6 +125,7 @@ function DeveloperSupportForm() {
         <p className="font-bold text-green-800 mb-1">Support request sent!</p>
         <p className="text-sm text-green-700">Your developer has been notified and will get back to you as soon as possible.</p>
         <button
+          type="button"
           onClick={() => { setSubmitted(false); setForm({ name: '', email: '', description: '' }); setScreenshots([]); }}
           className="mt-4 text-xs text-green-600 underline"
         >
@@ -183,7 +185,7 @@ function DeveloperSupportForm() {
                 }
                 <span className="max-w-[120px] truncate">{s.name}</span>
                 {!s.uploading && (
-                  <button type="button" onClick={() => removeScreenshot(i)}>
+                  <button type="button" onClick={() => removeScreenshot(i)} aria-label={`Remove screenshot ${s.name}`}>
                     <X className="w-3 h-3 text-muted-foreground hover:text-destructive" />
                   </button>
                 )}
@@ -192,15 +194,25 @@ function DeveloperSupportForm() {
           </div>
         )}
 
-        <label className="flex items-center gap-2 cursor-pointer w-fit bg-muted hover:bg-muted/80 rounded-lg px-4 py-2 text-sm font-medium transition-colors">
+        <label
+          className="flex items-center gap-2 cursor-pointer w-fit bg-muted hover:bg-muted/80 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              screenshotInputRef.current?.click();
+            }
+          }}
+        >
           <Upload className="w-4 h-4" />
           {screenshots.length > 0 ? 'Add more screenshots' : 'Attach screenshots'}
           <input
             type="file"
             accept="image/*"
             multiple
-            className="hidden"
+            className="sr-only"
             onChange={handleFiles}
+            ref={screenshotInputRef}
           />
         </label>
       </div>

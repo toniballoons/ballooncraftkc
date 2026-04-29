@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
 import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
+import { ensureAccessibleColor } from '@/lib/accessibility';
 
 export default function Navbar() {
   const { content } = useSiteContent('navbar');
@@ -18,15 +19,39 @@ export default function Navbar() {
   const navStyle = theme?.nav?.style || 'default';
 
   const isGlass = navStyle === 'glassmorphism' || navStyle === 'transparent-elegant';
+  const safeTextColor = ensureAccessibleColor(textColor, navBg);
+  const safeLogoColor = ensureAccessibleColor(logoColor, navBg, {
+    fallbackDark: safeTextColor,
+    fallbackLight: safeTextColor,
+  });
+  const mobileMenuId = 'mobile-site-menu';
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   return (
     <nav
+      aria-label="Primary"
       className="fixed top-0 left-0 right-0 z-50 shadow-sm"
       style={{
         background: navBg,
         backdropFilter: isGlass ? 'blur(12px)' : undefined,
         WebkitBackdropFilter: isGlass ? 'blur(12px)' : undefined,
-        borderBottom: `1px solid ${textColor}18`,
+        borderBottom: `1px solid ${safeTextColor}18`,
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,11 +87,18 @@ export default function Navbar() {
                   key={i}
                   to={link.href}
                   className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+                  aria-current={isActive ? 'page' : undefined}
                   style={{
-                    color: isActive ? (navStyle === 'pill' ? '#fff' : logoColor) : textColor,
-                    background: isActive ? `${logoColor}22` : 'transparent',
+                    color: isActive
+                      ? (navStyle === 'pill'
+                        ? ensureAccessibleColor('#ffffff', safeLogoColor)
+                        : safeLogoColor)
+                      : safeTextColor,
+                    background: isActive
+                      ? (navStyle === 'pill' ? safeLogoColor : `${safeLogoColor}22`)
+                      : 'transparent',
                     borderBottom: navStyle === 'serif-bar' || navStyle === 'deco'
-                      ? (isActive ? `2px solid ${logoColor}` : '2px solid transparent')
+                      ? (isActive ? `2px solid ${safeLogoColor}` : '2px solid transparent')
                       : undefined,
                     borderRadius: navStyle === 'serif-bar' || navStyle === 'deco' ? 0 : undefined,
                   }}
@@ -88,11 +120,12 @@ export default function Navbar() {
                   Admin
                 </Link>
                 <button
+                  type="button"
                   onClick={logout}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:opacity-80"
                   style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
                   Sign Out
                 </button>
               </div>
@@ -101,11 +134,15 @@ export default function Navbar() {
 
           {/* Mobile Toggle */}
           <button
+            type="button"
             className="md:hidden p-2 rounded-lg"
-            style={{ color: textColor }}
+            style={{ color: safeTextColor }}
             onClick={() => setOpen(!open)}
+            aria-expanded={open}
+            aria-controls={mobileMenuId}
+            aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
           >
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {open ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
           </button>
         </div>
       </div>
@@ -113,8 +150,9 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {open && (
         <div
+          id={mobileMenuId}
           className="md:hidden border-t pb-4"
-          style={{ background: navBg, borderColor: `${textColor}18` }}
+          style={{ background: navBg, borderColor: `${safeTextColor}18` }}
         >
           {(content.links || []).map((link, i) => (
             <Link
@@ -122,9 +160,10 @@ export default function Navbar() {
               to={link.href}
               onClick={() => setOpen(false)}
               className="block px-6 py-3 font-semibold text-sm transition-colors"
+              aria-current={location.pathname === link.href ? 'page' : undefined}
               style={{
-                color: location.pathname === link.href ? logoColor : textColor,
-                background: location.pathname === link.href ? `${logoColor}15` : 'transparent',
+                color: location.pathname === link.href ? safeLogoColor : safeTextColor,
+                background: location.pathname === link.href ? `${safeLogoColor}15` : 'transparent',
               }}
             >
               {link.label}
@@ -139,16 +178,17 @@ export default function Navbar() {
                 to="/admin"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2 px-6 py-3 font-semibold text-sm"
-                style={{ color: logoColor }}
+                style={{ color: safeLogoColor }}
               >
-                <LayoutDashboard className="w-4 h-4" /> Admin Panel
+                <LayoutDashboard className="w-4 h-4" aria-hidden="true" /> Admin Panel
               </Link>
               <button
+                type="button"
                 onClick={() => { setOpen(false); logout(); }}
                 className="flex items-center gap-2 px-6 py-3 font-semibold text-sm w-full text-left"
-                style={{ color: textColor }}
+                style={{ color: safeTextColor }}
               >
-                <LogOut className="w-4 h-4" /> Sign Out
+                <LogOut className="w-4 h-4" aria-hidden="true" /> Sign Out
               </button>
             </>
           )}

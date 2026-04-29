@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
+import { getHeroTextStyles } from '@/lib/accessibility';
 import { motion } from 'framer-motion';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
@@ -13,15 +14,16 @@ export default function LegalPage({ pageKey }) {
   const { content } = useSiteContent(key);
   const { theme } = useTheme();
   const heroBg = theme?.nav?.bg || '#1a1a2e';
+  const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
 
   return (
     <>
       <section className="relative py-20 overflow-hidden" style={{ background: heroBg }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.6 }}>
-            <h1 className="font-display text-4xl sm:text-5xl mb-3 text-white drop-shadow">{content.title}</h1>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.6 }} className="rounded-[2rem] px-6 py-8 sm:px-10 inline-block max-w-3xl" style={panelStyle}>
+            <h1 className="font-display text-4xl sm:text-5xl mb-3 drop-shadow" style={{ color: textColor }}>{content.title}</h1>
             {content.last_updated && (
-              <p className="text-muted-foreground text-sm">Last updated: {content.last_updated}</p>
+              <p className="text-sm" style={{ color: mutedTextColor }}>Last updated: {content.last_updated}</p>
             )}
           </motion.div>
         </div>
