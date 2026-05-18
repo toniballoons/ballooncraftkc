@@ -1,11 +1,24 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SiteContent from '@/entities/SiteContent';
+import * as SiteTheme from '@/entities/SiteTheme';
 import { getThemeById, THEMES } from './themes';
 
 const CACHE_KEY = 'ballooncraftkc_new_design_theme';
 const THEME_SETTINGS_KEY = 'new_design_theme_settings';
 const DEFAULT_THEME_ID = import.meta.env.VITE_NEW_DESIGN_ACTIVE_THEME || 'rainbow_birthday';
+const LEGACY_THEME_ID_MAP = {
+  black_tie: 'black_tie_gala',
+  circus_fun: 'carnival_big_top',
+  corporate_clean: 'corporate_pro',
+  neon_party: 'neon_underground',
+  unicorn_dream: 'unicorn_dreams',
+  raspberry_sorbet_v1: 'pink_lemonade',
+  vintage_gold_v1: 'art_deco_gold',
+  tech_modern: 'future_tech',
+  dinosaur_bash: 'deep_jungle',
+  cartoon_pop: 'pop_art',
+};
 
 function getCookie(name) {
   if (typeof document === 'undefined') return null;
@@ -51,6 +64,21 @@ function getCachedThemeId() {
   return getStoredValue(CACHE_KEY) || DEFAULT_THEME_ID;
 }
 
+function normalizeThemeId(id) {
+  if (!id) return DEFAULT_THEME_ID;
+
+  if (THEMES.some((theme) => theme.id === id)) {
+    return id;
+  }
+
+  const mappedId = LEGACY_THEME_ID_MAP[id];
+  if (mappedId && THEMES.some((theme) => theme.id === mappedId)) {
+    return mappedId;
+  }
+
+  return DEFAULT_THEME_ID;
+}
+
 // Write theme id to localStorage
 function setCachedThemeId(id) {
   setStoredValue(CACHE_KEY, id);
@@ -84,14 +112,22 @@ export function ThemeProvider({ children }) {
     queryFn: async () => {
       const results = await SiteContent.filter({ page_key: THEME_SETTINGS_KEY });
       const raw = results[0]?.content_json;
-      if (!raw) return DEFAULT_THEME_ID;
-
-      try {
-        const parsed = JSON.parse(raw);
-        return parsed.theme_id || DEFAULT_THEME_ID;
-      } catch {
-        return DEFAULT_THEME_ID;
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          return normalizeThemeId(parsed.theme_id);
+        } catch {
+          // Fall through to the legacy theme store before giving up.
+        }
       }
+
+      const legacyThemes = await SiteTheme.filter({ active: true });
+      const legacyThemeKey = legacyThemes[0]?.key;
+      if (legacyThemeKey) {
+        return normalizeThemeId(legacyThemeKey);
+      }
+
+      return DEFAULT_THEME_ID;
     },
     // Use cached value as initialData so there's no flash while Supabase loads
     initialData: getCachedThemeId,
@@ -124,8 +160,6 @@ export function ThemeProvider({ children }) {
       } else {
         await SiteContent.create({
           page_key: THEME_SETTINGS_KEY,
-          page_type: 'setting',
-          title: 'New Design Theme Settings',
           content_json: payload,
         });
       }
@@ -144,13 +178,13 @@ export function ThemeProvider({ children }) {
     },
   });
 
-  const setTheme = (id) => {
+  const setTheme = async (id) => {
     // Apply immediately + cache before the mutation completes
     const t = getThemeById(id);
     applyThemeCssVars(t);
     setCachedThemeId(id);
 
-    setThemeMutation.mutate(id);
+    await setThemeMutation.mutateAsync(id);
     // Trigger Vercel redeploy if a deploy hook is configured
     // This bakes the theme into the next build so new visitors never see a flash
     const deployHook = import.meta.env.VITE_VERCEL_DEPLOY_HOOK;

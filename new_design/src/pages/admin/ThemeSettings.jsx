@@ -64,10 +64,15 @@ export default function ThemeSettings() {
     return matchCat && matchGroup && matchSearch;
   });
 
-  const handleSelect = (id) => {
-    setTheme(id);
+  const handleSelect = async (id) => {
     const t = THEMES.find(x => x.id === id);
-    toast.success(`Theme "${t?.name}" applied!`);
+
+    try {
+      await setTheme(id);
+      toast.success(`Theme "${t?.name}" applied!`);
+    } catch (error) {
+      toast.error(error?.message || 'Failed to save theme. Please try again.');
+    }
   };
 
   return (
