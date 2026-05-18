@@ -1,0 +1,525 @@
+:root {
+  --toni-bg: #fff8fb;
+  --toni-surface: #ffffff;
+  --toni-ink: #211439;
+  --toni-muted: #6c6086;
+  --toni-purple: #6f2ea8;
+  --toni-pink: #f24b92;
+  --toni-yellow: #f9f14b;
+  --toni-lilac: #f3e8ff;
+  --toni-border: rgba(33, 20, 57, 0.1);
+  --toni-shadow: 0 18px 40px rgba(66, 31, 100, 0.12);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.toni-layout {
+  background: linear-gradient(180deg, #fff9fc 0%, #fff4fb 100%);
+  color: var(--toni-ink);
+  overflow-y: auto !important;
+}
+
+body.toni-layout::before,
+body.toni-layout .loader {
+  display: none !important;
+}
+
+body.toni-layout p,
+body.toni-layout li,
+body.toni-layout span,
+body.toni-layout label,
+body.toni-layout input,
+body.toni-layout textarea,
+body.toni-layout select {
+  color: var(--toni-muted);
+}
+
+body.toni-layout a {
+  text-decoration: none;
+}
+
+.toni-topline {
+  color: var(--toni-lilac);
+}
+
+.toni-topline a {
+  color: #fff;
+}
+
+.toni-center {
+  gap: 20px;
+}
+
+.toni-logo img {
+  width: 180px;
+  max-width: 100%;
+}
+
+.toni-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toni-brand-copy strong {
+  color: var(--toni-ink);
+  font-size: 1rem;
+}
+
+.toni-brand-copy span {
+  color: var(--toni-muted);
+  font-size: 0.95rem;
+  font-family: "Epilogue", sans-serif;
+}
+
+.toni-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.toni-header-actions .mini-note {
+  max-width: 230px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.toni-page-link {
+  position: relative;
+  color: var(--toni-ink);
+}
+
+.toni-page-link.is-active,
+.toni-page-link:hover {
+  color: var(--toni-purple);
+}
+
+.toni-page-link.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -14px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--toni-pink), var(--toni-yellow));
+}
+
+.toni-mobile-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--toni-ink);
+  font-size: 1.25rem;
+}
+
+.toni-mobile-nav {
+  display: none;
+  background: #fff;
+  border-top: 1px solid var(--toni-border);
+  box-shadow: var(--toni-shadow);
+}
+
+.toni-mobile-nav.is-open {
+  display: block;
+}
+
+.toni-mobile-nav a {
+  display: block;
+  padding: 14px 24px;
+  color: var(--toni-ink);
+  border-bottom: 1px solid rgba(33, 20, 57, 0.06);
+}
+
+.toni-mobile-nav a.is-active {
+  color: var(--toni-purple);
+  background: #faf2ff;
+}
+
+.toni-hero {
+  overflow: hidden;
+  padding: 110px 0 90px !important;
+}
+
+.toni-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(56, 14, 82, 0.78), rgba(100, 35, 135, 0.45));
+}
+
+.toni-hero .container {
+  position: relative;
+  z-index: 1;
+}
+
+.toni-hero-copy {
+  max-width: 640px;
+}
+
+.toni-hero .featured-area {
+  width: auto !important;
+  height: auto !important;
+  max-width: 700px;
+  margin: 32px 0;
+  padding: 54px 46px;
+  border-radius: 42px !important;
+  background: rgba(96, 34, 138, 0.82);
+}
+
+.toni-hero .featured-area::before,
+.toni-hero .featured-area::after {
+  display: none !important;
+}
+
+.toni-hero-copy h1,
+.toni-hero-copy h3 {
+  color: #fff;
+}
+
+.toni-hero-copy h3 {
+  font-size: 72px;
+  line-height: 0.95;
+  margin: 20px 0 16px;
+}
+
+.toni-hero-copy p,
+.toni-hero-copy .hero-note {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.toni-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.toni-hero-actions,
+.toni-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.toni-button-row .btn span i {
+  margin-left: 8px;
+}
+
+.toni-button-row .btn.ghost {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.toni-button-row .btn.ghost span {
+  color: #fff;
+}
+
+.toni-button-row .btn.ghost:before {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.toni-heading {
+  max-width: 680px;
+  margin: 0 auto 46px;
+  text-align: center;
+}
+
+.toni-heading.left {
+  margin-left: 0;
+  text-align: left;
+}
+
+.toni-heading h2 {
+  margin-bottom: 14px;
+}
+
+.toni-kicker {
+  color: var(--toni-pink);
+  font-family: "Epilogue", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.toni-surface {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 30px;
+  box-shadow: var(--toni-shadow);
+}
+
+.toni-card {
+  height: 100%;
+  padding: 30px;
+}
+
+.toni-card h3,
+.toni-card h4,
+.toni-card h5,
+.toni-card strong {
+  color: var(--toni-ink);
+}
+
+.toni-card .meta {
+  color: var(--toni-purple);
+  font-family: "Epilogue", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.toni-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 0;
+}
+
+.toni-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #faf2ff;
+  color: var(--toni-purple);
+  font-family: "Epilogue", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.toni-check-list {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toni-check-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.toni-check-list li i {
+  color: var(--toni-pink);
+  margin-top: 5px;
+}
+
+.toni-service-card img,
+.toni-portfolio-card img,
+.toni-occasion-card img,
+.toni-seasonal-card img,
+.toni-about-image img,
+.toni-gallery-image img {
+  width: 100%;
+  border-radius: 26px;
+  object-fit: cover;
+}
+
+.toni-service-card img,
+.toni-occasion-card img,
+.toni-seasonal-card img {
+  height: 240px;
+}
+
+.toni-portfolio-card img {
+  height: 255px;
+}
+
+.toni-mini-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.toni-stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.toni-stat {
+  padding: 24px;
+  text-align: center;
+}
+
+.toni-stat strong {
+  display: block;
+  color: var(--toni-purple);
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.toni-process-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.toni-process-step .step-number {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--toni-yellow), #ffd35f);
+  color: var(--toni-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.toni-form {
+  display: grid;
+  gap: 18px;
+}
+
+.toni-form input,
+.toni-form textarea,
+.toni-form select {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(33, 20, 57, 0.14);
+  background: #fff;
+  color: var(--toni-ink);
+  font-family: "Epilogue", sans-serif;
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.toni-form textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.toni-form-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.toni-inline-note {
+  margin-top: 14px;
+  font-size: 0.9rem;
+}
+
+.toni-cta-band {
+  padding: 38px 40px;
+  background: linear-gradient(135deg, rgba(111, 46, 168, 0.94), rgba(242, 75, 146, 0.88));
+  border-radius: 34px;
+  box-shadow: var(--toni-shadow);
+}
+
+.toni-cta-band h3,
+.toni-cta-band p {
+  color: #fff;
+}
+
+.toni-footer-note {
+  max-width: 320px;
+}
+
+.toni-footer-links li {
+  margin-bottom: 12px;
+}
+
+.toni-footer-links a {
+  color: #fff;
+}
+
+.toni-footer-links a:hover,
+.toni-footer-contact a:hover,
+.toni-socials a:hover {
+  color: var(--toni-yellow);
+}
+
+.toni-footer-contact a,
+.toni-footer-contact span,
+.toni-footer-contact p {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.toni-socials {
+  display: flex;
+  gap: 12px;
+}
+
+.toni-socials a {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+@media (max-width: 991.98px) {
+  .toni-header-actions .mini-note,
+  .toni-desktop-nav {
+    display: none;
+  }
+
+  .toni-stat-strip,
+  .toni-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .toni-logo img {
+    width: 144px;
+  }
+
+  .toni-header-actions {
+    gap: 10px;
+  }
+
+  .toni-header-actions .btn {
+    display: none;
+  }
+
+  .toni-hero {
+    padding: 84px 0 72px !important;
+  }
+
+  .toni-hero .featured-area {
+    padding: 38px 28px;
+    border-radius: 32px !important;
+  }
+
+  .toni-hero-copy h1,
+  .toni-hero-copy h3 {
+    font-size: 48px;
+    line-height: 1.05;
+  }
+
+  .toni-card {
+    padding: 24px;
+  }
+
+  .toni-stat-strip,
+  .toni-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .toni-cta-band {
+    padding: 30px 24px;
+  }
+}
