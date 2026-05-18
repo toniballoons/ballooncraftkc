@@ -27,7 +27,6 @@ This repo now uses the `/new_design` shell as the main website, CMS, and admin e
 
 - `VITE_ACTIVE_THEME` is the default production theme baked into the build.
 - `VITE_NEW_DESIGN_ACTIVE_THEME` is the default for the promoted new shell.
-- `VITE_SKIP_ADMIN_AUTH=true` is only meant for local preview bypasses.
 
 ## Database Setup
 

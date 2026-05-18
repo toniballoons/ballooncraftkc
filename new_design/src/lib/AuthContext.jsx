@@ -2,7 +2,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/api/supabaseClient';
 
 const AuthContext = createContext();
-const ADMIN_AUTH_BYPASS = import.meta.env.VITE_SKIP_ADMIN_AUTH === 'true';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -10,16 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   useEffect(() => {
-    if (ADMIN_AUTH_BYPASS) {
-      setUser({
-        id: 'local-admin-bypass',
-        email: 'preview@local.test',
-      });
-      setIsAuthenticated(true);
-      setIsLoadingAuth(false);
-      return undefined;
-    }
-
     // Hydrate from existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -38,10 +27,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = async () => {
-    if (ADMIN_AUTH_BYPASS) {
-      return;
-    }
-
     await supabase.auth.signOut();
     setUser(null);
     setIsAuthenticated(false);

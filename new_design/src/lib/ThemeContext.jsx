@@ -6,10 +6,6 @@ import { getThemeById, THEMES } from './themes';
 const CACHE_KEY = 'ballooncraftkc_new_design_theme';
 const THEME_SETTINGS_KEY = 'new_design_theme_settings';
 const DEFAULT_THEME_ID = import.meta.env.VITE_NEW_DESIGN_ACTIVE_THEME || 'rainbow_birthday';
-const LOCAL_ADMIN_PREVIEW =
-  import.meta.env.VITE_SKIP_ADMIN_AUTH === 'true' &&
-  typeof window !== 'undefined' &&
-  ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 function getCookie(name) {
   if (typeof document === 'undefined') return null;
@@ -86,12 +82,6 @@ export function ThemeProvider({ children }) {
   const { data: activeThemeId } = useQuery({
     queryKey: ['active-theme'],
     queryFn: async () => {
-      // Local admin bypass skips Supabase auth, so writes won't pass RLS.
-      // In preview mode we persist theme selection only in this origin's localStorage.
-      if (LOCAL_ADMIN_PREVIEW) {
-        return getCachedThemeId();
-      }
-
       const results = await SiteContent.filter({ page_key: THEME_SETTINGS_KEY });
       const raw = results[0]?.content_json;
       if (!raw) return DEFAULT_THEME_ID;
@@ -159,11 +149,6 @@ export function ThemeProvider({ children }) {
     const t = getThemeById(id);
     applyThemeCssVars(t);
     setCachedThemeId(id);
-
-    if (LOCAL_ADMIN_PREVIEW) {
-      queryClient.setQueryData(['active-theme'], id);
-      return;
-    }
 
     setThemeMutation.mutate(id);
     // Trigger Vercel redeploy if a deploy hook is configured

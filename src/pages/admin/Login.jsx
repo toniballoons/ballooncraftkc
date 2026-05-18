@@ -4,21 +4,21 @@ import { supabase } from '@/api/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const ADMIN_AUTH_BYPASS = import.meta.env.VITE_SKIP_ADMIN_AUTH === 'true';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (ADMIN_AUTH_BYPASS) {
+    if (isAuthenticated) {
       navigate('/admin', { replace: true });
     }
-  }, [navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
