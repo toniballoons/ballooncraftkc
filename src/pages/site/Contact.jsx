@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import * as ContactSubmission from '@/entities/ContactSubmission';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
-import { formatCanonicalUrl } from '@/lib/seo';
+import {
+  GEO_CITIES,
+  PRIMARY_EVENT_PHRASES,
+  PRIMARY_SERVICE_PHRASES,
+  buildBreadcrumbJsonLd,
+  buildFaqJsonLd,
+  buildLocalBusinessJsonLd,
+  buildSeoKeywordSet,
+} from '@/lib/seo';
+import { usePageSeo } from '@/lib/usePageSeo';
 import { getHeroTextStyles } from '@/lib/accessibility';
 import { Button } from '@/components/ui/button';
 // BalloonDecor removed — theme handles decoration
@@ -15,32 +24,39 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
+const SERVICE_CITIES = GEO_CITIES.filter(city => city !== 'Other');
+const CONTACT_FAQS = [
+  {
+    question: 'How do I book balloon decor in Kansas City?',
+    answer: 'Send us your event date, venue, city, and the kind of balloon decor you need. We use that information to recommend the right design direction and next steps for your quote.',
+  },
+  {
+    question: 'Do you travel outside Kansas City?',
+    answer: 'Yes. We serve Kansas City plus nearby metro communities including Overland Park, Olathe, Lee\'s Summit, Shawnee, Lenexa, Leawood, Prairie Village, and Independence.',
+  },
+  {
+    question: 'What events do you commonly style?',
+    answer: 'We regularly create balloon decor for weddings, birthday parties, baby showers, graduations, school events, corporate functions, galas, and grand openings.',
+  },
+];
+const CONTACT_KEYWORDS = buildSeoKeywordSet(PRIMARY_SERVICE_PHRASES, PRIMARY_EVENT_PHRASES, [
+  'contact balloon decorator Kansas City',
+  'balloon quote Kansas City',
+  'balloon installation quote Kansas City',
+  'balloon decor inquiry Kansas City',
+]);
 
 export default function Contact() {
   const { content } = useSiteContent('contact');
+  const { content: footerContent } = useSiteContent('footer');
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #e91e63, #ff9800)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', event_date: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const domain = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
-
-  useEffect(() => {
-    const canonical = formatCanonicalUrl(domain, '/contact');
-    let linkEl = document.querySelector('link[rel="canonical"]');
-    if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
-    linkEl.href = canonical;
-    const setMeta = (prop, val) => {
-      let el = document.querySelector(`meta[property="${prop}"]`);
-      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
-      el.content = val;
-    };
-    setMeta('og:title', content.title || 'Contact Us — BalloonCraft');
-    setMeta('og:description', content.subtitle || 'Get in touch for balloon decorations in Kansas City.');
-    setMeta('og:url', canonical);
-    return () => { const el = document.querySelector('link[rel="canonical"]'); if (el) el.remove(); };
-  }, [content, domain]);
+  const seoTitle = 'Contact BalloonCraft KC | Kansas City Balloon Decor Quotes';
+  const seoDescription = 'Request a BalloonCraft KC quote for balloon arches, garlands, walls, backdrops, and event installs in Kansas City, Overland Park, Olathe, Lee\'s Summit, Shawnee, and nearby metro communities.';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,12 +78,37 @@ export default function Contact() {
     }
   };
 
+  usePageSeo({
+    title: seoTitle,
+    description: seoDescription,
+    path: '/contact',
+    image: content.image || '/logo.png',
+    keywords: CONTACT_KEYWORDS,
+    schema: [
+      buildBreadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Contact', path: '/contact' },
+      ]),
+      buildLocalBusinessJsonLd({
+        title: 'BalloonCraft KC',
+        description: seoDescription,
+        path: '/contact',
+        image: content.image || '/logo.png',
+        contactContent: content,
+        footerContent,
+      }),
+      buildFaqJsonLd(CONTACT_FAQS),
+    ],
+  });
+
   const infoItems = [
     { icon: Mail, label: 'Email', value: content.email },
     { icon: Phone, label: 'Phone', value: content.phone },
     { icon: MapPin, label: 'Address', value: content.address },
     { icon: Clock, label: 'Hours', value: content.hours },
   ];
+  const telHref = content.phone ? `tel:${content.phone.replace(/[^\d+]/g, '')}` : null;
+  const mailHref = content.email ? `mailto:${content.email}` : null;
 
   return (
     <>
@@ -147,8 +188,21 @@ export default function Contact() {
           {/* Info */}
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
             {content.image && (
-              <img src={content.image} alt="Contact us" className="rounded-3xl shadow-xl mb-10 w-full" />
+              <img src={content.image} alt="BalloonCraft KC event consultation and balloon decor planning" className="rounded-3xl shadow-xl mb-10 w-full" decoding="async" />
             )}
+            <div className="rounded-[2rem] border border-border/40 bg-muted/25 p-6 mb-8">
+              <h2 className="font-display text-2xl mb-3">Request balloon decor in the Kansas City metro</h2>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                Reach out for custom balloon arches, balloon garlands, balloon walls, and backdrop installs for weddings, birthdays, baby showers, graduations, corporate events, and grand openings.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {SERVICE_CITIES.map(city => (
+                  <span key={city} className="rounded-full border border-border/40 bg-white px-3 py-1 text-xs font-medium text-foreground">
+                    {city}
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="space-y-6">
               {infoItems.filter(item => item.value).map((item, i) => (
                 <div key={i} className="flex items-start gap-4">
@@ -157,10 +211,25 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="font-bold text-sm">{item.label}</p>
-                    <p className="text-muted-foreground">{item.value}</p>
+                    {item.label === 'Email' && mailHref ? (
+                      <a href={mailHref} className="text-muted-foreground hover:text-primary transition-colors">{item.value}</a>
+                    ) : item.label === 'Phone' && telHref ? (
+                      <a href={telHref} className="text-muted-foreground hover:text-primary transition-colors">{item.value}</a>
+                    ) : (
+                      <p className="text-muted-foreground">{item.value}</p>
+                    )}
                   </div>
                 </div>
               ))}
+              <div className="rounded-[2rem] border border-border/40 bg-white p-6 shadow-sm">
+                <h2 className="font-display text-2xl mb-4">What to include in your inquiry</h2>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>Your event date and city</p>
+                  <p>The venue or type of setup space</p>
+                  <p>The balloon decor you have in mind: arch, garland, wall, backdrop, or custom installation</p>
+                  <p>Any theme, school colors, or brand colors we should match</p>
+                </div>
+              </div>
               {/* Social Links */}
               {content.social_links && Object.entries(content.social_links).some(([,v]) => v && v !== '#') && (
                 <div>
@@ -179,6 +248,14 @@ export default function Contact() {
                   </div>
                 </div>
               )}
+              <div className="space-y-4 pt-2">
+                {CONTACT_FAQS.map(faq => (
+                  <div key={faq.question} className="rounded-2xl border border-border/40 bg-white p-5 shadow-sm">
+                    <h3 className="font-semibold mb-2">{faq.question}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{faq.answer}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.div>
           </div>

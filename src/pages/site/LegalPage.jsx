@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { getHeroTextStyles } from '@/lib/accessibility';
+import { buildBreadcrumbJsonLd } from '@/lib/seo';
+import { usePageSeo } from '@/lib/usePageSeo';
 import { motion } from 'framer-motion';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
@@ -15,6 +17,20 @@ export default function LegalPage({ pageKey }) {
   const { theme } = useTheme();
   const heroBg = theme?.nav?.bg || '#1a1a2e';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
+  const seoTitle = `${content.title || 'Legal Information'} | BalloonCraft KC`;
+  const seoDescription = `Read the BalloonCraft KC ${content.title || 'legal information'} page for website policies, terms, and business information.`;
+
+  usePageSeo({
+    title: seoTitle,
+    description: seoDescription,
+    path: `/${key}`,
+    schema: [
+      buildBreadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: content.title || 'Legal', path: `/${key}` },
+      ]),
+    ],
+  });
 
   return (
     <>

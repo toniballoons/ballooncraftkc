@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/AuthContext';
+import { usePageSeo } from '@/lib/usePageSeo';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -19,6 +20,13 @@ export default function Login() {
       navigate('/admin', { replace: true });
     }
   }, [isAuthenticated, navigate]);
+
+  usePageSeo({
+    title: 'Admin Login | BalloonCraft KC',
+    description: 'Administrator login for BalloonCraft KC.',
+    path: '/admin/login',
+    noindex: true,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();

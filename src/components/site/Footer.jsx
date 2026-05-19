@@ -18,6 +18,8 @@ export default function Footer() {
   const { content } = useSiteContent('footer');
   const { content: contact } = useSiteContent('contact');
   const { theme } = useTheme();
+  const phoneHref = contact.phone ? `tel:${contact.phone.replace(/[^\d+]/g, '')}` : null;
+  const emailHref = contact.email ? `mailto:${contact.email}` : null;
   const footerBg = theme?.footer?.bg || '#1a0030';
   const footerText = theme?.footer?.textColor || '#fff';
   const footerAccent = theme?.footer?.accent || '#feca57';
@@ -64,9 +66,21 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-3" style={{ color: footerAccent }}>Get in Touch</h4>
             <div className="space-y-2 text-sm opacity-70">
-              {contact.email && <p>{contact.email}</p>}
-              {contact.phone && <p>{contact.phone}</p>}
-              {contact.address && <p>{contact.address}</p>}
+              {contact.email && (
+                <p>
+                  <a href={emailHref} className="hover:opacity-100 transition-opacity">
+                    {contact.email}
+                  </a>
+                </p>
+              )}
+              {contact.phone && (
+                <p>
+                  <a href={phoneHref} className="hover:opacity-100 transition-opacity">
+                    {contact.phone}
+                  </a>
+                </p>
+              )}
+              {contact.address && <address className="not-italic">{contact.address}</address>}
             </div>
 
             {contact.social_links && Object.keys(contact.social_links).some((key) => contact.social_links[key] && contact.social_links[key] !== '#') && (
