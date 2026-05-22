@@ -6,6 +6,11 @@ export default async function handler(req, res) {
   const body = [
     'User-agent: *',
     'Allow: /',
+    'Disallow: /admin',
+    'Disallow: /admin/',
+    'Disallow: /api/',
+    'Allow: /sitemap.xml',
+    'Allow: /sitemaps/',
     '',
     `Sitemap: ${baseUrl}/sitemap.xml`,
   ].join('\n');

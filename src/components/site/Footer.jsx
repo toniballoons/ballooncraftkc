@@ -81,6 +81,7 @@ export default function Footer() {
                 </p>
               )}
               {contact.address && <address className="not-italic">{contact.address}</address>}
+              {contact.hours && <p>{contact.hours}</p>}
             </div>
 
             {contact.social_links && Object.keys(contact.social_links).some((key) => contact.social_links[key] && contact.social_links[key] !== '#') && (

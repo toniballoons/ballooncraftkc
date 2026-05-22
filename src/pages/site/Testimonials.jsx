@@ -22,6 +22,7 @@ const TESTIMONIAL_KEYWORDS = buildSeoKeywordSet(PRIMARY_SERVICE_PHRASES, PRIMARY
   'balloon decor reviews Kansas City',
   'Kansas City balloon company reviews',
   'balloon decorator testimonials Kansas City',
+  'balloon decor reviews Overland Park',
 ]);
 
 export default function Testimonials() {
@@ -32,7 +33,7 @@ export default function Testimonials() {
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #fd79a8, #a29bfe)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
   const seoTitle = 'Balloon Decor Reviews | Kansas City Events & Installations';
-  const seoDescription = 'Read BalloonCraft KC client feedback for balloon arches, garlands, walls, and custom event installs across Kansas City weddings, birthdays, showers, graduations, and corporate events.';
+  const seoDescription = 'Read BalloonCraft KC client feedback for balloon arches, garlands, walls, and custom event installs across Kansas City, Overland Park, Olathe, Lee\'s Summit, and nearby metro celebrations.';
 
   const { data: testimonials = [], isLoading } = useQuery({
     queryKey: ['testimonials-public'],

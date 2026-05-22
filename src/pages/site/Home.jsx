@@ -13,7 +13,9 @@ import {
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
   buildLocalBusinessJsonLd,
+  buildOrganizationJsonLd,
   buildSeoKeywordSet,
+  buildServiceJsonLd,
   buildWebsiteJsonLd,
 } from '@/lib/seo';
 import { usePageSeo } from '@/lib/usePageSeo';
@@ -49,8 +51,10 @@ const HOME_KEYWORDS = buildSeoKeywordSet(
   SERVICE_TYPES,
   [
     'custom balloon decor Kansas City',
+    'balloon decor Overland Park',
     'balloon decorations Overland Park',
     'balloon garland Olathe',
+    'balloon installations Leawood',
     'balloon arch Lee\'s Summit',
     'grand opening balloons Kansas City',
     'corporate balloon installations Kansas City',
@@ -351,7 +355,7 @@ export default function Home() {
   const footerContent = siteContent.footer || {};
 
   const seoTitle = 'Kansas City Balloon Decor, Arches & Garlands | BalloonCraft KC';
-  const seoDescription = 'Custom balloon arches, garlands, walls, backdrops, and event installations for weddings, birthdays, baby showers, graduations, corporate events, and grand openings across the Kansas City metro.';
+  const seoDescription = 'Custom balloon arches, garlands, walls, and backdrops for weddings, birthdays, baby showers, school events, and corporate launches in Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, and across the KC metro.';
 
   usePageSeo({
     title: seoTitle,
@@ -365,12 +369,24 @@ export default function Home() {
         description: seoDescription,
         path: '/',
       }),
+      buildOrganizationJsonLd({
+        title: 'BalloonCraft KC',
+        contactContent,
+        footerContent,
+      }),
       buildLocalBusinessJsonLd({
         title: 'BalloonCraft KC',
         description: seoDescription,
         path: '/',
         image: content.image || '/logo.png',
         contactContent,
+        footerContent,
+      }),
+      buildServiceJsonLd({
+        serviceName: 'Custom balloon decor, balloon arches, garlands, and event backdrops',
+        description: seoDescription,
+        path: '/',
+        image: content.image || '/logo.png',
         footerContent,
       }),
       buildBreadcrumbJsonLd([{ name: 'Home', path: '/' }]),

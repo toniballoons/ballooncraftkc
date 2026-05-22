@@ -10,6 +10,7 @@ import {
   buildFaqJsonLd,
   buildLocalBusinessJsonLd,
   buildSeoKeywordSet,
+  buildServiceJsonLd,
 } from '@/lib/seo';
 import { usePageSeo } from '@/lib/usePageSeo';
 import { getHeroTextStyles } from '@/lib/accessibility';
@@ -44,6 +45,8 @@ const CONTACT_KEYWORDS = buildSeoKeywordSet(PRIMARY_SERVICE_PHRASES, PRIMARY_EVE
   'balloon quote Kansas City',
   'balloon installation quote Kansas City',
   'balloon decor inquiry Kansas City',
+  'balloon decor Overland Park',
+  'balloon decorator Olathe',
 ]);
 
 export default function Contact() {
@@ -56,7 +59,7 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const seoTitle = 'Contact BalloonCraft KC | Kansas City Balloon Decor Quotes';
-  const seoDescription = 'Request a BalloonCraft KC quote for balloon arches, garlands, walls, backdrops, and event installs in Kansas City, Overland Park, Olathe, Lee\'s Summit, Shawnee, and nearby metro communities.';
+  const seoDescription = 'Request a BalloonCraft KC quote for balloon arches, garlands, walls, backdrops, and event installs in Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, Shawnee, and nearby metro communities.';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,6 +98,13 @@ export default function Contact() {
         path: '/contact',
         image: content.image || '/logo.png',
         contactContent: content,
+        footerContent,
+      }),
+      buildServiceJsonLd({
+        serviceName: 'Balloon decor quotes, delivery, setup, and installation',
+        description: seoDescription,
+        path: '/contact',
+        image: content.image || '/logo.png',
         footerContent,
       }),
       buildFaqJsonLd(CONTACT_FAQS),

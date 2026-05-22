@@ -6,8 +6,13 @@ const DEFAULT_IMAGE = '/logo.png';
 const MANAGED_JSONLD_SELECTOR = 'script[data-seo-managed="true"]';
 
 function upsertMeta(selector, createTag, content) {
-  if (!content) return null;
   let element = document.head.querySelector(selector);
+  if (content === undefined || content === null || content === '') {
+    if (element) {
+      element.remove();
+    }
+    return null;
+  }
   if (!element) {
     element = createTag();
     document.head.appendChild(element);
@@ -59,7 +64,9 @@ export function usePageSeo({
     );
     const canonicalUrl = formatCanonicalUrl(siteUrl, path);
     const resolvedImage = image?.startsWith('http') ? image : formatCanonicalUrl(siteUrl, image || DEFAULT_IMAGE);
-    const robotsValue = `${noindex ? 'noindex' : 'index'},follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1`;
+    const robotsValue = noindex
+      ? 'noindex,nofollow,noarchive,nosnippet'
+      : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
 
     if (title) {
       document.title = title;
@@ -82,6 +89,12 @@ export function usePageSeo({
     upsertMeta('meta[name="googlebot"]', () => {
       const meta = document.createElement('meta');
       meta.setAttribute('name', 'googlebot');
+      return meta;
+    }, robotsValue);
+
+    upsertMeta('meta[name="bingbot"]', () => {
+      const meta = document.createElement('meta');
+      meta.setAttribute('name', 'bingbot');
       return meta;
     }, robotsValue);
 
@@ -148,6 +161,12 @@ export function usePageSeo({
     upsertMeta('meta[property="og:image"]', () => {
       const meta = document.createElement('meta');
       meta.setAttribute('property', 'og:image');
+      return meta;
+    }, resolvedImage);
+
+    upsertMeta('meta[property="og:image:url"]', () => {
+      const meta = document.createElement('meta');
+      meta.setAttribute('property', 'og:image:url');
       return meta;
     }, resolvedImage);
 

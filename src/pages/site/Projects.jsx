@@ -12,6 +12,7 @@ import {
   buildLocalBusinessJsonLd,
   buildProjectCollectionJsonLd,
   buildSeoKeywordSet,
+  buildServiceJsonLd,
 } from '@/lib/seo';
 import { usePageSeo } from '@/lib/usePageSeo';
 import { getHeroTextStyles } from '@/lib/accessibility';
@@ -35,6 +36,8 @@ const PORTFOLIO_KEYWORDS = buildSeoKeywordSet(
     'balloon garland portfolio Kansas City',
     'balloon wall portfolio Kansas City',
     'Kansas City event decorations portfolio',
+    'balloon decor Overland Park portfolio',
+    'balloon decorator Olathe portfolio',
   ]
 );
 const SEARCH_SUGGESTIONS = ['Balloon arch', 'Balloon garland', 'Wedding', 'Corporate', 'Grand opening', 'Overland Park'];
@@ -83,7 +86,7 @@ export default function Projects() {
   };
 
   const seoTitle = 'Balloon Decor Portfolio | Kansas City Arches, Garlands & Backdrops';
-  const seoDescription = 'Browse BalloonCraft KC project examples featuring balloon arches, garlands, columns, walls, and custom installs for Kansas City weddings, birthdays, baby showers, graduations, and corporate events.';
+  const seoDescription = 'Browse BalloonCraft KC portfolio examples featuring balloon arches, garlands, walls, and custom installs across Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, and nearby metro events.';
 
   usePageSeo({
     title: seoTitle,
@@ -100,6 +103,12 @@ export default function Projects() {
         description: seoDescription,
         path: '/projects',
         contactContent,
+        footerContent,
+      }),
+      buildServiceJsonLd({
+        serviceName: 'Balloon decor portfolio and installation examples',
+        description: seoDescription,
+        path: '/projects',
         footerContent,
       }),
       buildProjectCollectionJsonLd(projects, {
@@ -233,7 +242,7 @@ export default function Projects() {
 
           {/* Results count */}
           <p className="text-sm text-muted-foreground mb-6" aria-live="polite">
-            {filtered.length} {filtered.length === 1 ? 'post' : 'posts'}{hasFilters ? ' matching your filters' : ''}
+            {filtered.length} {filtered.length === 1 ? 'project' : 'projects'}{hasFilters ? ' matching your filters' : ''}
           </p>
 
           {/* Grid */}
@@ -241,7 +250,7 @@ export default function Projects() {
             <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">Loading portfolio...</div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">
-              <p className="mb-3">No posts found matching your filters.</p>
+              <p className="mb-3">No projects found matching your filters.</p>
               {hasFilters && <button type="button" onClick={clearFilters} className="text-primary underline text-sm">Clear filters</button>}
             </div>
           ) : (

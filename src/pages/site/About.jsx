@@ -9,6 +9,7 @@ import {
   buildBreadcrumbJsonLd,
   buildLocalBusinessJsonLd,
   buildSeoKeywordSet,
+  buildServiceJsonLd,
 } from '@/lib/seo';
 import { usePageSeo } from '@/lib/usePageSeo';
 import { getHeroTextStyles } from '@/lib/accessibility';
@@ -24,6 +25,8 @@ const ABOUT_KEYWORDS = buildSeoKeywordSet(PRIMARY_SERVICE_PHRASES, PRIMARY_EVENT
   'balloon decorator Kansas City',
   'event balloon artist Kansas City',
   'custom balloon installations Kansas City',
+  'balloon decor Overland Park',
+  'balloon installer Olathe',
 ]);
 
 export default function About() {
@@ -34,7 +37,7 @@ export default function About() {
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #a29bfe, #fd79a8)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
   const seoTitle = 'About BalloonCraft KC | Kansas City Balloon Decor Team';
-  const seoDescription = 'Learn about BalloonCraft KC, a Kansas City balloon decor studio creating custom arches, garlands, walls, and event installations for private celebrations and business events.';
+  const seoDescription = 'Learn about BalloonCraft KC, a balloon decor studio serving Kansas City, Overland Park, Olathe, Lee\'s Summit, and nearby metro events with custom arches, garlands, walls, and installations.';
 
   usePageSeo({
     title: seoTitle,
@@ -53,6 +56,13 @@ export default function About() {
         path: '/about',
         image: content.image || '/logo.png',
         contactContent,
+        footerContent,
+      }),
+      buildServiceJsonLd({
+        serviceName: 'Kansas City balloon decor team and installation services',
+        description: seoDescription,
+        path: '/about',
+        image: content.image || '/logo.png',
         footerContent,
       }),
     ],

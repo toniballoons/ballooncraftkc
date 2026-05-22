@@ -390,14 +390,42 @@ export function appendGeoToTitle(metaTitle, geoCity) {
 // ── Sitemap builder ──────────────────────────────────────────
 
 const STATIC_PAGES = [
-  { path: '/', changefreq: 'weekly', priority: '1.0', pageKeys: ['hero', 'about', 'contact'] },
-  { path: '/about', changefreq: 'monthly', priority: '0.8', pageKeys: ['about'] },
-  { path: '/projects', changefreq: 'weekly', priority: '0.9', pageKeys: ['projects'] },
-  { path: '/testimonials', changefreq: 'monthly', priority: '0.7', pageKeys: ['testimonials'] },
-  { path: '/contact', changefreq: 'monthly', priority: '0.8', pageKeys: ['contact'] },
-  { path: '/privacy', changefreq: 'yearly', priority: '0.3', pageKeys: ['privacy'] },
-  { path: '/terms', changefreq: 'yearly', priority: '0.3', pageKeys: ['terms'] },
-  { path: '/legal', changefreq: 'yearly', priority: '0.3', pageKeys: ['legal'] },
+  {
+    path: '/',
+    changefreq: 'weekly',
+    priority: '1.0',
+    pageKeys: ['hero', 'about', 'contact'],
+    imageSources: [
+      { pageKey: 'hero', fields: ['image'] },
+      { pageKey: 'about', fields: ['image'] },
+      { pageKey: 'contact', fields: ['image'] },
+    ],
+  },
+  {
+    path: '/about',
+    changefreq: 'monthly',
+    priority: '0.8',
+    pageKeys: ['about'],
+    imageSources: [{ pageKey: 'about', fields: ['image'] }],
+  },
+  { path: '/projects', changefreq: 'weekly', priority: '0.9', pageKeys: ['projects'], imageSources: [] },
+  {
+    path: '/testimonials',
+    changefreq: 'monthly',
+    priority: '0.7',
+    pageKeys: ['testimonials'],
+    imageSources: [{ pageKey: 'testimonials', fields: ['bg_image'] }],
+  },
+  {
+    path: '/contact',
+    changefreq: 'monthly',
+    priority: '0.8',
+    pageKeys: ['contact'],
+    imageSources: [{ pageKey: 'contact', fields: ['image'] }],
+  },
+  { path: '/privacy', changefreq: 'yearly', priority: '0.3', pageKeys: ['privacy'], imageSources: [] },
+  { path: '/terms', changefreq: 'yearly', priority: '0.3', pageKeys: ['terms'], imageSources: [] },
+  { path: '/legal', changefreq: 'yearly', priority: '0.3', pageKeys: ['legal'], imageSources: [] },
 ];
 
 function getLatestPageDate(pageKeys = [], pageUpdates = {}) {
@@ -411,6 +439,187 @@ function getLatestPageDate(pageKeys = [], pageUpdates = {}) {
 function buildOpeningHours(hours = '') {
   if (!hours) return [];
   return hours.split('|').map(part => part.trim()).filter(Boolean);
+}
+
+const DAY_ORDER = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+
+const DAY_MAP = {
+  mon: 'monday',
+  monday: 'monday',
+  tue: 'tuesday',
+  tues: 'tuesday',
+  tuesday: 'tuesday',
+  wed: 'wednesday',
+  weds: 'wednesday',
+  wednesday: 'wednesday',
+  thu: 'thursday',
+  thur: 'thursday',
+  thurs: 'thursday',
+  thursday: 'thursday',
+  fri: 'friday',
+  friday: 'friday',
+  sat: 'saturday',
+  saturday: 'saturday',
+  sun: 'sunday',
+  sunday: 'sunday',
+};
+
+function toSchemaDay(dayToken = '') {
+  const normalized = DAY_MAP[dayToken.trim().toLowerCase()];
+  return normalized ? `https://schema.org/${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}` : null;
+}
+
+function expandDayRange(startToken = '', endToken = '') {
+  const start = DAY_MAP[startToken.trim().toLowerCase()];
+  const end = DAY_MAP[endToken.trim().toLowerCase()];
+
+  if (!start) return [];
+  if (!end || start === end) {
+    return [toSchemaDay(startToken)].filter(Boolean);
+  }
+
+  const startIndex = DAY_ORDER.indexOf(start);
+  const endIndex = DAY_ORDER.indexOf(end);
+  if (startIndex === -1 || endIndex === -1) return [];
+
+  if (startIndex <= endIndex) {
+    return DAY_ORDER.slice(startIndex, endIndex + 1).map(day => `https://schema.org/${day.charAt(0).toUpperCase()}${day.slice(1)}`);
+  }
+
+  return [...DAY_ORDER.slice(startIndex), ...DAY_ORDER.slice(0, endIndex + 1)]
+    .map(day => `https://schema.org/${day.charAt(0).toUpperCase()}${day.slice(1)}`);
+}
+
+function normalizeTimeTo24Hour(value = '') {
+  const match = value.trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+  if (!match) return null;
+
+  let hours = Number(match[1]);
+  const minutes = match[2] || '00';
+  const meridiem = match[3];
+
+  if (hours === 12) {
+    hours = meridiem === 'am' ? 0 : 12;
+  } else if (meridiem === 'pm') {
+    hours += 12;
+  }
+
+  return `${String(hours).padStart(2, '0')}:${minutes}`;
+}
+
+function buildOpeningHoursSpecifications(hours = '') {
+  return buildOpeningHours(hours)
+    .map(segment => {
+      const match = segment.match(/^([A-Za-z]{3,9})(?:\s*-\s*([A-Za-z]{3,9}))?\s*:?\s*([0-9:\s]+(?:am|pm))\s*-\s*([0-9:\s]+(?:am|pm))$/i);
+      if (!match) return null;
+
+      const days = match[2] ? expandDayRange(match[1], match[2]) : [toSchemaDay(match[1])].filter(Boolean);
+      const opens = normalizeTimeTo24Hour(match[3]);
+      const closes = normalizeTimeTo24Hour(match[4]);
+
+      if (days.length === 0 || !opens || !closes) return null;
+
+      return {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: days,
+        opens,
+        closes,
+      };
+    })
+    .filter(Boolean);
+}
+
+function toAbsoluteImageUrl(imageUrl = '', siteUrl = 'https://ballooncraftkc.com') {
+  if (!imageUrl) return '';
+  return /^https?:\/\//i.test(imageUrl) ? imageUrl : formatCanonicalUrl(siteUrl, imageUrl);
+}
+
+function dedupeImageEntries(entries = []) {
+  const seen = new Set();
+
+  return entries.filter(entry => {
+    const key = entry?.loc;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildImageEntryXml(image = {}) {
+  const titleEntry = image.title ? `\n      <image:title>${escapeXml(image.title)}</image:title>` : '';
+  const captionEntry = image.caption ? `\n      <image:caption>${escapeXml(image.caption)}</image:caption>` : '';
+
+  return `\n    <image:image>\n      <image:loc>${escapeXml(image.loc)}</image:loc>${titleEntry}${captionEntry}\n    </image:image>`;
+}
+
+function buildUrlSetXml(urls = []) {
+  const urlEntries = urls
+    .map(url => {
+      const imageEntries = (url.images || []).map(buildImageEntryXml).join('');
+
+      return `  <url>\n    <loc>${escapeXml(url.loc)}</loc>\n    <lastmod>${escapeXml(url.lastmod)}</lastmod>\n    <changefreq>${escapeXml(url.changefreq)}</changefreq>\n    <priority>${escapeXml(url.priority)}</priority>${imageEntries}\n  </url>`;
+    })
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urlEntries}\n</urlset>`;
+}
+
+function buildSitemapIndexXml(entries = []) {
+  const body = entries
+    .map(entry => {
+      const lastmod = entry.lastmod ? `\n    <lastmod>${escapeXml(entry.lastmod)}</lastmod>` : '';
+      return `  <sitemap>\n    <loc>${escapeXml(entry.loc)}</loc>${lastmod}\n  </sitemap>`;
+    })
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</sitemapindex>`;
+}
+
+function buildStaticPageImages(page = {}, pageContent = {}, domain) {
+  const images = (page.imageSources || [])
+    .flatMap(source => {
+      const content = pageContent[source.pageKey] || {};
+      return (source.fields || [])
+        .map(field => content[field])
+        .filter(Boolean)
+        .map(imageUrl => ({
+          loc: toAbsoluteImageUrl(imageUrl, domain),
+          title: page.path === '/' ? 'BalloonCraft KC home page' : `BalloonCraft KC ${page.path.replace(/^\//, '')} page`,
+        }));
+    });
+
+  return dedupeImageEntries(images);
+}
+
+function buildProjectImageEntries(project = {}, domain) {
+  const galleryMetaImages = Array.isArray(project.gallery_images_meta)
+    ? project.gallery_images_meta.map(item => item?.url).filter(Boolean)
+    : [];
+  const galleryImages = Array.isArray(project.gallery_images)
+    ? project.gallery_images.filter(Boolean)
+    : [];
+  const imageCandidates = [
+    project.featured_image,
+    project.og_image,
+    ...galleryMetaImages,
+    ...galleryImages,
+  ].filter(Boolean);
+
+  return dedupeImageEntries(
+    imageCandidates.slice(0, 6).map(imageUrl => ({
+      loc: toAbsoluteImageUrl(imageUrl, domain),
+      title: project.title || 'BalloonCraft KC project',
+      caption: project.excerpt || project.title || undefined,
+    }))
+  );
 }
 
 export function buildSocialLinks(socialLinks = {}) {
@@ -443,6 +652,7 @@ export function buildWebsiteJsonLd({
     inLanguage: 'en-US',
     publisher: {
       '@type': 'Organization',
+      '@id': `${normalizedSiteUrl}#organization`,
       name: 'BalloonCraft KC',
       url: normalizedSiteUrl,
     },
@@ -450,6 +660,29 @@ export function buildWebsiteJsonLd({
       '@type': 'ViewAction',
       target: url,
     },
+  };
+}
+
+export function buildOrganizationJsonLd({
+  title = 'BalloonCraft KC',
+  siteUrl = 'https://ballooncraftkc.com',
+  contactContent = {},
+  footerContent = {},
+} = {}) {
+  const normalizedSiteUrl = normalizeBaseUrl(siteUrl);
+  const companyName = footerContent.company_name || title || 'BalloonCraft KC';
+  const sameAs = buildSocialLinks(contactContent.social_links);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${normalizedSiteUrl}#organization`,
+    name: companyName,
+    url: normalizedSiteUrl,
+    logo: formatCanonicalUrl(normalizedSiteUrl, '/logo.png'),
+    email: contactContent.email || undefined,
+    telephone: contactContent.phone || undefined,
+    sameAs,
   };
 }
 
@@ -470,6 +703,7 @@ export function buildLocalBusinessJsonLd({
   const companyName = footerContent.company_name || title || 'BalloonCraft KC';
   const sameAs = buildSocialLinks(contactContent.social_links);
   const areaServedList = buildAreaServedList(areaServed);
+  const openingHoursSpecification = buildOpeningHoursSpecifications(contactContent.hours);
   const offerItems = buildSeoKeywordSet(serviceTypes, eventTypes).map(name => ({
     '@type': 'Offer',
     itemOffered: {
@@ -482,14 +716,15 @@ export function buildLocalBusinessJsonLd({
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     '@id': `${normalizedSiteUrl}#localbusiness`,
+    additionalType: 'https://schema.org/ProfessionalService',
     name: companyName,
     url: normalizedSiteUrl,
     description,
-    image: image || formatCanonicalUrl(normalizedSiteUrl, '/logo.png'),
+    image: toAbsoluteImageUrl(image || '/logo.png', normalizedSiteUrl),
     logo: formatCanonicalUrl(normalizedSiteUrl, '/logo.png'),
     telephone: contactContent.phone || undefined,
     email: contactContent.email || undefined,
-    openingHours: buildOpeningHours(contactContent.hours),
+    openingHoursSpecification: openingHoursSpecification.length > 0 ? openingHoursSpecification : undefined,
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Kansas City',
@@ -506,14 +741,58 @@ export function buildLocalBusinessJsonLd({
       url,
     },
     areaServed: areaServedList,
+    serviceArea: areaServedList,
     sameAs,
     slogan: footerContent.tagline || undefined,
+    keywords: buildSeoKeywordSet(serviceTypes, eventTypes, areaServed).join(', '),
     knowsAbout: buildSeoKeywordSet(serviceTypes, eventTypes),
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Balloon decor services',
       itemListElement: offerItems,
     },
+  };
+}
+
+export function buildServiceJsonLd({
+  serviceName = 'Custom balloon decor and event installations',
+  description = '',
+  path = '/',
+  image = '',
+  siteUrl = 'https://ballooncraftkc.com',
+  footerContent = {},
+  serviceTypes = SERVICE_TYPES,
+  eventTypes = EVENT_TYPES,
+  areaServed = GEO_CITIES.filter(city => city !== 'Other'),
+} = {}) {
+  const normalizedSiteUrl = normalizeBaseUrl(siteUrl);
+  const url = formatCanonicalUrl(normalizedSiteUrl, path);
+  const companyName = footerContent.company_name || 'BalloonCraft KC';
+  const areaServedList = buildAreaServedList(areaServed);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${url}#service`,
+    name: serviceName,
+    serviceType: buildSeoKeywordSet(serviceTypes, eventTypes),
+    description,
+    url,
+    image: toAbsoluteImageUrl(image || '/logo.png', normalizedSiteUrl),
+    areaServed: areaServedList,
+    provider: {
+      '@type': 'LocalBusiness',
+      '@id': `${normalizedSiteUrl}#localbusiness`,
+      name: companyName,
+      url: normalizedSiteUrl,
+    },
+    offers: buildSeoKeywordSet(serviceTypes, eventTypes).map(name => ({
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'Service',
+        name,
+      },
+    })),
   };
 }
 
@@ -586,38 +865,55 @@ export function buildProjectCollectionJsonLd(
   };
 }
 
+export function buildStaticPageSitemapEntries(domain, pageUpdates = {}, pageContent = {}) {
+  return STATIC_PAGES.map(page => ({
+    loc: formatCanonicalUrl(domain, page.path),
+    lastmod: getLatestPageDate(page.pageKeys, pageUpdates),
+    changefreq: page.changefreq,
+    priority: page.priority,
+    images: buildStaticPageImages(page, pageContent, domain),
+  }));
+}
+
+export function buildProjectSitemapEntries(posts = [], domain = 'https://ballooncraftkc.com') {
+  return posts.map(project => ({
+    loc: formatCanonicalUrl(domain, `/projects/${project.slug}`),
+    lastmod: (project.updated_at || project.publish_date || project.created_at || new Date().toISOString()).split('T')[0],
+    changefreq: 'monthly',
+    priority: '0.8',
+    images: buildProjectImageEntries(project, domain),
+  }));
+}
+
+export function generateStaticPageSitemapXml(domain, pageUpdates = {}, pageContent = {}) {
+  return buildUrlSetXml(buildStaticPageSitemapEntries(domain, pageUpdates, pageContent));
+}
+
+export function generateProjectSitemapXml(posts = [], domain = 'https://ballooncraftkc.com') {
+  return buildUrlSetXml(buildProjectSitemapEntries(posts, domain));
+}
+
+export function generateSitemapIndexXml(domain, pageLastmod = '', projectLastmod = '') {
+  return buildSitemapIndexXml([
+    {
+      loc: formatCanonicalUrl(domain, '/sitemaps/pages.xml'),
+      lastmod: pageLastmod || undefined,
+    },
+    {
+      loc: formatCanonicalUrl(domain, '/sitemaps/projects.xml'),
+      lastmod: projectLastmod || undefined,
+    },
+  ]);
+}
+
 /**
- * Generate a sitemap XML string from published posts and static pages.
+ * Backward-compatible combined sitemap builder.
  */
-export function generateSitemapXml(posts, domain, pageUpdates = {}) {
-  const urls = [
-    ...STATIC_PAGES.map(page => ({
-      loc: formatCanonicalUrl(domain, page.path),
-      lastmod: getLatestPageDate(page.pageKeys, pageUpdates),
-      changefreq: page.changefreq,
-      priority: page.priority,
-    })),
-    ...posts.map(p => ({
-      loc: formatCanonicalUrl(domain, `/projects/${p.slug}`),
-      lastmod: (p.updated_at || p.created_at || new Date().toISOString()).split('T')[0],
-      changefreq: 'monthly',
-      priority: '0.8',
-      image: p.featured_image || '',
-    })),
-  ];
-
-  const urlEntries = urls
-    .map(
-      u => {
-        const imageEntry = u.image
-          ? `\n    <image:image>\n      <image:loc>${escapeXml(u.image)}</image:loc>\n    </image:image>`
-          : '';
-        return `  <url>\n    <loc>${escapeXml(u.loc)}</loc>\n    <lastmod>${escapeXml(u.lastmod)}</lastmod>\n    <changefreq>${escapeXml(u.changefreq)}</changefreq>\n    <priority>${escapeXml(u.priority)}</priority>${imageEntry}\n  </url>`;
-      }
-    )
-    .join('\n');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urlEntries}\n</urlset>`;
+export function generateSitemapXml(posts, domain, pageUpdates = {}, pageContent = {}) {
+  return buildUrlSetXml([
+    ...buildStaticPageSitemapEntries(domain, pageUpdates, pageContent),
+    ...buildProjectSitemapEntries(posts, domain),
+  ]);
 }
 
 // ── Duplicate post helper ────────────────────────────────────
