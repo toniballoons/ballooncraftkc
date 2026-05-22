@@ -41,7 +41,7 @@ export const DEFAULT_CONTENT = {
     address: "Kansas City, MO Metro Area",
     hours: "Mon-Fri: 9am-6pm | Sat: 10am-4pm",
     image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&auto=format&fit=crop',
-    form_success_message: "Thank you for reaching out! We'll get back to you within 24 hours.",
+    form_success_message: "We have received your message and will be in touch shortly.",
     social_links: {
       instagram: "#",
       facebook: "#",

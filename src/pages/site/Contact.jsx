@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import * as ContactSubmission from '@/entities/ContactSubmission';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import {
@@ -58,6 +57,7 @@ export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', event_date: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const successMessage = 'We have received your message and will be in touch shortly.';
   const seoTitle = 'Contact BalloonCraft KC | Kansas City Balloon Decor Quotes';
   const seoDescription = 'Request a BalloonCraft KC quote for balloon arches, garlands, walls, backdrops, and event installs in Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, Shawnee, and nearby metro communities.';
 
@@ -65,15 +65,18 @@ export default function Contact() {
     e.preventDefault();
     setLoading(true);
     try {
-      await ContactSubmission.create({ ...form, status: 'new' });
-      // Fire-and-forget email notification — visitor sees success regardless
-      fetch('/api/send-contact-email', {
+      const response = await fetch('/api/send-contact-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
-      }).catch(err => console.error('Email notification failed:', err));
+      });
+
+      if (!response.ok) {
+        throw new Error('Email request failed');
+      }
+
       setSubmitted(true);
-      toast.success(content.form_success_message || 'Message sent!');
+      toast.success(successMessage);
     } catch (err) {
       toast.error('Failed to send message. Please try again.');
     } finally {
@@ -140,8 +143,8 @@ export default function Contact() {
             {submitted ? (
               <div className="bg-green-50 rounded-3xl p-12 text-center" role="status" aria-live="polite">
                 <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" aria-hidden="true" />
-                <h2 className="font-display text-2xl mb-2">Message Sent!</h2>
-                <p className="text-muted-foreground">{content.form_success_message}</p>
+                <h2 className="font-display text-2xl mb-2">Message Received</h2>
+                <p className="text-muted-foreground">{successMessage}</p>
                 <Button className="mt-6 rounded-full" onClick={() => { setSubmitted(false); setForm({ name: '', email: '', phone: '', event_type: '', event_date: '', message: '' }); }}>
                   Send Another Message
                 </Button>

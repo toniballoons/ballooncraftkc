@@ -1,4 +1,18 @@
+import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+
+function createSupabaseAdminClient() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -21,6 +35,7 @@ export default async function handler(req, res) {
   }
 
   const resend = new Resend(apiKey);
+  const supabase = createSupabaseAdminClient();
 
   const optionalFields = [
     phone ? `
@@ -75,6 +90,26 @@ export default async function handler(req, res) {
   `;
 
   try {
+    let stored = false;
+
+    if (supabase) {
+      const { error: insertError } = await supabase.from('contact_submissions').insert({
+        name,
+        email,
+        phone: phone || null,
+        event_type: event_type || null,
+        event_date: event_date || null,
+        message,
+        status: 'new',
+      });
+
+      if (insertError) {
+        console.error('Supabase contact insert error:', insertError);
+      } else {
+        stored = true;
+      }
+    }
+
     await resend.emails.send({
       from: `BalloonCraft KC <${from}>`,
       to,
@@ -82,7 +117,8 @@ export default async function handler(req, res) {
       subject: `New contact from ${name}`,
       html,
     });
-    return res.status(200).json({ success: true });
+
+    return res.status(200).json({ success: true, stored });
   } catch (err) {
     console.error('Resend error:', err);
     return res.status(500).json({ error: 'Failed to send email' });
