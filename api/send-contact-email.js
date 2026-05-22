@@ -28,10 +28,13 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_EMAIL_TO || FALLBACK_CONTACT_EMAIL_TO;
+  const adminRecipients = [...new Set([
+    FALLBACK_CONTACT_EMAIL_TO,
+    process.env.CONTACT_EMAIL_TO,
+  ].filter(Boolean))];
   const from = process.env.CONTACT_EMAIL_FROM || 'onboarding@resend.dev';
 
-  if (!apiKey || !to || !from) {
+  if (!apiKey || adminRecipients.length === 0 || !from) {
     console.error('Missing email environment variables');
     return res.status(500).json({ error: 'Email service not configured' });
   }
@@ -159,10 +162,13 @@ export default async function handler(req, res) {
 
     const adminEmailResult = await resend.emails.send({
       from: `BalloonCraft KC <${from}>`,
-      to,
+      to: adminRecipients,
       replyTo: email,
       subject: `New contact from ${name}`,
       html,
+      tags: [
+        { name: 'flow', value: 'contact_admin_notification' },
+      ],
     });
 
     let confirmationSent = false;
@@ -173,6 +179,9 @@ export default async function handler(req, res) {
         to: email,
         subject: 'We received your BalloonCraft KC inquiry',
         html: confirmationHtml,
+        tags: [
+          { name: 'flow', value: 'contact_confirmation' },
+        ],
       });
       confirmationSent = true;
     } catch (confirmationError) {
@@ -183,7 +192,7 @@ export default async function handler(req, res) {
       success: true,
       stored,
       confirmationSent,
-      adminEmailId: adminEmailResult?.data?.id || null,
+      adminEmailId: adminEmailResult?.data?.id || adminEmailResult?.id || null,
     });
   } catch (err) {
     console.error('Resend error:', err);
