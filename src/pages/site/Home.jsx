@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAllSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
@@ -21,8 +21,10 @@ import {
 import { usePageSeo } from '@/lib/usePageSeo';
 
 import { Button } from '@/components/ui/button';
-import { Star, ArrowRight, Sparkles, PartyPopper, Palette, Calendar, Briefcase, Camera, Truck, MapPin, CheckCircle2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Star, ArrowRight, Sparkles, PartyPopper, Palette, Calendar, Briefcase, Camera, Truck, MapPin, CheckCircle2, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
 const ICON_MAP = [PartyPopper, Palette, Calendar, Briefcase, Camera, Truck];
@@ -348,6 +350,97 @@ function FaqSection() {
   );
 }
 
+function NewsletterSection() {
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('/api/newsletter-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          fullName,
+          source: 'homepage',
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'Failed to subscribe');
+      setEmail('');
+      setFullName('');
+      toast.success('You’re on the BalloonCraft KC newsletter list.');
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="py-20 bg-white content-section">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          transition={{ duration: 0.6 }}
+          className="rounded-[2.5rem] border border-border/50 bg-gradient-to-br from-rose-50 via-white to-amber-50 p-8 sm:p-10 shadow-sm"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-8 items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
+                <Mail className="w-4 h-4" aria-hidden="true" />
+                BalloonCraft KC Updates
+              </span>
+              <h2 className="font-display text-4xl mb-4">Stay in the loop without cluttering your inbox</h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                Join the newsletter for occasional BalloonCraft KC launch notes, featured installs, and studio updates.
+                This is separate from event emails like contracts, payment reminders, and anything else that still needs action.
+              </p>
+            </div>
+            <form onSubmit={handleSubmit} className="rounded-[2rem] border border-border/50 bg-white p-6 shadow-sm space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="newsletter-name" className="text-sm font-medium text-foreground">First name</label>
+                <Input
+                  id="newsletter-name"
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  placeholder="Toni"
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="newsletter-email" className="text-sm font-medium text-foreground">Email address</label>
+                <Input
+                  id="newsletter-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  className="rounded-xl"
+                />
+              </div>
+              <Button type="submit" className="w-full rounded-full font-bold" disabled={loading}>
+                {loading ? 'Joining...' : 'Join the Newsletter'}
+              </Button>
+              <p className="text-xs text-muted-foreground leading-6">
+                Newsletter emails only. Unsubscribing later will not stop payment emails, contract signing requests,
+                upcoming payment reminders, or anything else tied to your event.
+              </p>
+            </form>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const { content: siteContent } = useAllSiteContent();
   const content = siteContent.hero || {};
@@ -402,6 +495,7 @@ export default function Home() {
       <FeaturedProjectsSection content={content} />
       <TestimonialsPreview content={content} />
       <FaqSection />
+      <NewsletterSection />
       <CTASection />
     </>
   );

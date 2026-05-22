@@ -9,17 +9,17 @@ import { usePageSeo } from '@/lib/usePageSeo';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin, isLoadingAuth } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isAdmin) {
       navigate('/admin', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isAdmin, navigate]);
 
   usePageSeo({
     title: 'Admin Login | BalloonCraft KC',
@@ -41,7 +41,7 @@ export default function Login() {
       return;
     }
 
-    navigate('/admin');
+    setLoading(false);
   };
 
   return (
@@ -75,6 +75,9 @@ export default function Login() {
           </div>
           {error && (
             <p className="text-sm text-red-600" role="alert">{error}</p>
+          )}
+          {!isLoadingAuth && isAuthenticated && !isAdmin && (
+            <p className="text-sm text-red-600" role="alert">This account does not have admin access.</p>
           )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Signing in…' : 'Sign in'}

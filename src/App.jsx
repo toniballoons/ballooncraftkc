@@ -18,6 +18,8 @@ import ProjectDetail from '@/pages/site/ProjectDetail';
 import Testimonials from '@/pages/site/Testimonials';
 import Contact from '@/pages/site/Contact';
 import LegalPage from '@/pages/site/LegalPage';
+import NewsletterUnsubscribe from '@/pages/site/NewsletterUnsubscribe';
+import NewsletterUnsubscribeSuccess from '@/pages/site/NewsletterUnsubscribeSuccess';
 
 // Admin pages
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -31,6 +33,8 @@ import SiteAssets from '@/pages/admin/SiteAssets';
 import Login from '@/pages/admin/Login';
 import Help from '@/pages/admin/Help';
 import PagesManager from '@/pages/admin/PagesManager';
+import ClientsAdmin from '@/pages/admin/ClientsAdmin';
+import ContractSigningPage from '@/pages/site/ContractSigningPage';
 
 function App() {
   return (
@@ -49,6 +53,9 @@ function App() {
                   <Route path="/projects/:slug" element={<ProjectDetail />} />
                   <Route path="/testimonials" element={<Testimonials />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/sign/:token" element={<ContractSigningPage />} />
+                  <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
+                  <Route path="/newsletter/unsubscribed" element={<NewsletterUnsubscribeSuccess />} />
                   <Route path="/privacy" element={<LegalPage />} />
                   <Route path="/terms" element={<LegalPage />} />
                   <Route path="/legal" element={<LegalPage />} />
@@ -58,11 +65,12 @@ function App() {
                 <Route path="/admin/login" element={<Login />} />
 
                 {/* Admin panel — protected */}
-                <Route element={<ProtectedRoute />}>
+                <Route element={<ProtectedRoute requireAdmin />}>
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Dashboard />} />
                     <Route path="pages" element={<PageEditor />} />
                     <Route path="projects" element={<ProjectsAdmin />} />
+                    <Route path="clients" element={<ClientsAdmin />} />
                     <Route path="testimonials" element={<TestimonialsAdmin />} />
                     <Route path="messages" element={<MessagesAdmin />} />
                     <Route path="theme" element={<ThemeSettings />} />

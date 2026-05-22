@@ -7,15 +7,23 @@ const DefaultFallback = () => (
   </div>
 );
 
-export default function ProtectedRoute({ fallback = <DefaultFallback /> }) {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+export default function ProtectedRoute({
+  fallback = <DefaultFallback />,
+  redirectTo = '/admin/login',
+  requireAdmin = false,
+}) {
+  const { isAuthenticated, isLoadingAuth, isAdmin } = useAuth();
 
   if (isLoadingAuth) {
     return fallback;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;
