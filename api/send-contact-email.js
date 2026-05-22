@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
+const FALLBACK_CONTACT_EMAIL_TO = 'tonihall015@gmail.com';
+
 function createSupabaseAdminClient() {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -26,8 +28,8 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_EMAIL_TO || process.env.DEVELOPER_EMAIL_TO;
-  const from = process.env.CONTACT_EMAIL_FROM;
+  const to = process.env.CONTACT_EMAIL_TO || FALLBACK_CONTACT_EMAIL_TO;
+  const from = process.env.CONTACT_EMAIL_FROM || 'onboarding@resend.dev';
 
   if (!apiKey || !to || !from) {
     console.error('Missing email environment variables');
@@ -89,6 +91,51 @@ export default async function handler(req, res) {
     </div>
   `;
 
+  const confirmationHtml = `
+    <div style="margin:0;padding:24px;background:#fff7fb;font-family:Arial,sans-serif;color:#111827;">
+      <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #f3d4e4;border-radius:24px;overflow:hidden;box-shadow:0 18px 45px rgba(219,39,119,0.08);">
+        <div style="padding:28px 32px;background:linear-gradient(135deg,#ec4899 0%,#f59e0b 100%);color:#ffffff;">
+          <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.92;">BalloonCraft KC</p>
+          <h1 style="margin:0;font-size:28px;line-height:1.2;">We Received Your Message</h1>
+          <p style="margin:12px 0 0;font-size:15px;line-height:1.6;opacity:0.96;">Thanks for reaching out. We’re excited to hear more about your event.</p>
+        </div>
+
+        <div style="padding:28px 32px;">
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.7;">Hi ${name},</p>
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.7;">We’ve received your inquiry and will be in touch shortly. In the meantime, here’s a copy of what you sent us:</p>
+
+          <div style="margin:0 0 22px;padding:20px 22px;background:#fff8fb;border:1px solid #f6d3e2;border-radius:18px;">
+            <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#be185d;">Your Message</p>
+            <p style="margin:0;color:#374151;font-size:15px;line-height:1.7;white-space:pre-wrap;">${message}</p>
+          </div>
+
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+            ${event_type ? `
+              <tr>
+                <td style="padding:8px 0;color:#6b7280;font-size:14px;font-weight:600;">Event Type</td>
+                <td style="padding:8px 0;color:#111827;font-size:14px;">${event_type}</td>
+              </tr>
+            ` : ''}
+            ${event_date ? `
+              <tr>
+                <td style="padding:8px 0;color:#6b7280;font-size:14px;font-weight:600;">Event Date</td>
+                <td style="padding:8px 0;color:#111827;font-size:14px;">${event_date}</td>
+              </tr>
+            ` : ''}
+            ${phone ? `
+              <tr>
+                <td style="padding:8px 0;color:#6b7280;font-size:14px;font-weight:600;">Phone</td>
+                <td style="padding:8px 0;color:#111827;font-size:14px;">${phone}</td>
+              </tr>
+            ` : ''}
+          </table>
+
+          <p style="margin:24px 0 0;font-size:15px;line-height:1.7;">Thank you,<br /><strong>BalloonCraft KC</strong></p>
+        </div>
+      </div>
+    </div>
+  `;
+
   try {
     let stored = false;
 
@@ -110,7 +157,7 @@ export default async function handler(req, res) {
       }
     }
 
-    await resend.emails.send({
+    const adminEmailResult = await resend.emails.send({
       from: `BalloonCraft KC <${from}>`,
       to,
       replyTo: email,
@@ -118,7 +165,26 @@ export default async function handler(req, res) {
       html,
     });
 
-    return res.status(200).json({ success: true, stored });
+    let confirmationSent = false;
+
+    try {
+      await resend.emails.send({
+        from: `BalloonCraft KC <${from}>`,
+        to: email,
+        subject: 'We received your BalloonCraft KC inquiry',
+        html: confirmationHtml,
+      });
+      confirmationSent = true;
+    } catch (confirmationError) {
+      console.error('Resend confirmation email error:', confirmationError);
+    }
+
+    return res.status(200).json({
+      success: true,
+      stored,
+      confirmationSent,
+      adminEmailId: adminEmailResult?.data?.id || null,
+    });
   } catch (err) {
     console.error('Resend error:', err);
     return res.status(500).json({ error: 'Failed to send email' });
