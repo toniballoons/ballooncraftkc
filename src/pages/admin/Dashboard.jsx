@@ -81,11 +81,11 @@ export default function Dashboard() {
 
       {/* ── Quick Stats ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <StatCard title="Total Posts" value={projects.length} icon={FileText} color="bg-blue-500" href="/admin/projects" />
-        <StatCard title="Published" value={statusCounts.published} icon={FileText} color="bg-green-500" href="/admin/projects" />
-        <StatCard title="Drafts" value={statusCounts.draft} icon={FileText} color="bg-yellow-500" href="/admin/projects" />
-        <StatCard title="New Messages" value={weeklyMessages} icon={MessageSquare} color="bg-purple-500" href="/admin/messages" />
-        <StatCard title="Testimonials" value={testimonials.length} icon={Star} color="bg-pink-500" href="/admin/testimonials" />
+        <StatCard title="Total Posts" value={projects.length} icon={FileText} color="bg-blue-500" href="/admin/pages?panel=projects" />
+        <StatCard title="Published" value={statusCounts.published} icon={FileText} color="bg-green-500" href="/admin/pages?panel=projects" />
+        <StatCard title="Drafts" value={statusCounts.draft} icon={FileText} color="bg-yellow-500" href="/admin/pages?panel=projects" />
+        <StatCard title="New Messages" value={weeklyMessages} icon={MessageSquare} color="bg-purple-500" href="/admin/pages?panel=messages" />
+        <StatCard title="Testimonials" value={testimonials.length} icon={Star} color="bg-pink-500" href="/admin/pages?panel=testimonials" />
       </div>
 
       {/* ── Recent Activity + SEO Health ── */}
@@ -98,7 +98,7 @@ export default function Dashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center justify-between">
                 Recent Posts
-                <Link to="/admin/projects" className="text-xs text-primary font-normal hover:underline">View all</Link>
+                <Link to="/admin/pages?panel=projects" className="text-xs text-primary font-normal hover:underline">View all</Link>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -107,7 +107,7 @@ export default function Dashboard() {
               ) : recentProjects.map(p => (
                 <button
                   key={p.id}
-                  onClick={() => navigate('/admin/projects')}
+                  onClick={() => navigate('/admin/pages?panel=projects')}
                   className="w-full text-left flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
@@ -129,7 +129,7 @@ export default function Dashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center justify-between">
                 Recent Messages
-                <Link to="/admin/messages" className="text-xs text-primary font-normal hover:underline">View all</Link>
+                <Link to="/admin/pages?panel=messages" className="text-xs text-primary font-normal hover:underline">View all</Link>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -138,7 +138,7 @@ export default function Dashboard() {
               ) : recentMessages.map(m => (
                 <button
                   key={m.id}
-                  onClick={() => navigate('/admin/messages')}
+                  onClick={() => navigate('/admin/pages?panel=messages')}
                   className="w-full text-left flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
@@ -174,7 +174,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   {seoHealth.missingMeta > 0 && (
                     <button
-                      onClick={() => navigate('/admin/projects')}
+                      onClick={() => navigate('/admin/pages?panel=projects')}
                       className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function Dashboard() {
                   )}
                   {seoHealth.missingKeyword > 0 && (
                     <button
-                      onClick={() => navigate('/admin/projects')}
+                      onClick={() => navigate('/admin/pages?panel=projects')}
                       className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export default function Dashboard() {
                   )}
                   {seoHealth.missingImage > 0 && (
                     <button
-                      onClick={() => navigate('/admin/projects')}
+                      onClick={() => navigate('/admin/pages?panel=projects')}
                       className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-2">

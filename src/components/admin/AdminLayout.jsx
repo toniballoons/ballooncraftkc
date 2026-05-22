@@ -11,16 +11,16 @@ import { useTheme } from '@/lib/ThemeContext';
 import { ensureAccessibleColor } from '@/lib/accessibility';
 
 const NAV_ITEMS = [
-  { label: 'Dashboard',      href: '/admin',              icon: LayoutDashboard },
-  { label: 'Page Editor',    href: '/admin/pages',        icon: Settings },
-  { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft },
-  { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText },
-  { label: 'Client Admin',   href: '/admin/clients',     icon: ScrollText },
-  { label: 'Testimonials',   href: '/admin/testimonials', icon: Star },
-  { label: 'Messages',       href: '/admin/messages',     icon: Mail },
-  { label: 'Theme',          href: '/admin/theme',        icon: Palette },
-  { label: 'Site Assets',    href: '/admin/site',         icon: Image },
-  { label: 'Help',           href: '/admin/help',         icon: HelpCircle },
+  { label: 'Overview',         href: '/admin/pages?panel=overview',     icon: LayoutDashboard, panel: 'overview' },
+  { label: 'Site Content',     href: '/admin/pages?panel=content',      icon: Settings, panel: 'content' },
+  { label: 'Pages & Nav',      href: '/admin/pages?panel=manage-pages', icon: PanelsTopLeft, panel: 'manage-pages' },
+  { label: 'Portfolio / Blog', href: '/admin/pages?panel=projects',     icon: FileText, panel: 'projects' },
+  { label: 'Client Admin',     href: '/admin/pages?panel=clients',      icon: ScrollText, panel: 'clients' },
+  { label: 'Testimonials',     href: '/admin/pages?panel=testimonials', icon: Star, panel: 'testimonials' },
+  { label: 'Messages',         href: '/admin/pages?panel=messages',     icon: Mail, panel: 'messages' },
+  { label: 'Theme',            href: '/admin/pages?panel=theme',        icon: Palette, panel: 'theme' },
+  { label: 'Site Assets',      href: '/admin/pages?panel=site',         icon: Image, panel: 'site' },
+  { label: 'Help',             href: '/admin/pages?panel=help',         icon: HelpCircle, panel: 'help' },
 ];
 
 const SITE_LINKS = [
@@ -41,6 +41,10 @@ export default function AdminLayout() {
   const navBg = theme?.nav?.bg || 'rgba(255,255,255,0.97)';
   const navTextColor = theme?.nav?.textColor || '#1a1a1a';
   const safeNavTextColor = ensureAccessibleColor(navTextColor, navBg);
+  const routeSearch = new URLSearchParams(location.search);
+  const currentPanel = location.pathname === '/admin/pages'
+    ? routeSearch.get('panel') || (routeSearch.get('page') ? 'content' : 'overview')
+    : null;
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -117,9 +121,9 @@ export default function AdminLayout() {
               {/* Divider + admin controls */}
               <div className="flex items-center gap-1 ml-2 pl-2 border-l" style={{ borderColor: `${safeNavTextColor}30` }}>
                 <Link
-                  to="/admin"
+                  to="/admin/pages"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border"
-                  aria-current={location.pathname === '/admin' ? 'page' : undefined}
+                  aria-current={location.pathname === '/admin/pages' ? 'page' : undefined}
                   style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
@@ -174,9 +178,9 @@ export default function AdminLayout() {
                 key={item.href}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
-                aria-current={location.pathname === item.href ? 'page' : undefined}
+                aria-current={location.pathname === '/admin/pages' && currentPanel === item.panel ? 'page' : undefined}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  location.pathname === item.href
+                  location.pathname === '/admin/pages' && currentPanel === item.panel
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}

@@ -159,7 +159,7 @@ export default function SiteAssets() {
           <h1 className="font-display text-3xl">Site Images</h1>
           <p className="text-muted-foreground text-sm mt-1">{totalImages} images across your site — hover any image to replace it instantly</p>
         </div>
-        <Link to="/admin/pages">
+        <Link to="/admin/pages?panel=content">
           <Button variant="outline" size="sm">
             <Pencil className="w-4 h-4 mr-1" /> Edit Content
           </Button>
@@ -171,7 +171,7 @@ export default function SiteAssets() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2"><Palette className="w-4 h-4" /> Active Theme</CardTitle>
-            <Link to="/admin/theme">
+            <Link to="/admin/pages?panel=theme">
               <Button size="sm" variant="outline" className="text-xs h-7">Change Theme</Button>
             </Link>
           </div>
@@ -195,7 +195,7 @@ export default function SiteAssets() {
         <div className="text-center py-16 text-muted-foreground">
           <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>No images found in site content yet.</p>
-          <Link to="/admin/pages"><Button className="mt-4" size="sm">Go to Page Editor</Button></Link>
+          <Link to="/admin/pages?panel=content"><Button className="mt-4" size="sm">Go to Page Editor</Button></Link>
         </div>
       ) : (
         allImagesByPage.map(({ pageKey, fields }) => (

@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -23,17 +23,8 @@ import NewsletterUnsubscribeSuccess from '@/pages/site/NewsletterUnsubscribeSucc
 
 // Admin pages
 import AdminLayout from '@/components/admin/AdminLayout';
-import Dashboard from '@/pages/admin/Dashboard';
 import PageEditor from '@/pages/admin/PageEditor';
-import ProjectsAdmin from '@/pages/admin/ProjectsAdmin';
-import TestimonialsAdmin from '@/pages/admin/TestimonialsAdmin';
-import MessagesAdmin from '@/pages/admin/MessagesAdmin';
-import ThemeSettings from '@/pages/admin/ThemeSettings';
-import SiteAssets from '@/pages/admin/SiteAssets';
 import Login from '@/pages/admin/Login';
-import Help from '@/pages/admin/Help';
-import PagesManager from '@/pages/admin/PagesManager';
-import ClientsAdmin from '@/pages/admin/ClientsAdmin';
 import ContractSigningPage from '@/pages/site/ContractSigningPage';
 
 function App() {
@@ -67,16 +58,16 @@ function App() {
                 {/* Admin panel — protected */}
                 <Route element={<ProtectedRoute requireAdmin />}>
                   <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<Dashboard />} />
+                    <Route index element={<Navigate to="/admin/pages" replace />} />
                     <Route path="pages" element={<PageEditor />} />
-                    <Route path="projects" element={<ProjectsAdmin />} />
-                    <Route path="clients" element={<ClientsAdmin />} />
-                    <Route path="testimonials" element={<TestimonialsAdmin />} />
-                    <Route path="messages" element={<MessagesAdmin />} />
-                    <Route path="theme" element={<ThemeSettings />} />
-                    <Route path="site" element={<SiteAssets />} />
-                    <Route path="manage-pages" element={<PagesManager />} />
-                    <Route path="help" element={<Help />} />
+                    <Route path="projects" element={<Navigate to="/admin/pages?panel=projects" replace />} />
+                    <Route path="clients" element={<Navigate to="/admin/pages?panel=clients" replace />} />
+                    <Route path="testimonials" element={<Navigate to="/admin/pages?panel=testimonials" replace />} />
+                    <Route path="messages" element={<Navigate to="/admin/pages?panel=messages" replace />} />
+                    <Route path="theme" element={<Navigate to="/admin/pages?panel=theme" replace />} />
+                    <Route path="site" element={<Navigate to="/admin/pages?panel=site" replace />} />
+                    <Route path="manage-pages" element={<Navigate to="/admin/pages?panel=manage-pages" replace />} />
+                    <Route path="help" element={<Navigate to="/admin/pages?panel=help" replace />} />
                   </Route>
                 </Route>
 
