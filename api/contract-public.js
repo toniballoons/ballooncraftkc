@@ -3,7 +3,7 @@ import {
   fetchContractContext,
   getBaseUrl,
 } from './_contract-utils.js';
-import { createSupabaseAdminClient, getRequestIp } from './_server-utils.js';
+import { createSupabaseAdminClient, getRequestIp } from '../server/server-utils.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

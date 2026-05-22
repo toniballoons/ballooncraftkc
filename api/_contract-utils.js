@@ -26,7 +26,7 @@ import {
   hydrateContractPayload,
 } from '../src/lib/contracts.js';
 import { formatCurrency, formatDate, humanizeStatus, toMoneyNumber } from '../src/lib/billing.js';
-import { FALLBACK_CONTACT_EMAIL_TO, getBaseUrl, getAdminInboxRecipients } from './_server-utils.js';
+import { FALLBACK_CONTACT_EMAIL_TO, getBaseUrl, getAdminInboxRecipients } from '../server/server-utils.js';
 
 const ACCENT = 'C0266D';
 const ACCENT_RGB = rgb(0.75, 0.15, 0.43);

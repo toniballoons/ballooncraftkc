@@ -1,4 +1,4 @@
-import { createSupabaseAdminClient } from './_server-utils.js';
+import { createSupabaseAdminClient } from '../server/server-utils.js';
 
 const TRANSPARENT_GIF = Buffer.from(
   'R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',

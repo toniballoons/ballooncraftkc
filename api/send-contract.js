@@ -14,7 +14,7 @@ import {
   createTrackedEmail,
   requireAdminUser,
   getRequestIp,
-} from './_server-utils.js';
+} from '../server/server-utils.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

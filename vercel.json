@@ -20,11 +20,11 @@
     }
   ],
   "rewrites": [
-    { "source": "/llms.txt", "destination": "/api/llms" },
-    { "source": "/robots.txt", "destination": "/api/robots" },
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/sitemaps/pages.xml", "destination": "/api/sitemap-pages" },
-    { "source": "/sitemaps/projects.xml", "destination": "/api/sitemap-projects" },
+    { "source": "/llms.txt", "destination": "/api/seo?type=llms" },
+    { "source": "/robots.txt", "destination": "/api/seo?type=robots" },
+    { "source": "/sitemap.xml", "destination": "/api/seo?type=sitemap" },
+    { "source": "/sitemaps/pages.xml", "destination": "/api/seo?type=pages" },
+    { "source": "/sitemaps/projects.xml", "destination": "/api/seo?type=projects" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]

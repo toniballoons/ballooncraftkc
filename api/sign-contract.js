@@ -18,7 +18,7 @@ import {
   createSupabaseAdminClient,
   createTrackedEmail,
   getRequestIp,
-} from './_server-utils.js';
+} from '../server/server-utils.js';
 
 function normalizeCustomFieldResponses(fields, responses) {
   const responseMap = responses && typeof responses === 'object' ? responses : {};

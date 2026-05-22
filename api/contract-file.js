@@ -6,7 +6,7 @@ import {
   getBaseUrl,
   getContractResponseFilename,
 } from './_contract-utils.js';
-import { requireAdminUser } from './_server-utils.js';
+import { requireAdminUser } from '../server/server-utils.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
