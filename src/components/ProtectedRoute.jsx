@@ -12,9 +12,9 @@ export default function ProtectedRoute({
   redirectTo = '/admin/login',
   requireAdmin = false,
 }) {
-  const { isAuthenticated, isLoadingAuth, isAdmin } = useAuth();
+  const { isAuthenticated, isLoadingAuth, isLoadingProfile, isAdmin } = useAuth();
 
-  if (isLoadingAuth) {
+  if (isLoadingAuth || (requireAdmin && isAuthenticated && isLoadingProfile)) {
     return fallback;
   }
 

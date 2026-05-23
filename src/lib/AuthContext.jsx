@@ -9,41 +9,29 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-
-  const hydrateProfile = async (nextUser) => {
-    if (!nextUser) {
-      setProfile(null);
-      return;
-    }
-
-    try {
-      const nextProfile = await UserProfile.getForUser(nextUser.id);
-      setProfile(nextProfile || null);
-    } catch (error) {
-      console.error('Failed to load user profile', error);
-      setProfile(null);
-    }
-  };
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   useEffect(() => {
     let active = true;
 
     // Hydrate from existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (!active) return;
       const nextUser = session?.user ?? null;
       setUser(nextUser);
       setIsAuthenticated(!!nextUser);
-      await hydrateProfile(nextUser);
-      if (active) setIsLoadingAuth(false);
+      setIsLoadingAuth(false);
     });
 
     // Keep state in sync across tabs and after token refresh
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const nextUser = session?.user ?? null;
       setUser(nextUser);
       setIsAuthenticated(!!nextUser);
-      await hydrateProfile(nextUser);
+      if (!nextUser) {
+        setProfile(null);
+        setIsLoadingProfile(false);
+      }
       setIsLoadingAuth(false);
     });
 
@@ -53,21 +41,70 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadProfile() {
+      if (!user) {
+        setProfile(null);
+        setIsLoadingProfile(false);
+        return;
+      }
+
+      setIsLoadingProfile(true);
+      try {
+        const nextProfile = await UserProfile.getForUser(user.id);
+        if (!active) return;
+        setProfile(nextProfile || null);
+      } catch (error) {
+        if (!active) return;
+        console.error('Failed to load user profile', error);
+        setProfile(null);
+      } finally {
+        if (active) {
+          setIsLoadingProfile(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
     setIsAuthenticated(false);
+    setIsLoadingProfile(false);
   };
 
   const refreshProfile = async () => {
-    await hydrateProfile(user);
+    if (!user) {
+      setProfile(null);
+      setIsLoadingProfile(false);
+      return;
+    }
+
+    setIsLoadingProfile(true);
+    try {
+      const nextProfile = await UserProfile.getForUser(user.id);
+      setProfile(nextProfile || null);
+    } catch (error) {
+      console.error('Failed to refresh user profile', error);
+      setProfile(null);
+    } finally {
+      setIsLoadingProfile(false);
+    }
   };
 
   const isAdmin = profile?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, profile, role: profile?.role || null, isAdmin, isAuthenticated, isLoadingAuth, logout, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, role: profile?.role || null, isAdmin, isAuthenticated, isLoadingAuth, isLoadingProfile, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
