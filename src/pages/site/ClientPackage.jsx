@@ -36,7 +36,7 @@ import {
 async function fetchClientPackage(token) {
   const response = await fetch(`/api/client-package?token=${encodeURIComponent(token)}`);
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Unable to load package.');
+  if (!response.ok) throw new Error(data.error || 'Unable to load delivery.');
   return data;
 }
 
@@ -281,7 +281,7 @@ export default function ClientPackage() {
     robotsTag.setAttribute('name', 'robots');
     robotsTag.setAttribute('content', 'noindex, nofollow');
     if (!robotsTag.parentNode) document.head.appendChild(robotsTag);
-    document.title = 'Official BalloonCraft KC Document Signing';
+    document.title = 'BalloonCraft KC Official Document Signing';
 
     return () => {
       document.title = previousTitle;
@@ -469,21 +469,47 @@ export default function ClientPackage() {
                 <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground font-semibold">BalloonCraft KC Secure Document Center</p>
                 <h1 className="font-display text-3xl mt-2">{packageData.packetTitle}</h1>
                 <p className="text-muted-foreground mt-2 max-w-2xl">
-                  Review your official event documents, invoice schedule, uploaded agreements, and signing checkpoints below. When everything looks right, complete the digital signature workflow and we will email the finished copy automatically.
+                  Review your official BalloonCraft KC document delivery, including the agreement, payment schedule, uploaded files, and marked signing checkpoints below.
+                  When everything looks right, complete the digital signature workflow and we will email the finished copy automatically.
                 </p>
               </div>
             </div>
             <div className="rounded-3xl border bg-primary/5 px-5 py-4 min-w-[260px]">
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Document status</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Signature delivery status</p>
               <div className="mt-2 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-primary" />
                 <p className="font-semibold capitalize">{packageData.status.replace(/_/g, ' ')}</p>
               </div>
               <p className="text-sm text-muted-foreground mt-3">{client.contactName} • {client.email}</p>
-              <p className="text-xs text-muted-foreground mt-1">Package ID: {packageData.packageCode}</p>
+              <p className="text-xs text-muted-foreground mt-1">Delivery ID: {packageData.packageCode}</p>
             </div>
           </div>
         </div>
+
+        <Card>
+          <CardContent className="p-6 grid gap-4 lg:grid-cols-4">
+            <div className="rounded-2xl border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Step 1</p>
+              <p className="font-semibold mt-2">Review every document</p>
+              <p className="text-sm text-muted-foreground mt-2">Read the generated agreement and each supporting file attached to this BalloonCraft KC delivery.</p>
+            </div>
+            <div className="rounded-2xl border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Step 2</p>
+              <p className="font-semibold mt-2">Complete marked checkpoints</p>
+              <p className="text-sm text-muted-foreground mt-2">Fill every required signature, initials, date, or text field Toni placed on your documents.</p>
+            </div>
+            <div className="rounded-2xl border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Step 3</p>
+              <p className="font-semibold mt-2">Submit your signature</p>
+              <p className="text-sm text-muted-foreground mt-2">Confirm your name, initials, and agreement to the terms, then complete the official signing step.</p>
+            </div>
+            <div className="rounded-2xl border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Step 4</p>
+              <p className="font-semibold mt-2">Receive the finished copy</p>
+              <p className="text-sm text-muted-foreground mt-2">BalloonCraft KC records the completion and emails the finalized copy back automatically.</p>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-6">
@@ -569,7 +595,7 @@ export default function ClientPackage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileSignature className="w-5 h-5" />
-                  Complete document signing
+                  Complete BalloonCraft KC signing
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -584,7 +610,7 @@ export default function ClientPackage() {
                 ) : (
                   <>
                     <div className="rounded-2xl border bg-primary/5 p-4 space-y-2">
-                      <p className="text-sm font-semibold">Signing checklist</p>
+                      <p className="text-sm font-semibold">Completion checklist</p>
                       <p className="text-sm text-muted-foreground">
                         Your secure document center includes {1 + uploadedDocuments.length} document{uploadedDocuments.length ? 's' : ''} and {signatureFields.length} configured signer field{signatureFields.length === 1 ? '' : 's'}.
                       </p>
@@ -595,6 +621,11 @@ export default function ClientPackage() {
                       ) : (
                         <p className="text-sm text-emerald-700">All required signing fields are ready to submit.</p>
                       )}
+                    </div>
+
+                    <div className="rounded-2xl border bg-muted/30 p-4 text-sm text-muted-foreground space-y-2">
+                      <p><strong>Before you sign:</strong> make sure each uploaded file has been reviewed and each marked checkpoint below is complete.</p>
+                      <p><strong>After you sign:</strong> BalloonCraft KC stores the completion record and emails the finished copy to both sides automatically.</p>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -624,7 +655,7 @@ export default function ClientPackage() {
                       onClick={() => signMutation.mutate()}
                       disabled={signMutation.isPending || !signatureForm.signedName || !signatureForm.signedInitials || !signatureForm.agreedToTerms || missingFields.length > 0}
                     >
-                      {signMutation.isPending ? 'Submitting signature...' : 'Complete signature'}
+                      {signMutation.isPending ? 'Submitting signature...' : 'Submit official signature'}
                     </Button>
                     <p className="text-xs text-muted-foreground">
                       After you sign, a completed copy is emailed to both you and BalloonCraft KC automatically.
@@ -638,9 +669,9 @@ export default function ClientPackage() {
           <Card>
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle>Official documents and supporting files</CardTitle>
+                <CardTitle>Official documents and marked checkpoints</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Review the BalloonCraft KC agreement, complete any document-specific signer fields, and download or print an official copy whenever you need one.
+                  Review the BalloonCraft KC agreement, complete each marked checkpoint Toni assigned, and download or print an official copy whenever you need one.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -687,7 +718,7 @@ export default function ClientPackage() {
 
                 <DocumentSignatureSection
                   title="Generated agreement fields"
-                  description="These signature markers are attached directly to the BalloonCraft KC agreement."
+                  description="These markers were placed directly on the generated BalloonCraft KC agreement. Complete each one before submitting your signature."
                   fields={groupedSignatureFields[GENERATED_DOCUMENT_TARGET] || []}
                   fieldValues={effectiveFieldValues}
                   onChange={handleFieldValueChange}
@@ -725,14 +756,20 @@ export default function ClientPackage() {
 
                   <DocumentViewer document={document} />
 
-                  <DocumentSignatureSection
-                    title="Complete fields on this uploaded document"
-                    description="Use the notes below to match BalloonCraft KC’s requested signature, initials, date, and text entry spots on this file."
-                    fields={groupedSignatureFields[document.id] || []}
-                    fieldValues={effectiveFieldValues}
-                    onChange={handleFieldValueChange}
-                    disabled={alreadySigned}
-                  />
+                  {(groupedSignatureFields[document.id] || []).length > 0 ? (
+                    <DocumentSignatureSection
+                      title="Marked checkpoints on this uploaded file"
+                      description="Use the page and placement notes below to match BalloonCraft KC’s requested signature, initials, date, and text entry spots on this file."
+                      fields={groupedSignatureFields[document.id] || []}
+                      fieldValues={effectiveFieldValues}
+                      onChange={handleFieldValueChange}
+                      disabled={alreadySigned}
+                    />
+                  ) : (
+                    <div className="rounded-3xl border bg-muted/20 p-4 text-sm text-muted-foreground">
+                      No signature, initials, date, or typed response is required on this uploaded file. Review it for reference as part of this delivery.
+                    </div>
+                  )}
                 </div>
               ))}
 
@@ -742,7 +779,7 @@ export default function ClientPackage() {
                   <p className="font-semibold">Need help?</p>
                 </div>
                 <p>
-                  If you need changes before signing, reply directly to the BalloonCraft KC email you received and Toni can update your documents before you submit them.
+                  If you need changes before signing, reply directly to the BalloonCraft KC email you received and Toni can update your delivery before you submit it.
                 </p>
                 <p className="mt-2">
                   If you need a PDF copy, choose <strong>Print / save PDF</strong> above. Most browsers let you save that print view directly as a PDF.

@@ -140,7 +140,7 @@ function SetupRequired({ error }) {
   return (
     <Card className="border-amber-300 bg-amber-50">
       <CardContent className="py-8 space-y-3">
-        <h2 className="font-display text-2xl text-amber-950">Documents & Invoicing needs one database migration</h2>
+        <h2 className="font-display text-2xl text-amber-950">BalloonCraft KC Signature Center needs one database migration</h2>
         <p className="text-sm text-amber-900 leading-6">
           The UI is wired, but the new invoicing and agreement tables are not available in this environment yet.
           Run the latest client migrations in Supabase, including <code>009_client_operations.sql</code> and <code>011_contract_document_fields.sql</code>, then refresh this page.
@@ -207,7 +207,7 @@ function DocumentPreview({ template, client, invoice, packetTitle }) {
   if (!template || !client || !invoice) {
     return (
       <div className="rounded-2xl border border-dashed p-6 text-sm text-muted-foreground">
-        Choose a client, invoice, and agreement template to preview the package before sending it.
+        Choose a client, invoice, and agreement template to preview the BalloonCraft KC delivery before sending it.
       </div>
     );
   }
@@ -224,7 +224,7 @@ function DocumentPreview({ template, client, invoice, packetTitle }) {
     <div className="rounded-2xl border bg-white p-6 space-y-5">
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">
-          {packetTitle || `${client.contact_name} official document set`}
+          {packetTitle || `${client.contact_name} BalloonCraft KC document delivery`}
         </p>
         <h3 className="font-display text-2xl">{title}</h3>
       </div>
@@ -247,9 +247,19 @@ function DocumentPreview({ template, client, invoice, packetTitle }) {
         </p>
       ))}
 
+      <div className="rounded-2xl border bg-primary/5 p-4 space-y-3">
+        <p className="text-sm font-semibold">BalloonCraft KC Signature Center flow</p>
+        <div className="grid gap-2 text-sm text-muted-foreground">
+          <p><strong>1.</strong> BalloonCraft KC sends the official document delivery by secure link.</p>
+          <p><strong>2.</strong> Your client reviews the generated agreement and every uploaded file you attached here.</p>
+          <p><strong>3.</strong> Your configured sign, initial, date, and text checkpoints appear in the hosted signing page.</p>
+          <p><strong>4.</strong> After completion, the signed record and finished copy are emailed back automatically.</p>
+        </div>
+      </div>
+
       {signatureFields.length > 0 ? (
         <div className="rounded-2xl border bg-primary/5 p-4 space-y-2">
-          <p className="text-sm font-semibold">Configured signer fields</p>
+          <p className="text-sm font-semibold">Configured client checkpoints</p>
           <div className="flex flex-wrap gap-2">
             {signatureFields.map((field) => {
               const targetLabel = field.target_document_id === GENERATED_DOCUMENT_TARGET
@@ -268,7 +278,7 @@ function DocumentPreview({ template, client, invoice, packetTitle }) {
 
       {uploadedDocuments.length > 0 ? (
         <div className="rounded-2xl border bg-muted/30 p-4 space-y-3">
-          <p className="text-sm font-semibold">Uploaded documents included in this package</p>
+          <p className="text-sm font-semibold">Uploaded documents included in this delivery</p>
           {uploadedDocuments.map((document) => (
             <div key={document.id} className="rounded-2xl border bg-white px-4 py-3">
               <p className="font-medium">{document.name}</p>
@@ -468,13 +478,13 @@ export default function ClientStudio({ embedded = false }) {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to send package.');
+      if (!response.ok) throw new Error(data.error || 'Failed to send delivery.');
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-contract-packages'] });
       queryClient.invalidateQueries({ queryKey: ['admin-invoices'] });
-      toast.success(`Package sent. Secure link: ${data.packageCode}`);
+      toast.success(`Delivery sent. Secure link: ${data.packageCode}`);
       setPackageForm((current) => ({ ...current, packetTitle: '' }));
     },
     onError: (error) => toast.error(error.message),
@@ -680,23 +690,23 @@ export default function ClientStudio({ embedded = false }) {
     <div className="space-y-8">
       {embedded ? (
         <div className="rounded-2xl border bg-primary/5 px-4 py-4 text-sm">
-          <p className="font-semibold text-primary">Documents & Invoicing inside CMS</p>
+          <p className="font-semibold text-primary">BalloonCraft KC Signature Center inside CMS</p>
           <p className="text-muted-foreground mt-1">
-            Register clients, build invoices, send official document sets, and track payments from this CMS workspace.
+            Register clients, build invoices, place signing checkpoints, send official BalloonCraft KC document deliveries, and track every completed copy from this CMS workspace.
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="font-display text-3xl">Client Documents & Invoicing</h1>
+            <h1 className="font-display text-3xl">BalloonCraft KC Signature Center</h1>
             <p className="text-muted-foreground mt-2 max-w-3xl">
               Register clients, create invoices with deposit and final-payment schedules, build BalloonCraft KC agreement templates,
-              and send polished secure document sets for review, signing, and payment from one admin workspace.
+              and send polished secure document deliveries for review, signing, and payment from one admin workspace.
             </p>
           </div>
           <div className="rounded-2xl border bg-primary/5 px-4 py-3 text-sm">
-            <p className="font-semibold text-primary">Signature flow included</p>
-            <p className="text-muted-foreground">Packages send from BalloonCraft KC and auto-email the completed copy back on signature.</p>
+            <p className="font-semibold text-primary">BalloonCraft KC-owned signing flow</p>
+            <p className="text-muted-foreground">BalloonCraft KC sends the delivery, captures every required checkpoint, and auto-emails the completed copy back after signature.</p>
           </div>
         </div>
       )}
@@ -705,16 +715,16 @@ export default function ClientStudio({ embedded = false }) {
         <OverviewCard icon={BriefcaseBusiness} title="Clients" value={clients.length} detail="Lead and booking records" />
         <OverviewCard icon={ReceiptText} title="Invoices" value={invoices.length} detail="Custom event proposals and balances" />
         <OverviewCard icon={Wallet} title="Payments" value={payments.length} detail="Recorded receipts and confirmations" />
-        <OverviewCard icon={ClipboardSignature} title="Templates" value={templates.length} detail="Reusable agreement frameworks" />
-        <OverviewCard icon={MailCheck} title="Packages" value={packages.length} detail="Sent, viewed, and signed packets" />
+        <OverviewCard icon={ClipboardSignature} title="Templates" value={templates.length} detail="Reusable signature-ready agreements" />
+        <OverviewCard icon={MailCheck} title="Deliveries" value={packages.length} detail="Sent, opened, and signed document deliveries" />
       </div>
 
       <Tabs defaultValue="clients" className="space-y-6">
         <TabsList className="h-auto flex-wrap justify-start">
           <TabsTrigger value="clients">Clients</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
-          <TabsTrigger value="contracts">Agreements</TabsTrigger>
-          <TabsTrigger value="packages">Packages</TabsTrigger>
+          <TabsTrigger value="contracts">Agreement Builder</TabsTrigger>
+          <TabsTrigger value="packages">Deliveries</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
         </TabsList>
 
@@ -962,9 +972,20 @@ export default function ClientStudio({ embedded = false }) {
         <TabsContent value="contracts" className="grid gap-6 xl:grid-cols-[1fr_1fr]">
           <Card>
             <CardHeader>
-              <CardTitle>{editingTemplateId ? 'Edit agreement template' : 'Build a BalloonCraft KC agreement template'}</CardTitle>
+              <CardTitle>{editingTemplateId ? 'Edit signature template' : 'Build a BalloonCraft KC signature template'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="rounded-2xl border bg-primary/5 p-4 space-y-3">
+                <p className="text-sm font-semibold">How BalloonCraft KC document signing works</p>
+                <div className="grid gap-2 text-sm text-muted-foreground">
+                  <p><strong>Step 1:</strong> Write the agreement text BalloonCraft KC wants generated for every delivery.</p>
+                  <p><strong>Step 2:</strong> Upload any supporting files, addendums, rental sheets, or custom contracts that should travel with it.</p>
+                  <p><strong>Step 3:</strong> Add a signer field for every place your client should sign, initial, date, or type a response.</p>
+                  <p><strong>Step 4:</strong> Use the page and placement hints to tell the client exactly where that checkpoint belongs on the original file.</p>
+                  <p><strong>Step 5:</strong> Send the secure delivery and let BalloonCraft KC collect and return the finished signed copy.</p>
+                </div>
+              </div>
+
               <div className="rounded-2xl border bg-muted/40 p-4 space-y-2">
                 <p className="text-sm font-semibold">Available placeholders</p>
                 <div className="flex flex-wrap gap-2">
@@ -1001,7 +1022,7 @@ export default function ClientStudio({ embedded = false }) {
                 <Label>Fallback subject line</Label>
                 <Input value={templateForm.subject_line} onChange={(event) => setTemplateForm({ ...templateForm, subject_line: event.target.value })} />
                 <p className="text-xs text-muted-foreground">
-                  Downpayment and final-payment invoice emails use automatic BalloonCraft KC subject lines. This stays available as a fallback for future non-invoice package sends.
+                  Downpayment and final-payment invoice emails use automatic BalloonCraft KC subject lines. This stays available as a fallback for future non-invoice delivery sends.
                 </p>
               </div>
               <div className="space-y-2">
@@ -1026,7 +1047,7 @@ export default function ClientStudio({ embedded = false }) {
                   <div>
                     <p className="text-sm font-semibold">Uploaded documents</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Add PDFs, Word docs, or images that should travel with this agreement package.
+                      Add PDFs, Word docs, or images that should travel with this official document delivery.
                     </p>
                   </div>
                   <label className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-muted">
@@ -1080,7 +1101,7 @@ export default function ClientStudio({ embedded = false }) {
                   <div>
                     <p className="text-sm font-semibold">Signer field configuration</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Add sign, initial, date, or typed-name fields for the generated agreement or any uploaded document.
+                      Add sign, initial, date, or text checkpoints for the generated agreement or any uploaded document in this delivery.
                     </p>
                   </div>
                   <Button variant="outline" onClick={addTemplateSignerField}>
@@ -1089,9 +1110,28 @@ export default function ClientStudio({ embedded = false }) {
                   </Button>
                 </div>
 
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="rounded-2xl border bg-white p-3 text-sm">
+                    <p className="font-semibold">Signature</p>
+                    <p className="text-muted-foreground mt-1">Use for a full legal name on a signature line.</p>
+                  </div>
+                  <div className="rounded-2xl border bg-white p-3 text-sm">
+                    <p className="font-semibold">Initials</p>
+                    <p className="text-muted-foreground mt-1">Use for short approvals beside individual clauses or sections.</p>
+                  </div>
+                  <div className="rounded-2xl border bg-white p-3 text-sm">
+                    <p className="font-semibold">Date</p>
+                    <p className="text-muted-foreground mt-1">Use when the client must confirm the signing date on the document.</p>
+                  </div>
+                  <div className="rounded-2xl border bg-white p-3 text-sm">
+                    <p className="font-semibold">Text entry</p>
+                    <p className="text-muted-foreground mt-1">Use for typed acknowledgements, names, business names, or short answers.</p>
+                  </div>
+                </div>
+
                 {normalizeSignatureFields(templateForm.signature_fields || [], templateForm.uploaded_documents || []).length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No custom signer fields yet. The package still uses the main electronic signature block; add fields here if uploaded documents need initials, dates, or typed acknowledgements.
+                    No custom signer fields yet. The delivery still uses the main electronic signature block; add fields here if uploaded documents need initials, dates, or typed acknowledgements.
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -1101,7 +1141,7 @@ export default function ClientStudio({ embedded = false }) {
                           <div>
                             <p className="font-semibold">{field.label}</p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              This field appears in the hosted signing flow and is stored with the signed package.
+                              This field appears in the hosted signing flow and is stored with the signed delivery.
                             </p>
                           </div>
                           <Button size="icon" variant="outline" onClick={() => removeTemplateSignerField(field.id)} aria-label={`Remove ${field.label}`}>
@@ -1111,7 +1151,7 @@ export default function ClientStudio({ embedded = false }) {
 
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-2">
-                            <Label>Document target</Label>
+                            <Label>File to mark</Label>
                             <Select value={field.target_document_id} onValueChange={(value) => updateTemplateSignerField(field.id, { target_document_id: value })}>
                               <SelectTrigger><SelectValue /></SelectTrigger>
                               <SelectContent>
@@ -1122,7 +1162,7 @@ export default function ClientStudio({ embedded = false }) {
                             </Select>
                           </div>
                           <div className="space-y-2">
-                            <Label>Field type</Label>
+                            <Label>What the client completes</Label>
                             <Select value={field.type} onValueChange={(value) => updateTemplateSignerField(field.id, { type: value })}>
                               <SelectTrigger><SelectValue /></SelectTrigger>
                               <SelectContent>
@@ -1133,20 +1173,20 @@ export default function ClientStudio({ embedded = false }) {
                             </Select>
                           </div>
                           <div className="space-y-2">
-                            <Label>Field label</Label>
+                            <Label>Field name shown to client</Label>
                             <Input value={field.label} onChange={(event) => updateTemplateSignerField(field.id, { label: event.target.value })} placeholder="Client initials on cancellation clause" />
                           </div>
                           <div className="space-y-2">
-                            <Label>Placeholder / helper value</Label>
+                            <Label>Input prompt</Label>
                             <Input value={field.placeholder || ''} onChange={(event) => updateTemplateSignerField(field.id, { placeholder: event.target.value })} placeholder="Type your initials" />
                           </div>
                           <div className="space-y-2">
-                            <Label>Page hint</Label>
-                            <Input value={field.page_hint || ''} onChange={(event) => updateTemplateSignerField(field.id, { page_hint: event.target.value })} placeholder="Page 2" />
+                            <Label>Page number or section</Label>
+                            <Input value={field.page_hint || ''} onChange={(event) => updateTemplateSignerField(field.id, { page_hint: event.target.value })} placeholder="Page 2, pricing section, paragraph 4" />
                           </div>
                           <div className="space-y-2">
-                            <Label>Placement hint</Label>
-                            <Input value={field.anchor_hint || ''} onChange={(event) => updateTemplateSignerField(field.id, { anchor_hint: event.target.value })} placeholder="Near payment terms paragraph" />
+                            <Label>Where on the document</Label>
+                            <Input value={field.anchor_hint || ''} onChange={(event) => updateTemplateSignerField(field.id, { anchor_hint: event.target.value })} placeholder="Bottom right signature line under payment terms" />
                           </div>
                           <div className="space-y-2">
                             <Label>Prefill</Label>
@@ -1160,8 +1200,8 @@ export default function ClientStudio({ embedded = false }) {
                             </Select>
                           </div>
                           <div className="space-y-2 md:col-span-2">
-                            <Label>Help text</Label>
-                            <Textarea rows={2} value={field.help_text || ''} onChange={(event) => updateTemplateSignerField(field.id, { help_text: event.target.value })} placeholder="Tell the client exactly what they are acknowledging or completing here." />
+                            <Label>Client instructions</Label>
+                            <Textarea rows={2} value={field.help_text || ''} onChange={(event) => updateTemplateSignerField(field.id, { help_text: event.target.value })} placeholder="Tell the client exactly what they are acknowledging and where they should complete this field." />
                           </div>
                         </div>
 
@@ -1170,8 +1210,13 @@ export default function ClientStudio({ embedded = false }) {
                             checked={field.required !== false}
                             onCheckedChange={(checked) => updateTemplateSignerField(field.id, { required: checked === true })}
                           />
-                          This signer field is required before the package can be completed.
+                          This signer field is required before the delivery can be completed.
                         </label>
+
+                        <div className="rounded-2xl border bg-primary/5 p-3 text-xs text-muted-foreground">
+                          BalloonCraft KC uses this checkpoint in the hosted signing page. Match the original file by choosing the right document,
+                          naming the action clearly, and filling in the page and placement hints so the client knows exactly where to sign, initial, date, or type.
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1245,9 +1290,27 @@ export default function ClientStudio({ embedded = false }) {
         <TabsContent value="packages" className="grid gap-6 xl:grid-cols-[1fr_1fr]">
           <Card>
             <CardHeader>
-              <CardTitle>Send an official document set</CardTitle>
+              <CardTitle>Send a BalloonCraft KC signature delivery</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="rounded-2xl border bg-primary/5 p-4 space-y-3">
+                <p className="text-sm font-semibold">Delivery procedure</p>
+                <div className="grid gap-2 text-sm text-muted-foreground">
+                  <p><strong>1.</strong> Pick the client, invoice, and signature template.</p>
+                  <p><strong>2.</strong> BalloonCraft KC emails a secure signing link from your branded delivery flow.</p>
+                  <p><strong>3.</strong> The client reviews each document, completes every required sign/initial/date/text checkpoint, and signs.</p>
+                  <p><strong>4.</strong> BalloonCraft KC records the completion and emails the final signed copy back automatically.</p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border bg-muted/30 p-4 space-y-2 text-sm">
+                <p className="font-semibold">What your client receives</p>
+                <p className="text-muted-foreground">
+                  Each delivery opens a BalloonCraft KC Signature Center page with the agreement, uploaded files, payment details,
+                  marked signer checkpoints, Word export, print/PDF export, and the final electronic signature submission.
+                </p>
+              </div>
+
               <div className="space-y-2">
                 <Label>Client</Label>
                 <Select
@@ -1313,8 +1376,11 @@ export default function ClientStudio({ embedded = false }) {
               </div>
 
               <div className="space-y-2">
-                <Label>Document set title</Label>
-                <Input value={packageForm.packetTitle} onChange={(event) => setPackageForm({ ...packageForm, packetTitle: event.target.value })} placeholder="Optional custom document-set title" />
+                <Label>Delivery title</Label>
+                <Input value={packageForm.packetTitle} onChange={(event) => setPackageForm({ ...packageForm, packetTitle: event.target.value })} placeholder="Optional custom BalloonCraft KC delivery title" />
+                <p className="text-xs text-muted-foreground">
+                  This is the title your client sees inside the BalloonCraft KC Signature Center.
+                </p>
               </div>
 
               <div className="flex gap-3">
@@ -1323,12 +1389,12 @@ export default function ClientStudio({ embedded = false }) {
                   disabled={sendPackageMutation.isPending || !packageForm.clientId || !packageForm.invoiceId || !packageForm.templateId}
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {sendPackageMutation.isPending ? 'Sending...' : 'Send secure documents'}
+                  {sendPackageMutation.isPending ? 'Sending...' : 'Send official delivery'}
                 </Button>
                 <Button variant="outline" onClick={() => setPackageForm(emptyPackageForm)}>Reset</Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Invoice-package subjects are generated automatically as “BalloonCraft KC - Downpayment Invoice for ...” or
+                Invoice-delivery subjects are generated automatically as “BalloonCraft KC - Downpayment Invoice for ...” or
                 “BalloonCraft KC - Final Payment Invoice for ...” based on the email type you choose here.
               </p>
 
@@ -1343,11 +1409,11 @@ export default function ClientStudio({ embedded = false }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Sent document tracker</CardTitle>
+              <CardTitle>Signature delivery tracker</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {packages.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No document sets sent yet.</p>
+                <p className="text-sm text-muted-foreground">No signature deliveries sent yet.</p>
               ) : packages.map((packet) => {
                 const packetUrl = `${window.location.origin}/documents/sign/${packet.access_token}`;
                 return (
@@ -1380,7 +1446,7 @@ export default function ClientStudio({ embedded = false }) {
                     <div className="text-sm text-muted-foreground space-y-1">
                       <p>{packet.recipient_name} • {packet.recipient_email}</p>
                       <p>Sent {packet.created_at ? format(new Date(packet.created_at), 'MMM d, yyyy h:mm a') : 'recently'}</p>
-                      <p>{packet.signed_at ? `Signed ${format(new Date(packet.signed_at), 'MMM d, yyyy h:mm a')}` : packet.viewed_at ? 'Viewed by client' : 'Waiting for first review'}</p>
+                      <p>{packet.signed_at ? `Completed and signed ${format(new Date(packet.signed_at), 'MMM d, yyyy h:mm a')}` : packet.viewed_at ? 'Opened by client in Signature Center' : 'Delivered and waiting for first review'}</p>
                     </div>
                   </div>
                 );

@@ -80,7 +80,7 @@ export function buildPackagePayload({ client, invoice, template, packetTitle, em
   const documentModel = buildPackageDocumentModel({ client, invoice, template });
 
   return {
-    packetTitle: packetTitle || `${client.contact_name} official document set`,
+    packetTitle: packetTitle || `${client.contact_name} BalloonCraft KC document delivery`,
     mergedFields,
     paymentLinks: invoice.payment_links || {},
     paymentInstructions: invoice.payment_instructions || '',
@@ -160,18 +160,33 @@ function renderInvoiceSummary(invoice) {
   `;
 }
 
+function renderDeliverySteps() {
+  return `
+    <div style="margin-top:22px;padding:18px;background:#fff8fb;border:1px solid #f6d3e2;border-radius:18px;">
+      <p style="margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#be185d;">How BalloonCraft KC signing works</p>
+      <div style="display:grid;gap:8px;">
+        <p style="margin:0;font-size:15px;line-height:1.7;color:#374151;"><strong>1.</strong> Open your secure BalloonCraft KC Signature Center link.</p>
+        <p style="margin:0;font-size:15px;line-height:1.7;color:#374151;"><strong>2.</strong> Review the generated agreement and each supporting file included in this delivery.</p>
+        <p style="margin:0;font-size:15px;line-height:1.7;color:#374151;"><strong>3.</strong> Complete every marked signature, initials, date, or text checkpoint Toni assigned to your documents.</p>
+        <p style="margin:0;font-size:15px;line-height:1.7;color:#374151;"><strong>4.</strong> Submit your signature and BalloonCraft KC will automatically email the completed copy back.</p>
+      </div>
+    </div>
+  `;
+}
+
 export function buildClientPackageEmailHtml({ client, invoice, packet, accessUrl }) {
   return `
     <div style="margin:0;padding:24px;background:#fff7fb;font-family:Arial,sans-serif;color:#111827;">
       <div style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #f3d4e4;border-radius:24px;overflow:hidden;box-shadow:0 18px 45px rgba(219,39,119,0.08);">
         <div style="padding:30px 34px;background:linear-gradient(135deg,#ec4899 0%,#f59e0b 100%);color:#ffffff;">
           <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.92;">BalloonCraft KC Secure Document Center</p>
-          <h1 style="margin:0;font-size:30px;line-height:1.2;">Your official documents are ready</h1>
-          <p style="margin:12px 0 0;font-size:15px;line-height:1.65;opacity:0.96;">Hi ${escapeHtml(client.contact_name)}, your invoice summary, event agreement, uploaded documents, and signing instructions are ready for secure review.</p>
+          <h1 style="margin:0;font-size:30px;line-height:1.2;">Your official BalloonCraft KC document delivery is ready</h1>
+          <p style="margin:12px 0 0;font-size:15px;line-height:1.65;opacity:0.96;">Hi ${escapeHtml(client.contact_name)}, your invoice summary, agreement, supporting files, and signing checkpoints are ready for secure review.</p>
         </div>
 
         <div style="padding:30px 34px;">
           <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#374151;">${nl2br(packet.document_intro || 'Please review the agreement and sign when everything looks right.')}</p>
+          ${renderDeliverySteps()}
           ${renderInvoiceSummary(invoice)}
           ${packet.payment_instructions ? `
             <div style="margin-top:20px;padding:18px;background:#fff8fb;border:1px solid #f6d3e2;border-radius:18px;">
@@ -182,7 +197,7 @@ export function buildClientPackageEmailHtml({ client, invoice, packet, accessUrl
           ${renderPaymentLinkCards(packet.payment_links)}
 
           <div style="margin-top:26px;">
-            <a href="${escapeHtml(accessUrl)}" style="display:inline-block;padding:14px 22px;border-radius:999px;background:#111827;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">Open secure document center</a>
+            <a href="${escapeHtml(accessUrl)}" style="display:inline-block;padding:14px 22px;border-radius:999px;background:#111827;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">Open BalloonCraft KC Signature Center</a>
           </div>
 
           <p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#6b7280;">If the button above does not work, copy and paste this secure link into your browser:<br /><span style="color:#be185d;">${escapeHtml(accessUrl)}</span></p>
@@ -190,7 +205,7 @@ export function buildClientPackageEmailHtml({ client, invoice, packet, accessUrl
             <div style="margin-top:20px;padding:18px;background:#fff8fb;border:1px solid #f6d3e2;border-radius:18px;">
               <p style="margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#be185d;">Included documents</p>
               <p style="margin:0;font-size:15px;line-height:1.7;color:#374151;">
-                This package includes ${(packet.uploaded_documents || packet.uploadedDocuments || []).length} uploaded document${(packet.uploaded_documents || packet.uploadedDocuments || []).length === 1 ? '' : 's'} alongside the generated BalloonCraft KC agreement.
+                This delivery includes ${(packet.uploaded_documents || packet.uploadedDocuments || []).length} uploaded document${(packet.uploaded_documents || packet.uploadedDocuments || []).length === 1 ? '' : 's'} alongside the generated BalloonCraft KC agreement.
               </p>
             </div>
           ` : ''}
@@ -220,7 +235,7 @@ export function buildSignedCompletionEmailHtml({ client, invoice, packet, headin
     <div style="margin:0;padding:24px;background:#fff7fb;font-family:Arial,sans-serif;color:#111827;">
       <div style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #f3d4e4;border-radius:24px;overflow:hidden;box-shadow:0 18px 45px rgba(219,39,119,0.08);">
         <div style="padding:30px 34px;background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:#ffffff;">
-          <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.92;">BalloonCraft KC Agreement Complete</p>
+          <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.92;">BalloonCraft KC Document Delivery Complete</p>
           <h1 style="margin:0;font-size:30px;line-height:1.2;">${escapeHtml(heading)}</h1>
           <p style="margin:12px 0 0;font-size:15px;line-height:1.65;opacity:0.96;">${escapeHtml(intro)}</p>
         </div>
