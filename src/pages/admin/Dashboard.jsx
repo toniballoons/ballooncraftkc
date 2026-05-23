@@ -12,7 +12,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { getAdminPanelHref } from '@/lib/adminNavigation';
 import {
   FileText, MessageSquare, Star, CheckCircle2, AlertCircle, Lightbulb, ChevronRight,
 } from 'lucide-react';
@@ -78,15 +77,15 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <h1 className="font-display text-3xl">CMS Overview</h1>
+      <h1 className="font-display text-3xl">Dashboard</h1>
 
       {/* ── Quick Stats ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <StatCard title="Total Posts" value={projects.length} icon={FileText} color="bg-blue-500" href={getAdminPanelHref('projects')} />
-        <StatCard title="Published" value={statusCounts.published} icon={FileText} color="bg-green-500" href={getAdminPanelHref('projects')} />
-        <StatCard title="Drafts" value={statusCounts.draft} icon={FileText} color="bg-yellow-500" href={getAdminPanelHref('projects')} />
-        <StatCard title="New Messages" value={weeklyMessages} icon={MessageSquare} color="bg-purple-500" href={getAdminPanelHref('messages')} />
-        <StatCard title="Testimonials" value={testimonials.length} icon={Star} color="bg-pink-500" href={getAdminPanelHref('testimonials')} />
+        <StatCard title="Total Posts" value={projects.length} icon={FileText} color="bg-blue-500" href="/admin/projects" />
+        <StatCard title="Published" value={statusCounts.published} icon={FileText} color="bg-green-500" href="/admin/projects" />
+        <StatCard title="Drafts" value={statusCounts.draft} icon={FileText} color="bg-yellow-500" href="/admin/projects" />
+        <StatCard title="New Messages" value={weeklyMessages} icon={MessageSquare} color="bg-purple-500" href="/admin/messages" />
+        <StatCard title="Testimonials" value={testimonials.length} icon={Star} color="bg-pink-500" href="/admin/testimonials" />
       </div>
 
       {/* ── Recent Activity + SEO Health ── */}
@@ -99,7 +98,7 @@ export default function Dashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center justify-between">
                 Recent Posts
-                <Link to={getAdminPanelHref('projects')} className="text-xs text-primary font-normal hover:underline">View all</Link>
+                <Link to="/admin/projects" className="text-xs text-primary font-normal hover:underline">View all</Link>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -108,7 +107,7 @@ export default function Dashboard() {
               ) : recentProjects.map(p => (
                 <button
                   key={p.id}
-                  onClick={() => navigate(getAdminPanelHref('projects'))}
+                  onClick={() => navigate('/admin/projects')}
                   className="w-full text-left flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
@@ -130,7 +129,7 @@ export default function Dashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center justify-between">
                 Recent Messages
-                <Link to={getAdminPanelHref('messages')} className="text-xs text-primary font-normal hover:underline">View all</Link>
+                <Link to="/admin/messages" className="text-xs text-primary font-normal hover:underline">View all</Link>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -139,7 +138,7 @@ export default function Dashboard() {
               ) : recentMessages.map(m => (
                 <button
                   key={m.id}
-                  onClick={() => navigate(getAdminPanelHref('messages'))}
+                  onClick={() => navigate('/admin/messages')}
                   className="w-full text-left flex items-start gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
@@ -175,7 +174,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   {seoHealth.missingMeta > 0 && (
                     <button
-                      onClick={() => navigate(getAdminPanelHref('projects'))}
+                      onClick={() => navigate('/admin/projects')}
                       className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-2">
@@ -187,7 +186,7 @@ export default function Dashboard() {
                   )}
                   {seoHealth.missingKeyword > 0 && (
                     <button
-                      onClick={() => navigate(getAdminPanelHref('projects'))}
+                      onClick={() => navigate('/admin/projects')}
                       className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-2">
@@ -199,7 +198,7 @@ export default function Dashboard() {
                   )}
                   {seoHealth.missingImage > 0 && (
                     <button
-                      onClick={() => navigate(getAdminPanelHref('projects'))}
+                      onClick={() => navigate('/admin/projects')}
                       className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-2">

@@ -1,11 +1,20 @@
+import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import {
-  appendTrackingPixel,
-  createSupabaseAdminClient,
-  createTrackedEmail,
-  FALLBACK_CONTACT_EMAIL_TO,
-  getBaseUrl,
-} from '../server/server-utils.js';
+
+const FALLBACK_CONTACT_EMAIL_TO = 'tonihall015@gmail.com';
+
+function createSupabaseAdminClient() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -32,7 +41,6 @@ export default async function handler(req, res) {
 
   const resend = new Resend(apiKey);
   const supabase = createSupabaseAdminClient();
-  const baseUrl = getBaseUrl(req);
 
   const optionalFields = [
     phone ? `
@@ -126,10 +134,6 @@ export default async function handler(req, res) {
           </table>
 
           <p style="margin:24px 0 0;font-size:15px;line-height:1.7;">Thank you,<br /><strong>BalloonCraft KC</strong></p>
-          <p style="margin:20px 0 0;font-size:12px;line-height:1.7;color:#6b7280;">
-            Newsletter preferences: <a href="${baseUrl}/newsletter/unsubscribe?email=${encodeURIComponent(email)}" style="color:#db2777;">manage newsletter emails here</a>.
-            This does not affect quotes, contracts, payment reminders, or any other event-specific emails.
-          </p>
         </div>
       </div>
     </div>
@@ -170,25 +174,11 @@ export default async function handler(req, res) {
     let confirmationSent = false;
 
     try {
-      const tracking = await createTrackedEmail({
-        supabase,
-        relatedType: 'contact_confirmation',
-        relatedId: null,
-        recipientName: name,
-        recipientEmail: email,
-        subject: 'We received your BalloonCraft KC inquiry',
-        metadata: {
-          event_type: event_type || null,
-          event_date: event_date || null,
-        },
-        baseUrl,
-      });
-
       await resend.emails.send({
         from: `BalloonCraft KC <${from}>`,
         to: email,
         subject: 'We received your BalloonCraft KC inquiry',
-        html: appendTrackingPixel(confirmationHtml, tracking.pixelUrl),
+        html: confirmationHtml,
         tags: [
           { name: 'flow', value: 'contact_confirmation' },
         ],

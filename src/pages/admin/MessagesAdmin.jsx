@@ -49,7 +49,7 @@ function printMessage(m) {
       ${m.event_type ? `<div class="field"><div class="label">Event Type</div><div class="value">${m.event_type}</div></div>` : ''}
       ${m.event_date ? `<div class="field"><div class="label">Event Date</div><div class="value">${m.event_date}</div></div>` : ''}
       <div class="field"><div class="label">Message</div><div class="message-box">${m.message}</div></div>
-      <div class="footer">BalloonCraft KC — Site Management / CMS</div>
+      <div class="footer">BalloonCraft KC — Admin Panel</div>
     </body>
     </html>
   `);
@@ -72,7 +72,7 @@ function downloadMessage(m) {
     `--- Message ---`,
     m.message,
     ``,
-    `--- BalloonCraft KC Site Management / CMS ---`,
+    `--- BalloonCraft KC Admin Panel ---`,
   ].filter(l => l !== null).join('\n');
 
   const blob = new Blob([lines], { type: 'text/plain' });

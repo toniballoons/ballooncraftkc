@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, Pencil, ExternalLink, Palette, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
-import { getAdminPanelHref } from '@/lib/adminNavigation';
 
 // Extract all image fields from content with their path so we can patch them back
 function extractImageFields(obj, path = []) {
@@ -111,7 +110,7 @@ function ImageCard({ field, pageKey, onReplace }) {
 export default function SiteAssets() {
   const queryClient = useQueryClient();
   const { content } = useAllSiteContent();
-  const { theme } = useTheme();
+  const { theme, activeThemeId } = useTheme();
 
   const { data: allDbContent = [] } = useQuery({
     queryKey: ['admin-site-content'],
@@ -160,7 +159,7 @@ export default function SiteAssets() {
           <h1 className="font-display text-3xl">Site Images</h1>
           <p className="text-muted-foreground text-sm mt-1">{totalImages} images across your site — hover any image to replace it instantly</p>
         </div>
-        <Link to={getAdminPanelHref('content')}>
+        <Link to="/admin/pages">
           <Button variant="outline" size="sm">
             <Pencil className="w-4 h-4 mr-1" /> Edit Content
           </Button>
@@ -172,7 +171,7 @@ export default function SiteAssets() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2"><Palette className="w-4 h-4" /> Active Theme</CardTitle>
-            <Link to={getAdminPanelHref('theme')}>
+            <Link to="/admin/theme">
               <Button size="sm" variant="outline" className="text-xs h-7">Change Theme</Button>
             </Link>
           </div>
@@ -196,7 +195,7 @@ export default function SiteAssets() {
         <div className="text-center py-16 text-muted-foreground">
           <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>No images found in site content yet.</p>
-          <Link to={getAdminPanelHref('content')}><Button className="mt-4" size="sm">Go to Site Content</Button></Link>
+          <Link to="/admin/pages"><Button className="mt-4" size="sm">Go to Page Editor</Button></Link>
         </div>
       ) : (
         allImagesByPage.map(({ pageKey, fields }) => (

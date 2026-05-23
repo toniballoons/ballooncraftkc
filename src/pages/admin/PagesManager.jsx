@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
-import { getAdminPanelHref } from '@/lib/adminNavigation';
 
 const BUILTIN_SECTIONS = [
   { key: 'hero', label: '🏠 Hero', url: '/', editable: true },
@@ -66,7 +65,7 @@ function PageRow({ page, isBuiltin, onEdit, onDelete, onToggleVisible, onDuplica
           </Button>
         )}
       </div>
-      <Link to={getAdminPanelHref('content', page.page_key)}>
+      <Link to={`/admin/pages?page=${page.page_key}`}>
         <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
           <ChevronRight className="w-4 h-4" />
         </Button>
@@ -77,6 +76,7 @@ function PageRow({ page, isBuiltin, onEdit, onDelete, onToggleVisible, onDuplica
 
 function PageDialog({ open, onOpenChange, page, onSave }) {
   const isNew = !page?.id;
+  const isBuiltin = page && !page.id && BUILTIN_SECTIONS.find(s => s.key === page.page_key);
   
   const [form, setForm] = useState({
     title: page?.title || page?.label || '',
@@ -254,9 +254,9 @@ export default function PagesManager() {
 
       {/* Quick links */}
       <div className="flex gap-3 flex-wrap">
-        <Link to={getAdminPanelHref('content')}>
+        <Link to="/admin/pages">
           <Button variant="outline" size="sm" className="rounded-full">
-            <Layout className="w-3.5 h-3.5 mr-1.5" /> Open Site Content
+            <Layout className="w-3.5 h-3.5 mr-1.5" /> Page Content Editor
           </Button>
         </Link>
         <a href="/" target="_blank" rel="noopener noreferrer">
