@@ -11,8 +11,8 @@ import { useTheme } from '@/lib/ThemeContext';
 import { ensureAccessibleColor } from '@/lib/accessibility';
 
 const NAV_ITEMS = [
-  { label: 'Dashboard',      href: '/admin',              icon: LayoutDashboard },
-  { label: 'CMS / Site Management', href: '/admin/pages', icon: Settings },
+  { label: 'CMS / Site Management', href: '/admin',       icon: Settings },
+  { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard },
   { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft },
   { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText },
   { label: 'Testimonials',   href: '/admin/testimonials', icon: Star },
@@ -129,8 +129,8 @@ export default function AdminLayout() {
                   aria-current={location.pathname === '/admin' ? 'page' : undefined}
                   style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
-                  Admin
+                  <Settings className="w-3.5 h-3.5" aria-hidden="true" />
+                  CMS
                 </Link>
                 <button
                   type="button"
@@ -170,7 +170,7 @@ export default function AdminLayout() {
           style={{ top: '80px' }}
         >
           <div className="flex items-center justify-between p-4 border-b">
-            <span className="font-display text-xl text-primary">Admin Panel</span>
+            <span className="font-display text-xl text-primary">CMS / Site Management</span>
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(false)} aria-label="Close admin navigation">
               <X className="w-5 h-5" aria-hidden="true" />
             </Button>
@@ -212,7 +212,7 @@ export default function AdminLayout() {
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} aria-label="Open admin navigation">
               <Menu className="w-5 h-5" aria-hidden="true" />
             </Button>
-            <span className="font-display text-lg text-primary">Admin Panel</span>
+            <span className="font-display text-lg text-primary">CMS / Site Management</span>
           </div>
           <main
             id="admin-main-content"

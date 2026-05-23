@@ -92,7 +92,7 @@ export default function Dashboard() {
         <StatCard title="Published" value={statusCounts.published} icon={FileText} color="bg-green-500" href="/admin/projects" />
         <StatCard title="Drafts" value={statusCounts.draft} icon={FileText} color="bg-yellow-500" href="/admin/projects" />
         <StatCard title="New Messages" value={weeklyMessages} icon={MessageSquare} color="bg-purple-500" href="/admin/messages" />
-        <StatCard title="Clients" value={clients.length} icon={ReceiptText} color="bg-rose-500" href="/admin/pages?panel=clients" />
+        <StatCard title="Clients" value={clients.length} icon={ReceiptText} color="bg-rose-500" href="/admin?panel=clients" />
         <StatCard title="Testimonials" value={testimonials.length} icon={Star} color="bg-pink-500" href="/admin/testimonials" />
       </div>
 

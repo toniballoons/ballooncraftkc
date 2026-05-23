@@ -66,12 +66,13 @@ function App() {
                 {/* Admin panel — protected */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<Dashboard />} />
-                    <Route path="pages" element={<PageEditor />} />
+                    <Route index element={<PageEditor />} />
+                    <Route path="pages" element={<Navigate to="/admin" replace />} />
+                    <Route path="dashboard" element={<Dashboard />} />
                     <Route path="projects" element={<ProjectsAdmin />} />
                     <Route path="testimonials" element={<TestimonialsAdmin />} />
                     <Route path="messages" element={<MessagesAdmin />} />
-                    <Route path="clients" element={<Navigate to="/admin/pages?panel=clients" replace />} />
+                    <Route path="clients" element={<Navigate to="/admin?panel=clients" replace />} />
                     <Route path="theme" element={<ThemeSettings />} />
                     <Route path="site" element={<SiteAssets />} />
                     <Route path="manage-pages" element={<PagesManager />} />
