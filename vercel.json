@@ -23,8 +23,8 @@
     { "source": "/llms.txt", "destination": "/api/llms" },
     { "source": "/robots.txt", "destination": "/api/robots" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/sitemaps/pages.xml", "destination": "/api/sitemap-pages" },
-    { "source": "/sitemaps/projects.xml", "destination": "/api/sitemap-projects" },
+    { "source": "/sitemaps/pages.xml", "destination": "/api/sitemap?scope=pages" },
+    { "source": "/sitemaps/projects.xml", "destination": "/api/sitemap?scope=projects" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
