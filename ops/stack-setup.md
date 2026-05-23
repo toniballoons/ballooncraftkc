@@ -28,12 +28,19 @@ This project uses four main services:
 ### Supabase
 
 - Apply migrations in `supabase/migrations/`
+- For remote migration work, use the repo scripts instead of relying on `supabase db push` against the pooler:
+  - `npm run db:remote:status`
+  - `npm run db:remote:sync`
+  - `npm run db:remote:repair -- 001 002`
 - Create the `site-assets` storage bucket
 - Keep these values available locally and in Vercel:
   - `VITE_SUPABASE_URL`
-  - `VITE_SUPABASE_ANON_KEY`
+  - `VITE_SUPABASE_PUBLISHABLE_KEY`
+  - legacy fallback: `VITE_SUPABASE_ANON_KEY`
   - `SUPABASE_URL`
-  - `SUPABASE_SERVICE_ROLE_KEY`
+  - preferred server key: `SUPABASE_SECRET_KEY`
+  - legacy fallback: `SUPABASE_SERVICE_ROLE_KEY`
+  - optional migration connection: `SUPABASE_DB_URL`
 
 ### Resend
 

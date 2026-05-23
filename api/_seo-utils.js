@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import { DEFAULT_CONTENT } from '../src/lib/siteDefaults.js';
+import { createSupabaseServerClient } from './_supabase.js';
 
 export function getBaseUrl(req) {
   const protocol = req.headers['x-forwarded-proto'] || 'https';
@@ -8,14 +8,10 @@ export function getBaseUrl(req) {
 }
 
 export function createSupabaseAdminClient() {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    return null;
-  }
-
-  return createClient(supabaseUrl, supabaseKey);
+  return createSupabaseServerClient({
+    allowPublishableFallback: true,
+    requireKey: false,
+  });
 }
 
 export function parseSiteContentRows(rows = []) {

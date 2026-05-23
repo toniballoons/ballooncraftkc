@@ -1,19 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { createSupabaseServerClient } from './_supabase.js';
 
 const FALLBACK_CONTACT_EMAIL_TO = 'tonihall015@gmail.com';
 
 function createSupabaseAdminClient() {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    return null;
-  }
-
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  return createSupabaseServerClient({ requireKey: false });
 }
 
 export default async function handler(req, res) {

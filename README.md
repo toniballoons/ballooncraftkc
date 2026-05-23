@@ -19,9 +19,12 @@ This repo is the root app for the public website and the `/admin` CMS.
 ## Required Environment Variables
 
 - `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- legacy fallback: `VITE_SUPABASE_ANON_KEY`
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- preferred server key: `SUPABASE_SECRET_KEY`
+- legacy server key fallback: `SUPABASE_SERVICE_ROLE_KEY`
+- optional remote migration connection: `SUPABASE_DB_URL`
 - `RESEND_API_KEY`
 - `SITE_URL`
 - `CONTACT_EMAIL_TO`
@@ -32,7 +35,12 @@ This repo is the root app for the public website and the `/admin` CMS.
 
 ## Supabase Setup
 
-- Run the SQL files in `supabase/migrations/` in order.
+- For day-to-day remote migration work, prefer:
+  - `npm run db:remote:status`
+  - `npm run db:remote:sync`
+  - `npm run db:remote:repair -- 001 002`
+- These scripts use `psql` plus the `supabase_migrations.schema_migrations` table directly, which avoids the prepared-statement issue we hit through the Supabase CLI on the pooled connection.
+- `SUPABASE_DB_URL` should be set to a working Postgres connection string for the project.
 - Make sure the public storage bucket `site-assets` exists.
 - The client studio and newsletter flows require:
   - `009_client_operations.sql`
