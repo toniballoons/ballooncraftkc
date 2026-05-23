@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Mail, Settings, Menu, X,
-  Star, Palette, Image, HelpCircle, LogOut, PanelsTopLeft,
+  Star, Palette, Image, HelpCircle, LogOut, PanelsTopLeft, ReceiptText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { label: 'Page Editor',    href: '/admin/pages',        icon: Settings },
   { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft },
   { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText },
+  { label: 'Client Studio',   href: '/admin/clients',    icon: ReceiptText },
   { label: 'Testimonials',   href: '/admin/testimonials', icon: Star },
   { label: 'Messages',       href: '/admin/messages',     icon: Mail },
   { label: 'Theme',          href: '/admin/theme',        icon: Palette },

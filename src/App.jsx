@@ -31,6 +31,9 @@ import SiteAssets from '@/pages/admin/SiteAssets';
 import Login from '@/pages/admin/Login';
 import Help from '@/pages/admin/Help';
 import PagesManager from '@/pages/admin/PagesManager';
+import ClientStudio from '@/pages/admin/ClientStudio';
+import ClientPackage from '@/pages/site/ClientPackage';
+import Unsubscribe from '@/pages/site/Unsubscribe';
 
 function App() {
   return (
@@ -54,6 +57,9 @@ function App() {
                   <Route path="/legal" element={<LegalPage />} />
                 </Route>
 
+                <Route path="/client-package/:accessToken" element={<ClientPackage />} />
+                <Route path="/unsubscribe/:accessToken" element={<Unsubscribe />} />
+
                 {/* Admin login — public */}
                 <Route path="/admin/login" element={<Login />} />
 
@@ -65,6 +71,7 @@ function App() {
                     <Route path="projects" element={<ProjectsAdmin />} />
                     <Route path="testimonials" element={<TestimonialsAdmin />} />
                     <Route path="messages" element={<MessagesAdmin />} />
+                    <Route path="clients" element={<ClientStudio />} />
                     <Route path="theme" element={<ThemeSettings />} />
                     <Route path="site" element={<SiteAssets />} />
                     <Route path="manage-pages" element={<PagesManager />} />

@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { wrapBrandedEmail } from './_email-template.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -28,14 +29,16 @@ export default async function handler(req, res) {
        </div>`
     : '';
 
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111">
-      <p>Hi ${to_name || 'there'},</p>
+  const html = wrapBrandedEmail({
+    eyebrow: 'BalloonCraft KC Reply',
+    title: 'A note from Toni',
+    intro: `Hi ${to_name || 'there'},`,
+    bodyHtml: `
       <div style="white-space:pre-wrap;line-height:1.7;font-size:15px">${reply_body}</div>
-      <p style="margin-top:24px">Best regards,<br/><strong>Toni</strong><br/>BalloonCraft KC</p>
+      <p style="margin-top:24px;font-size:15px;line-height:1.7;">Best regards,<br/><strong>Toni</strong><br/>BalloonCraft KC</p>
       ${originalQuote}
-    </div>
-  `;
+    `,
+  });
 
   try {
     await resend.emails.send({

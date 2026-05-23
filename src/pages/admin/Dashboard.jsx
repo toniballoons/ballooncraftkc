@@ -14,8 +14,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   FileText, MessageSquare, Star, CheckCircle2, AlertCircle, Lightbulb, ChevronRight,
+  ReceiptText,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import * as ClientRecord from '@/entities/ClientRecord';
 
 // ── SEO Tips ─────────────────────────────────────────────────
 const SEO_TIPS = [
@@ -66,6 +68,11 @@ export default function Dashboard() {
     queryFn: () => Testimonial.list(),
     initialData: [],
   });
+  const { data: clients = [] } = useQuery({
+    queryKey: ['admin-clients'],
+    queryFn: () => ClientRecord.list(),
+    initialData: [],
+  });
 
   const statusCounts = computeStatusCounts(projects);
   const weeklyMessages = computeWeeklyMessageCount(messages);
@@ -80,11 +87,12 @@ export default function Dashboard() {
       <h1 className="font-display text-3xl">Dashboard</h1>
 
       {/* ── Quick Stats ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard title="Total Posts" value={projects.length} icon={FileText} color="bg-blue-500" href="/admin/projects" />
         <StatCard title="Published" value={statusCounts.published} icon={FileText} color="bg-green-500" href="/admin/projects" />
         <StatCard title="Drafts" value={statusCounts.draft} icon={FileText} color="bg-yellow-500" href="/admin/projects" />
         <StatCard title="New Messages" value={weeklyMessages} icon={MessageSquare} color="bg-purple-500" href="/admin/messages" />
+        <StatCard title="Clients" value={clients.length} icon={ReceiptText} color="bg-rose-500" href="/admin/clients" />
         <StatCard title="Testimonials" value={testimonials.length} icon={Star} color="bg-pink-500" href="/admin/testimonials" />
       </div>
 
