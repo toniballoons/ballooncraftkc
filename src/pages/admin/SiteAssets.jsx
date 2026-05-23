@@ -195,7 +195,7 @@ export default function SiteAssets() {
         <div className="text-center py-16 text-muted-foreground">
           <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>No images found in site content yet.</p>
-          <Link to="/admin/pages"><Button className="mt-4" size="sm">Go to Page Editor</Button></Link>
+          <Link to="/admin/pages"><Button className="mt-4" size="sm">Go to CMS</Button></Link>
         </div>
       ) : (
         allImagesByPage.map(({ pageKey, fields }) => (

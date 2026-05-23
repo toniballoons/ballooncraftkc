@@ -8,12 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, Eye, Code, RotateCcw, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSearchParams } from 'react-router-dom';
 import HeroEditor from '@/components/admin/HeroEditor';
 import AboutEditor from '@/components/admin/AboutEditor';
 import ContactFormEditor from '@/components/admin/ContactFormEditor';
 import NavbarEditor from '@/components/admin/NavbarEditor';
 import FooterEditor from '@/components/admin/FooterEditor';
 import GenericPageEditor from '@/components/admin/GenericPageEditor';
+import ClientStudio from '@/pages/admin/ClientStudio';
 
 const PAGE_KEYS = ['hero', 'about', 'contact', 'testimonials', 'projects', 'navbar', 'footer', 'privacy', 'terms', 'legal'];
 
@@ -65,12 +67,28 @@ function EditorForPage({ pageKey, content, setContent }) {
 }
 
 export default function PageEditor() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const [activePageKey, setActivePageKey] = useState('hero');
   const [showCode, setShowCode] = useState(false);
-  const [content, setContent] = useState(DEFAULT_CONTENT[activePageKey] || {});
+  const [content, setContent] = useState(DEFAULT_CONTENT.hero || {});
   const [dbRecordId, setDbRecordId] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
+  const activePanel = searchParams.get('panel') === 'clients' ? 'clients' : 'content';
+  const activePageKey = PAGE_KEYS.includes(searchParams.get('page')) ? searchParams.get('page') : 'hero';
+
+  const updateWorkspace = (panel, pageKey = activePageKey) => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (panel === 'clients') {
+      nextParams.set('panel', 'clients');
+      nextParams.delete('page');
+    } else {
+      nextParams.delete('panel');
+      nextParams.set('page', pageKey);
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  };
 
   // Wrap setContent to track unsaved changes
   const handleContentChange = (newContent) => {
@@ -121,26 +139,43 @@ export default function PageEditor() {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl">Page Editor</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleReset}>
-            <RotateCcw className="w-4 h-4 mr-1" /> Reset
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowCode(s => !s)}>
-            <Code className="w-4 h-4 mr-1" /> {showCode ? 'Visual' : 'JSON'}
-          </Button>
-          <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
-            className={isDirty ? 'animate-pulse bg-orange-500 hover:bg-orange-600' : ''}
-          >
-            <Save className="w-4 h-4 mr-1" /> {saveMutation.isPending ? 'Saving...' : isDirty ? 'Save Changes ●' : 'Save'}
-          </Button>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="font-display text-3xl">CMS / Site Management</h1>
+          <p className="text-muted-foreground mt-2 max-w-3xl">
+            Manage public site content, client invoicing, secure document delivery, and hosted signing from one admin workspace.
+          </p>
         </div>
+        {activePanel === 'content' ? (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleReset}>
+              <RotateCcw className="w-4 h-4 mr-1" /> Reset
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowCode((s) => !s)}>
+              <Code className="w-4 h-4 mr-1" /> {showCode ? 'Visual' : 'JSON'}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => saveMutation.mutate()}
+              disabled={saveMutation.isPending}
+              className={isDirty ? 'animate-pulse bg-orange-500 hover:bg-orange-600' : ''}
+            >
+              <Save className="w-4 h-4 mr-1" /> {saveMutation.isPending ? 'Saving...' : isDirty ? 'Save Changes ●' : 'Save'}
+            </Button>
+          </div>
+        ) : null}
       </div>
 
+      <Tabs value={activePanel} onValueChange={(value) => updateWorkspace(value, activePageKey)}>
+        <TabsList className="h-auto flex-wrap justify-start">
+          <TabsTrigger value="content">Site Content</TabsTrigger>
+          <TabsTrigger value="clients">Documents & Invoicing</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       {/* Unsaved changes banner */}
-      {isDirty && (
+      {activePanel === 'content' && isDirty && (
         <div className="mb-4 px-4 py-2.5 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-between text-sm">
           <span className="text-orange-700 font-semibold">⚠️ You have unsaved changes — click Save to apply them to your website.</span>
           <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="bg-orange-500 hover:bg-orange-600 text-white">
@@ -149,62 +184,68 @@ export default function PageEditor() {
         </div>
       )}
 
-      {/* Page tabs */}
-      <div className="mb-6 overflow-x-auto">
-        <Tabs value={activePageKey} onValueChange={setActivePageKey}>
-          <TabsList className="flex w-max gap-1 h-auto p-1">
-            {PAGE_KEYS.map(key => (
-              <TabsTrigger key={key} value={key} className="text-xs whitespace-nowrap">
-                {PAGE_LABELS[key]}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </div>
+      {activePanel === 'clients' ? (
+        <ClientStudio embedded />
+      ) : (
+        <>
+          {/* Page tabs */}
+          <div className="overflow-x-auto">
+            <Tabs value={activePageKey} onValueChange={(value) => updateWorkspace('content', value)}>
+              <TabsList className="flex w-max gap-1 h-auto p-1">
+                {PAGE_KEYS.map((key) => (
+                  <TabsTrigger key={key} value={key} className="text-xs whitespace-nowrap">
+                    {PAGE_LABELS[key]}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Editor column */}
-        <Card>
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm">{PAGE_LABELS[activePageKey]}</CardTitle>
-            <a
-              href={PREVIEW_URLS[activePageKey] || '/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-            >
-              <ExternalLink className="w-3.5 h-3.5" /> Open Page
-            </a>
-          </CardHeader>
-          <CardContent>
-            {showCode ? (
-              <JsonEditor value={content} onChange={handleContentChange} />
-            ) : (
-              <EditorForPage pageKey={activePageKey} content={content} setContent={handleContentChange} />
-            )}
-          </CardContent>
-        </Card>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Editor column */}
+            <Card>
+              <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm">{PAGE_LABELS[activePageKey]}</CardTitle>
+                <a
+                  href={PREVIEW_URLS[activePageKey] || '/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open Page
+                </a>
+              </CardHeader>
+              <CardContent>
+                {showCode ? (
+                  <JsonEditor value={content} onChange={handleContentChange} />
+                ) : (
+                  <EditorForPage pageKey={activePageKey} content={content} setContent={handleContentChange} />
+                )}
+              </CardContent>
+            </Card>
 
-        {/* Live preview */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2"><Eye className="w-4 h-4" /> Live Preview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-white rounded-xl border overflow-hidden h-[600px]">
-              <div className="bg-muted px-4 py-2 border-b flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                  <div className="w-3 h-3 rounded-full bg-green-400" />
+            {/* Live preview */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2"><Eye className="w-4 h-4" /> Live Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-white rounded-xl border overflow-hidden h-[600px]">
+                  <div className="bg-muted px-4 py-2 border-b flex items-center gap-2">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-400" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                      <div className="w-3 h-3 rounded-full bg-green-400" />
+                    </div>
+                    <span className="text-xs text-muted-foreground ml-2">{PREVIEW_URLS[activePageKey] || '/'}</span>
+                  </div>
+                  <iframe src={PREVIEW_URLS[activePageKey] || '/'} className="w-full h-full border-none" title="Preview" />
                 </div>
-                <span className="text-xs text-muted-foreground ml-2">{PREVIEW_URLS[activePageKey] || '/'}</span>
-              </div>
-              <iframe src={PREVIEW_URLS[activePageKey] || '/'} className="w-full h-full border-none" title="Preview" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }

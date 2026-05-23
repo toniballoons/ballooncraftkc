@@ -9,13 +9,13 @@ export default function HelpPageEditor() {
           <Settings className="w-5 h-5 text-indigo-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold">Page Editor</h2>
-          <p className="text-sm text-muted-foreground">Edit every page on your website — no coding needed</p>
+          <h2 className="text-xl font-bold">CMS / Site Management</h2>
+          <p className="text-sm text-muted-foreground">Edit site content and access document delivery and invoicing tools from one admin workspace</p>
         </div>
       </div>
 
       <p className="text-sm text-muted-foreground leading-relaxed">
-        The Page Editor lets you change the text, images, and content on every page of your website. Click a tab at the top to select a page, make your changes in the form fields, and click Save. Your website updates immediately.
+        The CMS workspace lets you change the text, images, and content on every public page of your website, and it now includes the Documents & Invoicing panel for invoicing, official agreement delivery, and hosted signing. Use the top tabs to switch between content editing and client operations.
       </p>
 
       <div className="space-y-3">
@@ -104,7 +104,7 @@ export default function HelpPageEditor() {
       </div>
 
       <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-        <p className="font-bold text-indigo-800 mb-2">💡 Tips for the Page Editor</p>
+        <p className="font-bold text-indigo-800 mb-2">💡 Tips for the CMS</p>
         <ul className="text-sm text-indigo-700 space-y-1.5">
           <li>• Update your Contact page with your real phone number, email, and hours right away</li>
           <li>• Add your Instagram and Facebook links in the Contact and Footer sections</li>

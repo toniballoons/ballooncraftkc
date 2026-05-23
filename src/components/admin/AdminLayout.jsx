@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Mail, Settings, Menu, X,
-  Star, Palette, Image, HelpCircle, LogOut, PanelsTopLeft, ReceiptText,
+  Star, Palette, Image, HelpCircle, LogOut, PanelsTopLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
@@ -12,10 +12,9 @@ import { ensureAccessibleColor } from '@/lib/accessibility';
 
 const NAV_ITEMS = [
   { label: 'Dashboard',      href: '/admin',              icon: LayoutDashboard },
-  { label: 'Page Editor',    href: '/admin/pages',        icon: Settings },
+  { label: 'CMS / Site Management', href: '/admin/pages', icon: Settings },
   { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft },
   { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText },
-  { label: 'Client Studio',   href: '/admin/clients',    icon: ReceiptText },
   { label: 'Testimonials',   href: '/admin/testimonials', icon: Star },
   { label: 'Messages',       href: '/admin/messages',     icon: Mail },
   { label: 'Theme',          href: '/admin/theme',        icon: Palette },
@@ -41,6 +40,14 @@ export default function AdminLayout() {
   const navBg = theme?.nav?.bg || 'rgba(255,255,255,0.97)';
   const navTextColor = theme?.nav?.textColor || '#1a1a1a';
   const safeNavTextColor = ensureAccessibleColor(navTextColor, navBg);
+  const currentAdminUrl = `${location.pathname}${location.search}`;
+
+  const isNavItemActive = (href) => {
+    const [pathname, rawSearch] = href.split('?');
+    if (pathname !== location.pathname) return false;
+    if (!rawSearch) return true;
+    return currentAdminUrl === href;
+  };
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -174,9 +181,9 @@ export default function AdminLayout() {
                 key={item.href}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
-                aria-current={location.pathname === item.href ? 'page' : undefined}
+                aria-current={isNavItemActive(item.href) ? 'page' : undefined}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  location.pathname === item.href
+                  isNavItemActive(item.href)
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}

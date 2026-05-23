@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -31,7 +31,6 @@ import SiteAssets from '@/pages/admin/SiteAssets';
 import Login from '@/pages/admin/Login';
 import Help from '@/pages/admin/Help';
 import PagesManager from '@/pages/admin/PagesManager';
-import ClientStudio from '@/pages/admin/ClientStudio';
 import ClientPackage from '@/pages/site/ClientPackage';
 import Unsubscribe from '@/pages/site/Unsubscribe';
 
@@ -57,6 +56,7 @@ function App() {
                   <Route path="/legal" element={<LegalPage />} />
                 </Route>
 
+                <Route path="/documents/sign/:accessToken" element={<ClientPackage />} />
                 <Route path="/client-package/:accessToken" element={<ClientPackage />} />
                 <Route path="/unsubscribe/:accessToken" element={<Unsubscribe />} />
 
@@ -71,7 +71,7 @@ function App() {
                     <Route path="projects" element={<ProjectsAdmin />} />
                     <Route path="testimonials" element={<TestimonialsAdmin />} />
                     <Route path="messages" element={<MessagesAdmin />} />
-                    <Route path="clients" element={<ClientStudio />} />
+                    <Route path="clients" element={<Navigate to="/admin/pages?panel=clients" replace />} />
                     <Route path="theme" element={<ThemeSettings />} />
                     <Route path="site" element={<SiteAssets />} />
                     <Route path="manage-pages" element={<PagesManager />} />

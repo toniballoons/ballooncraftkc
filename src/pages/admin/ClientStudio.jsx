@@ -7,11 +7,13 @@ import {
   ClipboardSignature,
   Copy,
   ExternalLink,
+  FileUp,
   MailCheck,
   Pencil,
   ReceiptText,
   Send,
   Sparkles,
+  Trash2,
   Wallet,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -25,17 +27,26 @@ import { useAuth } from '@/lib/AuthContext';
 import {
   CONTRACT_PLACEHOLDERS,
   DEFAULT_CONTRACT_TEMPLATE,
+  GENERATED_DOCUMENT_TARGET,
+  SIGNATURE_FIELD_TYPES,
+  SIGNATURE_PREFILL_OPTIONS,
   buildMergedFields,
   computeInvoiceStatus,
   formatDate,
   formatMoney,
+  getDocumentTargetOptions,
   makeClientCode,
+  makeDocumentAssetId,
   makeInvoiceCode,
+  makeSignerFieldId,
   makeTemplateCode,
   mergeTemplateText,
+  normalizeSignatureFields,
+  normalizeUploadedDocuments,
   parseMoney,
   renderTextSections,
 } from '@/lib/clientOps';
+import { uploadFile } from '@/lib/uploadFile';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -103,6 +114,8 @@ const emptyTemplateForm = {
   document_title: '',
   body_text: '',
   closing_text: '',
+  uploaded_documents: [],
+  signature_fields: [],
 };
 
 const emptyPackageForm = {
@@ -127,10 +140,10 @@ function SetupRequired({ error }) {
   return (
     <Card className="border-amber-300 bg-amber-50">
       <CardContent className="py-8 space-y-3">
-        <h2 className="font-display text-2xl text-amber-950">Client Studio needs one database migration</h2>
+        <h2 className="font-display text-2xl text-amber-950">Documents & Invoicing needs one database migration</h2>
         <p className="text-sm text-amber-900 leading-6">
           The UI is wired, but the new invoicing and agreement tables are not available in this environment yet.
-          Run <code>supabase/migrations/009_client_operations.sql</code> in Supabase, then refresh this page.
+          Run the latest client migrations in Supabase, including <code>009_client_operations.sql</code> and <code>011_contract_document_fields.sql</code>, then refresh this page.
         </p>
         {error ? <p className="text-xs text-amber-800">{error.message}</p> : null}
       </CardContent>
@@ -204,12 +217,14 @@ function DocumentPreview({ template, client, invoice, packetTitle }) {
   const title = mergeTemplateText(template.document_title || '', mergedFields);
   const body = mergeTemplateText(template.body_text || '', mergedFields);
   const closing = mergeTemplateText(template.closing_text || '', mergedFields);
+  const uploadedDocuments = normalizeUploadedDocuments(template.uploaded_documents || []);
+  const signatureFields = normalizeSignatureFields(template.signature_fields || [], uploadedDocuments);
 
   return (
     <div className="rounded-2xl border bg-white p-6 space-y-5">
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">
-          {packetTitle || `${client.contact_name} booking package`}
+          {packetTitle || `${client.contact_name} official document set`}
         </p>
         <h3 className="font-display text-2xl">{title}</h3>
       </div>
@@ -231,11 +246,42 @@ function DocumentPreview({ template, client, invoice, packetTitle }) {
           {paragraph}
         </p>
       ))}
+
+      {signatureFields.length > 0 ? (
+        <div className="rounded-2xl border bg-primary/5 p-4 space-y-2">
+          <p className="text-sm font-semibold">Configured signer fields</p>
+          <div className="flex flex-wrap gap-2">
+            {signatureFields.map((field) => {
+              const targetLabel = field.target_document_id === GENERATED_DOCUMENT_TARGET
+                ? 'Generated agreement'
+                : uploadedDocuments.find((document) => document.id === field.target_document_id)?.name || 'Uploaded document';
+
+              return (
+                <span key={field.id} className="rounded-full border bg-white px-3 py-1 text-xs">
+                  {field.label} • {field.type} • {targetLabel}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {uploadedDocuments.length > 0 ? (
+        <div className="rounded-2xl border bg-muted/30 p-4 space-y-3">
+          <p className="text-sm font-semibold">Uploaded documents included in this package</p>
+          {uploadedDocuments.map((document) => (
+            <div key={document.id} className="rounded-2xl border bg-white px-4 py-3">
+              <p className="font-medium">{document.name}</p>
+              {document.description ? <p className="text-sm text-muted-foreground mt-1">{document.description}</p> : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
-export default function ClientStudio() {
+export default function ClientStudio({ embedded = false }) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -247,6 +293,7 @@ export default function ClientStudio() {
 
   const [templateForm, setTemplateForm] = useState(emptyTemplateForm);
   const [editingTemplateId, setEditingTemplateId] = useState(null);
+  const [uploadingTemplateDocument, setUploadingTemplateDocument] = useState(false);
 
   const [packageForm, setPackageForm] = useState(emptyPackageForm);
   const [paymentForm, setPaymentForm] = useState(emptyPaymentForm);
@@ -389,6 +436,8 @@ export default function ClientStudio() {
     mutationFn: async () => {
       const payload = {
         ...templateForm,
+        uploaded_documents: normalizeUploadedDocuments(templateForm.uploaded_documents || []),
+        signature_fields: normalizeSignatureFields(templateForm.signature_fields || [], templateForm.uploaded_documents || []),
         updated_at: new Date().toISOString(),
       };
 
@@ -516,7 +565,109 @@ export default function ClientStudio() {
       document_title: template.document_title || '',
       body_text: template.body_text || '',
       closing_text: template.closing_text || '',
+      uploaded_documents: normalizeUploadedDocuments(template.uploaded_documents || []),
+      signature_fields: normalizeSignatureFields(template.signature_fields || [], template.uploaded_documents || []),
     });
+  };
+
+  const updateTemplateDocument = (documentId, changes) => {
+    setTemplateForm((current) => ({
+      ...current,
+      uploaded_documents: normalizeUploadedDocuments(current.uploaded_documents || []).map((document) => (
+        document.id === documentId ? { ...document, ...changes } : document
+      )),
+    }));
+  };
+
+  const removeTemplateDocument = (documentId) => {
+    setTemplateForm((current) => {
+      const uploaded_documents = normalizeUploadedDocuments(current.uploaded_documents || [])
+        .filter((document) => document.id !== documentId);
+      const signature_fields = normalizeSignatureFields(current.signature_fields || [], uploaded_documents)
+        .filter((field) => field.target_document_id !== documentId);
+
+      return {
+        ...current,
+        uploaded_documents,
+        signature_fields,
+      };
+    });
+  };
+
+  const handleTemplateDocumentUpload = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    setUploadingTemplateDocument(true);
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        const { file_url } = await uploadFile(file);
+        uploaded.push({
+          id: makeDocumentAssetId(),
+          name: file.name,
+          file_url,
+          file_type: file.type || '',
+          description: '',
+        });
+      }
+
+      setTemplateForm((current) => ({
+        ...current,
+        uploaded_documents: [
+          ...normalizeUploadedDocuments(current.uploaded_documents || []),
+          ...uploaded,
+        ],
+      }));
+
+      toast.success(`${uploaded.length} document${uploaded.length === 1 ? '' : 's'} uploaded.`);
+    } catch (error) {
+      toast.error(error.message || 'Failed to upload document.');
+    } finally {
+      setUploadingTemplateDocument(false);
+      event.target.value = '';
+    }
+  };
+
+  const addTemplateSignerField = () => {
+    const uploadedDocuments = normalizeUploadedDocuments(templateForm.uploaded_documents || []);
+    const defaultTarget = uploadedDocuments[0]?.id || GENERATED_DOCUMENT_TARGET;
+
+    setTemplateForm((current) => ({
+      ...current,
+      signature_fields: [
+        ...normalizeSignatureFields(current.signature_fields || [], current.uploaded_documents || []),
+        {
+          id: makeSignerFieldId(),
+          target_document_id: defaultTarget,
+          type: 'signature',
+          label: 'Client signature',
+          required: true,
+          placeholder: '',
+          help_text: '',
+          page_hint: '',
+          anchor_hint: '',
+          prefill_key: '',
+        },
+      ],
+    }));
+  };
+
+  const updateTemplateSignerField = (fieldId, changes) => {
+    setTemplateForm((current) => ({
+      ...current,
+      signature_fields: normalizeSignatureFields(current.signature_fields || [], current.uploaded_documents || []).map((field) => (
+        field.id === fieldId ? { ...field, ...changes } : field
+      )),
+    }));
+  };
+
+  const removeTemplateSignerField = (fieldId) => {
+    setTemplateForm((current) => ({
+      ...current,
+      signature_fields: normalizeSignatureFields(current.signature_fields || [], current.uploaded_documents || [])
+        .filter((field) => field.id !== fieldId),
+    }));
   };
 
   const selectedPaymentInvoice = invoices.find((invoice) => invoice.id === paymentForm.invoiceId);
@@ -527,19 +678,28 @@ export default function ClientStudio() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="font-display text-3xl">Client Studio</h1>
-          <p className="text-muted-foreground mt-2 max-w-3xl">
-            Register clients, create invoices with deposit and final-payment schedules, build BalloonCraft KC agreement templates,
-            and send polished signature-ready booking packages from one admin workspace.
+      {embedded ? (
+        <div className="rounded-2xl border bg-primary/5 px-4 py-4 text-sm">
+          <p className="font-semibold text-primary">Documents & Invoicing inside CMS</p>
+          <p className="text-muted-foreground mt-1">
+            Register clients, build invoices, send official document sets, and track payments from this CMS workspace.
           </p>
         </div>
-        <div className="rounded-2xl border bg-primary/5 px-4 py-3 text-sm">
-          <p className="font-semibold text-primary">Signature flow included</p>
-          <p className="text-muted-foreground">Packages send from BalloonCraft KC and auto-email the completed copy back on signature.</p>
+      ) : (
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="font-display text-3xl">Client Documents & Invoicing</h1>
+            <p className="text-muted-foreground mt-2 max-w-3xl">
+              Register clients, create invoices with deposit and final-payment schedules, build BalloonCraft KC agreement templates,
+              and send polished secure document sets for review, signing, and payment from one admin workspace.
+            </p>
+          </div>
+          <div className="rounded-2xl border bg-primary/5 px-4 py-3 text-sm">
+            <p className="font-semibold text-primary">Signature flow included</p>
+            <p className="text-muted-foreground">Packages send from BalloonCraft KC and auto-email the completed copy back on signature.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <OverviewCard icon={BriefcaseBusiness} title="Clients" value={clients.length} detail="Lead and booking records" />
@@ -860,11 +1020,178 @@ export default function ClientStudio() {
                 <Label>Closing text</Label>
                 <Textarea rows={4} value={templateForm.closing_text} onChange={(event) => setTemplateForm({ ...templateForm, closing_text: event.target.value })} />
               </div>
+
+              <div className="rounded-2xl border bg-muted/30 p-4 space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold">Uploaded documents</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Add PDFs, Word docs, or images that should travel with this agreement package.
+                    </p>
+                  </div>
+                  <label className="inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-muted">
+                    <FileUp className="w-4 h-4" />
+                    {uploadingTemplateDocument ? 'Uploading…' : 'Upload documents'}
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
+                      multiple
+                      className="hidden"
+                      onChange={handleTemplateDocumentUpload}
+                      disabled={uploadingTemplateDocument}
+                    />
+                  </label>
+                </div>
+
+                {normalizeUploadedDocuments(templateForm.uploaded_documents || []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No uploaded documents attached to this template yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {normalizeUploadedDocuments(templateForm.uploaded_documents || []).map((document) => (
+                      <div key={document.id} className="rounded-2xl border bg-white p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-semibold break-words">{document.name}</p>
+                            <a href={document.file_url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline break-all">
+                              {document.file_url}
+                            </a>
+                          </div>
+                          <Button size="icon" variant="outline" onClick={() => removeTemplateDocument(document.id)} aria-label={`Remove ${document.name}`}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Document description</Label>
+                          <Textarea
+                            rows={2}
+                            value={document.description || ''}
+                            onChange={(event) => updateTemplateDocument(document.id, { description: event.target.value })}
+                            placeholder="Explain what this file is and what the client should review before signing."
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border bg-muted/30 p-4 space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold">Signer field configuration</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Add sign, initial, date, or typed-name fields for the generated agreement or any uploaded document.
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={addTemplateSignerField}>
+                    <ClipboardSignature className="w-3.5 h-3.5 mr-1" />
+                    Add signer field
+                  </Button>
+                </div>
+
+                {normalizeSignatureFields(templateForm.signature_fields || [], templateForm.uploaded_documents || []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No custom signer fields yet. The package still uses the main electronic signature block; add fields here if uploaded documents need initials, dates, or typed acknowledgements.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {normalizeSignatureFields(templateForm.signature_fields || [], templateForm.uploaded_documents || []).map((field) => (
+                      <div key={field.id} className="rounded-2xl border bg-white p-4 space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold">{field.label}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              This field appears in the hosted signing flow and is stored with the signed package.
+                            </p>
+                          </div>
+                          <Button size="icon" variant="outline" onClick={() => removeTemplateSignerField(field.id)} aria-label={`Remove ${field.label}`}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label>Document target</Label>
+                            <Select value={field.target_document_id} onValueChange={(value) => updateTemplateSignerField(field.id, { target_document_id: value })}>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {getDocumentTargetOptions(templateForm.uploaded_documents || []).map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Field type</Label>
+                            <Select value={field.type} onValueChange={(value) => updateTemplateSignerField(field.id, { type: value })}>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {SIGNATURE_FIELD_TYPES.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Field label</Label>
+                            <Input value={field.label} onChange={(event) => updateTemplateSignerField(field.id, { label: event.target.value })} placeholder="Client initials on cancellation clause" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Placeholder / helper value</Label>
+                            <Input value={field.placeholder || ''} onChange={(event) => updateTemplateSignerField(field.id, { placeholder: event.target.value })} placeholder="Type your initials" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Page hint</Label>
+                            <Input value={field.page_hint || ''} onChange={(event) => updateTemplateSignerField(field.id, { page_hint: event.target.value })} placeholder="Page 2" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Placement hint</Label>
+                            <Input value={field.anchor_hint || ''} onChange={(event) => updateTemplateSignerField(field.id, { anchor_hint: event.target.value })} placeholder="Near payment terms paragraph" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Prefill</Label>
+                            <Select value={field.prefill_key || ''} onValueChange={(value) => updateTemplateSignerField(field.id, { prefill_key: value })}>
+                              <SelectTrigger><SelectValue placeholder="Choose optional prefill" /></SelectTrigger>
+                              <SelectContent>
+                                {SIGNATURE_PREFILL_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value || 'none'} value={option.value}>{option.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2 md:col-span-2">
+                            <Label>Help text</Label>
+                            <Textarea rows={2} value={field.help_text || ''} onChange={(event) => updateTemplateSignerField(field.id, { help_text: event.target.value })} placeholder="Tell the client exactly what they are acknowledging or completing here." />
+                          </div>
+                        </div>
+
+                        <label className="flex items-center gap-3 text-sm">
+                          <Checkbox
+                            checked={field.required !== false}
+                            onCheckedChange={(checked) => updateTemplateSignerField(field.id, { required: checked === true })}
+                          />
+                          This signer field is required before the package can be completed.
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex flex-wrap gap-3">
                 <Button onClick={() => templateMutation.mutate()} disabled={templateMutation.isPending || !templateForm.name || !templateForm.document_title || !templateForm.body_text}>
                   {templateMutation.isPending ? 'Saving...' : editingTemplateId ? 'Update template' : 'Create template'}
                 </Button>
-                <Button variant="outline" onClick={() => { setTemplateForm({ ...DEFAULT_CONTRACT_TEMPLATE, template_code: '', status: 'active' }); setEditingTemplateId(null); }}>
+                <Button variant="outline" onClick={() => {
+                  setTemplateForm({
+                    ...DEFAULT_CONTRACT_TEMPLATE,
+                    template_code: '',
+                    status: 'active',
+                    uploaded_documents: [],
+                    signature_fields: [],
+                  });
+                  setEditingTemplateId(null);
+                }}>
                   <Sparkles className="w-3.5 h-3.5 mr-1" />
                   Load starter template
                 </Button>
@@ -901,6 +1228,14 @@ export default function ClientStudio() {
                     </Button>
                   </div>
                   <p className="text-sm text-muted-foreground">{template.description || 'No description provided.'}</p>
+                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span className="rounded-full border px-3 py-1 bg-muted/40">
+                      {normalizeUploadedDocuments(template.uploaded_documents || []).length} uploaded doc{normalizeUploadedDocuments(template.uploaded_documents || []).length === 1 ? '' : 's'}
+                    </span>
+                    <span className="rounded-full border px-3 py-1 bg-muted/40">
+                      {normalizeSignatureFields(template.signature_fields || [], template.uploaded_documents || []).length} signer field{normalizeSignatureFields(template.signature_fields || [], template.uploaded_documents || []).length === 1 ? '' : 's'}
+                    </span>
+                  </div>
                 </div>
               ))}
             </CardContent>
@@ -910,7 +1245,7 @@ export default function ClientStudio() {
         <TabsContent value="packages" className="grid gap-6 xl:grid-cols-[1fr_1fr]">
           <Card>
             <CardHeader>
-              <CardTitle>Send a client package</CardTitle>
+              <CardTitle>Send an official document set</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -978,8 +1313,8 @@ export default function ClientStudio() {
               </div>
 
               <div className="space-y-2">
-                <Label>Packet title</Label>
-                <Input value={packageForm.packetTitle} onChange={(event) => setPackageForm({ ...packageForm, packetTitle: event.target.value })} placeholder="Optional custom package title" />
+                <Label>Document set title</Label>
+                <Input value={packageForm.packetTitle} onChange={(event) => setPackageForm({ ...packageForm, packetTitle: event.target.value })} placeholder="Optional custom document-set title" />
               </div>
 
               <div className="flex gap-3">
@@ -988,7 +1323,7 @@ export default function ClientStudio() {
                   disabled={sendPackageMutation.isPending || !packageForm.clientId || !packageForm.invoiceId || !packageForm.templateId}
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {sendPackageMutation.isPending ? 'Sending...' : 'Send package'}
+                  {sendPackageMutation.isPending ? 'Sending...' : 'Send secure documents'}
                 </Button>
                 <Button variant="outline" onClick={() => setPackageForm(emptyPackageForm)}>Reset</Button>
               </div>
@@ -1008,13 +1343,13 @@ export default function ClientStudio() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Sent package tracker</CardTitle>
+              <CardTitle>Sent document tracker</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {packages.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No packages sent yet.</p>
+                <p className="text-sm text-muted-foreground">No document sets sent yet.</p>
               ) : packages.map((packet) => {
-                const packetUrl = `${window.location.origin}/client-package/${packet.access_token}`;
+                const packetUrl = `${window.location.origin}/documents/sign/${packet.access_token}`;
                 return (
                   <div key={packet.id} className="rounded-2xl border p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
@@ -1026,7 +1361,7 @@ export default function ClientStudio() {
                         <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mt-1">{packet.package_code}</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="icon" variant="outline" onClick={() => window.open(packetUrl, '_blank')} aria-label="Open client package">
+                        <Button size="icon" variant="outline" onClick={() => window.open(packetUrl, '_blank')} aria-label="Open secure document center">
                           <ExternalLink className="w-4 h-4" />
                         </Button>
                         <Button
@@ -1034,9 +1369,9 @@ export default function ClientStudio() {
                           variant="outline"
                           onClick={async () => {
                             await navigator.clipboard.writeText(packetUrl);
-                            toast.success('Package link copied.');
+                            toast.success('Secure document link copied.');
                           }}
-                          aria-label="Copy client package link"
+                          aria-label="Copy secure document link"
                         >
                           <Copy className="w-4 h-4" />
                         </Button>

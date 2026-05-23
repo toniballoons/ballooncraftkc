@@ -37,14 +37,14 @@ export default async function handler(req, res) {
     });
 
     const siteUrl = process.env.SITE_URL || 'https://www.ballooncraftkc.com';
-    const accessUrl = `${siteUrl.replace(/\/$/, '')}/client-package/${packet.access_token}`;
+    const accessUrl = `${siteUrl.replace(/\/$/, '')}/documents/sign/${packet.access_token}`;
     const html = buildClientPackageEmailHtml({ client, invoice, packet, accessUrl });
 
     await sendPackageEmail({
       resend,
       from,
       to: client.email,
-      subject: packet.subject_line || 'Your BalloonCraft KC booking package is ready',
+      subject: packet.subject_line || 'Your BalloonCraft KC official documents are ready',
       html,
     });
 

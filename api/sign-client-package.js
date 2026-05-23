@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { token, signedName, signedInitials, signedTitle, agreedToTerms } = req.body || {};
+  const { token, signedName, signedInitials, signedTitle, agreedToTerms, signatureFieldValues = {} } = req.body || {};
 
   if (!token || !signedName || !signedInitials || !agreedToTerms) {
     return res.status(400).json({ error: 'Token, signed name, initials, and agreement confirmation are required.' });
@@ -38,6 +38,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, alreadySigned: true });
     }
 
+    const configuredFields = Array.isArray(packet.signature_fields) ? packet.signature_fields : [];
+    const normalizedFieldValues = Object.fromEntries(
+      Object.entries(signatureFieldValues || {}).map(([key, value]) => [key, String(value ?? '').trim()])
+    );
+
+    const missingField = configuredFields.find((field) => field.required !== false && !normalizedFieldValues[field.id]);
+    if (missingField) {
+      return res.status(400).json({ error: `${missingField.label || 'A required signer field'} is still required.` });
+    }
+
     const signerIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '';
     const signedAt = new Date().toISOString();
 
@@ -50,6 +60,7 @@ export default async function handler(req, res) {
         signed_title: signedTitle || null,
         signature_value: signedName,
         agreed_to_terms: true,
+        signature_field_values: normalizedFieldValues,
         signed_at: signedAt,
         signer_ip: Array.isArray(signerIp) ? signerIp[0] : signerIp,
         completion_email_sent: false,
@@ -86,7 +97,7 @@ export default async function handler(req, res) {
       invoice,
       packet: updatedPacket,
       heading: 'A client signed their agreement',
-      intro: `${client.contact_name} completed the BalloonCraft KC booking package.`,
+      intro: `${client.contact_name} completed the official BalloonCraft KC document signing process.`,
     });
     const clientHtml = buildSignedCompletionEmailHtml({
       client,

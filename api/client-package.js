@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   const token = req.query?.token;
   if (!token) {
-    return res.status(400).json({ error: 'Missing package token.' });
+    return res.status(400).json({ error: 'Missing secure document token.' });
   }
 
   try {
@@ -58,8 +58,12 @@ export default async function handler(req, res) {
         documentIntro: packet.document_intro,
         documentBody: packet.document_body,
         documentClosing: packet.document_closing,
+        mergedFields: packet.merged_fields || {},
         paymentLinks: packet.payment_links || {},
         paymentInstructions: packet.payment_instructions || '',
+        uploadedDocuments: packet.uploaded_documents || [],
+        signatureFields: packet.signature_fields || [],
+        signatureFieldValues: packet.signature_field_values || {},
         signedName: packet.signed_name,
         signedInitials: packet.signed_initials,
         signedTitle: packet.signed_title,
@@ -74,6 +78,7 @@ export default async function handler(req, res) {
       invoice: {
         invoiceCode: invoice.invoice_code,
         invoiceTitle: invoice.invoice_title,
+        eventType: invoice.event_type,
         eventDate: invoice.event_date,
         eventLocation: invoice.event_location,
         contractAmount: invoice.contract_amount,

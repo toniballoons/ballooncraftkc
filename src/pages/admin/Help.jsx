@@ -20,7 +20,7 @@ const SECTIONS = [
   { id: 'portfolio',      label: 'Portfolio / Blog',  icon: FileText,        color: 'bg-green-100 text-green-600',  component: HelpPortfolio },
   { id: 'messages',       label: 'Messages',          icon: MessageSquare,   color: 'bg-purple-100 text-purple-600',component: HelpMessages },
   { id: 'testimonials',   label: 'Testimonials',      icon: Star,            color: 'bg-yellow-100 text-yellow-600',component: HelpTestimonials },
-  { id: 'page-editor',    label: 'Page Editor',       icon: Settings,        color: 'bg-indigo-100 text-indigo-600',component: HelpPageEditor },
+  { id: 'page-editor',    label: 'CMS / Site Management', icon: Settings,    color: 'bg-indigo-100 text-indigo-600',component: HelpPageEditor },
   { id: 'theme',          label: 'Theme Settings',    icon: Palette,         color: 'bg-pink-100 text-pink-600',    component: HelpTheme },
   { id: 'site-assets',    label: 'Site Assets',       icon: Image,           color: 'bg-teal-100 text-teal-600',    component: HelpSiteAssets },
   { id: 'seo',            label: 'SEO Guide',         icon: Search,          color: 'bg-orange-100 text-orange-600',component: HelpSEO },

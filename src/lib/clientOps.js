@@ -43,6 +43,14 @@ export function makePackageCode() {
   return `BKC-PKG-${timestampChunk()}-${randomChunk(4)}`;
 }
 
+export function makeDocumentAssetId() {
+  return `BKC-DOC-${randomChunk(6)}`;
+}
+
+export function makeSignerFieldId() {
+  return `BKC-FLD-${randomChunk(6)}`;
+}
+
 export function makeAccessToken() {
   return `${randomChunk(10)}${randomChunk(10)}${randomChunk(10)}`.toLowerCase();
 }
@@ -142,13 +150,38 @@ export const CONTRACT_PLACEHOLDERS = [
   { key: 'additional_terms', label: 'Additional terms' },
 ];
 
+export const SIGNATURE_FIELD_TYPES = [
+  { value: 'signature', label: 'Signature' },
+  { value: 'initials', label: 'Initials' },
+  { value: 'date', label: 'Date' },
+  { value: 'text', label: 'Text input' },
+];
+
+export const SIGNATURE_PREFILL_OPTIONS = [
+  { value: '', label: 'No prefill' },
+  { value: 'client_name', label: 'Client name' },
+  { value: 'business_name', label: 'Business name' },
+  { value: 'event_type', label: 'Event type' },
+  { value: 'event_date', label: 'Event date' },
+  { value: 'event_location', label: 'Event location' },
+  { value: 'contract_amount', label: 'Contract amount' },
+  { value: 'down_payment_amount', label: 'Down payment amount' },
+  { value: 'final_payment_amount', label: 'Final payment amount' },
+  { value: 'invoice_code', label: 'Invoice ID' },
+  { value: 'today', label: 'Today’s date' },
+];
+
+export const GENERATED_DOCUMENT_TARGET = 'generated_agreement';
+
 export const DEFAULT_CONTRACT_TEMPLATE = {
   name: 'Balloon event service agreement',
   description: 'Starter agreement for balloon decor events, deposits, and final payment terms.',
-  subject_line: 'Your BalloonCraft KC booking package is ready',
+  subject_line: 'Your BalloonCraft KC official documents are ready',
   intro_text: 'Please review the agreement below, confirm the invoice details, and sign digitally to move forward with your booking.',
   document_title: 'BalloonCraft KC Service Agreement',
   closing_text: 'Once signed, both sides will receive a completed copy by email.',
+  uploaded_documents: [],
+  signature_fields: [],
   body_text: `This BalloonCraft KC Service Agreement is entered into by BalloonCraft KC and {{client_name}}{{business_name}} for {{event_type}} services scheduled for {{event_date}} at {{event_location}}.
 
 BalloonCraft KC will provide the following scope of work: {{service_summary}}.
@@ -206,4 +239,139 @@ export function renderTextSections(text = '') {
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
+}
+
+export function getDocumentTargetOptions(uploadedDocuments = []) {
+  return [
+    { value: GENERATED_DOCUMENT_TARGET, label: 'Generated BalloonCraft agreement' },
+    ...normalizeUploadedDocuments(uploadedDocuments).map((document) => ({
+      value: document.id,
+      label: document.name || 'Uploaded document',
+    })),
+  ];
+}
+
+export function normalizeUploadedDocuments(documents = []) {
+  if (!Array.isArray(documents)) return [];
+
+  return documents.map((document) => ({
+    id: document.id || makeDocumentAssetId(),
+    name: document.name || 'Untitled document',
+    file_url: document.file_url || document.url || '',
+    file_type: document.file_type || document.mime_type || '',
+    description: document.description || '',
+  })).filter((document) => document.file_url);
+}
+
+export function normalizeSignatureFields(fields = [], uploadedDocuments = []) {
+  const validTargets = new Set([
+    GENERATED_DOCUMENT_TARGET,
+    ...normalizeUploadedDocuments(uploadedDocuments).map((document) => document.id),
+  ]);
+
+  if (!Array.isArray(fields)) return [];
+
+  return fields.map((field) => {
+    const target_document_id = validTargets.has(field.target_document_id)
+      ? field.target_document_id
+      : GENERATED_DOCUMENT_TARGET;
+
+    return {
+      id: field.id || makeSignerFieldId(),
+      target_document_id,
+      type: field.type || 'signature',
+      label: field.label || 'Signature field',
+      required: field.required !== false,
+      placeholder: field.placeholder || '',
+      help_text: field.help_text || '',
+      page_hint: field.page_hint || '',
+      anchor_hint: field.anchor_hint || '',
+      prefill_key: field.prefill_key || '',
+    };
+  });
+}
+
+export function resolveSignatureFieldPrefill(field, mergedFields = {}) {
+  if (!field?.prefill_key) return '';
+  if (field.prefill_key === 'today') {
+    return field.type === 'date'
+      ? new Date().toISOString().slice(0, 10)
+      : new Date().toLocaleDateString('en-US');
+  }
+
+  return mergedFields[field.prefill_key] || '';
+}
+
+export function buildPackageDocumentModel({ client, invoice, template }) {
+  const mergedFields = buildMergedFields({ client, invoice });
+  const uploadedDocuments = normalizeUploadedDocuments(template?.uploaded_documents || []);
+  const signatureFields = normalizeSignatureFields(template?.signature_fields || [], uploadedDocuments);
+
+  return {
+    uploadedDocuments,
+    signatureFields,
+    mergedFields,
+  };
+}
+
+export function buildAgreementHtml({
+  packet,
+  client,
+  invoice,
+  signatureFields = [],
+  signatureFieldValues = {},
+}) {
+  const uploadedDocuments = normalizeUploadedDocuments(packet?.uploadedDocuments || packet?.uploaded_documents || []);
+  const fieldGroups = normalizeSignatureFields(signatureFields, uploadedDocuments)
+    .reduce((groups, field) => {
+      groups[field.target_document_id] ||= [];
+      groups[field.target_document_id].push(field);
+      return groups;
+    }, {});
+
+  const renderFieldSummary = (fields) => {
+    if (!fields?.length) return '';
+
+    return `
+      <div style="margin-top:16px;padding:16px;background:#fff8fb;border:1px solid #f6d3e2;border-radius:16px;">
+        <p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#be185d;">Required signer fields</p>
+        ${fields.map((field) => `
+          <div style="margin:0 0 10px;">
+            <p style="margin:0;font-size:14px;font-weight:700;color:#111827;">${field.label}</p>
+            <p style="margin:4px 0 0;font-size:13px;color:#6b7280;">
+              ${[field.type, field.page_hint, field.anchor_hint].filter(Boolean).join(' • ')}
+            </p>
+            ${signatureFieldValues[field.id] ? `<p style="margin:4px 0 0;font-size:13px;color:#111827;">Captured value: ${signatureFieldValues[field.id]}</p>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  };
+
+  return `
+    <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.6;">
+      <h1 style="font-size:28px;margin:0 0 12px;">${packet.documentTitle}</h1>
+      ${renderTextSections(packet.documentIntro).map((paragraph) => `<p style="font-size:15px;color:#4b5563;margin:0 0 14px;">${paragraph}</p>`).join('')}
+      ${renderTextSections(packet.documentBody).map((paragraph) => `<p style="font-size:15px;margin:0 0 14px;">${paragraph}</p>`).join('')}
+      ${renderTextSections(packet.documentClosing).map((paragraph) => `<p style="font-size:15px;color:#4b5563;margin:0 0 14px;">${paragraph}</p>`).join('')}
+      ${renderFieldSummary(fieldGroups[GENERATED_DOCUMENT_TARGET])}
+      ${uploadedDocuments.length ? `
+        <div style="margin-top:28px;">
+          <h2 style="font-size:20px;margin:0 0 12px;">Attached documents</h2>
+          ${uploadedDocuments.map((document) => `
+            <div style="margin:0 0 16px;padding:18px;border:1px solid #e5e7eb;border-radius:16px;">
+              <p style="margin:0;font-size:16px;font-weight:700;">${document.name}</p>
+              ${document.description ? `<p style="margin:8px 0 0;font-size:14px;color:#6b7280;">${document.description}</p>` : ''}
+              <p style="margin:8px 0 0;font-size:14px;"><a href="${document.file_url}" style="color:#be185d;text-decoration:none;">Open file</a></p>
+              ${renderFieldSummary(fieldGroups[document.id])}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+      <div style="margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;">
+        <p style="margin:0;font-size:14px;"><strong>Client:</strong> ${client.contactName || client.contact_name || '—'}</p>
+        <p style="margin:4px 0 0;font-size:14px;"><strong>Invoice:</strong> ${invoice.invoiceCode || invoice.invoice_code || '—'}</p>
+      </div>
+    </div>
+  `;
 }
