@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
-import { formatCanonicalUrl } from '@/lib/seo';
+import { LOCAL_SERVICE_AREAS, formatCanonicalUrl } from '@/lib/seo';
 import { getHeroTextStyles } from '@/lib/accessibility';
 import { motion } from 'framer-motion';
 import { Heart, Award, Lightbulb, Clock } from 'lucide-react';
@@ -14,21 +14,34 @@ export default function About() {
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #a29bfe, #fd79a8)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
-  const domain = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
+  const domain = typeof window !== 'undefined' ? window.location.hostname : 'www.ballooncraftkc.com';
 
   useEffect(() => {
     const canonical = formatCanonicalUrl(domain, '/about');
+    const pageTitle = 'About BalloonCraft KC | Kansas City Balloon Decor Team';
+    const description = content.subtitle || 'Learn about BalloonCraft KC, a Kansas City balloon decor studio serving weddings, birthdays, showers, schools, and corporate events across the metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
-    const setMeta = (prop, val) => {
-      let el = document.querySelector(`meta[property="${prop}"]`);
-      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+
+    document.title = pageTitle;
+
+    const setMeta = (attr, prop, val) => {
+      let el = document.querySelector(`meta[${attr}="${prop}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, prop); document.head.appendChild(el); }
       el.content = val;
     };
-    setMeta('og:title', content.title || 'About Us — BalloonCraft');
-    setMeta('og:description', content.subtitle || 'Learn about our balloon decoration team in Kansas City.');
-    setMeta('og:url', canonical);
+    setMeta('property', 'og:title', pageTitle);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:url', canonical);
+    setMeta('property', 'og:type', 'website');
+    if (content.image) {
+      setMeta('property', 'og:image', content.image);
+      setMeta('name', 'twitter:image', content.image);
+    }
+    setMeta('name', 'description', description);
+    setMeta('name', 'twitter:title', pageTitle);
+    setMeta('name', 'twitter:description', description);
     return () => { const el = document.querySelector('link[rel="canonical"]'); if (el) el.remove(); };
   }, [content, domain]);
 
@@ -59,6 +72,24 @@ export default function About() {
               <img src={content.image} alt="Our balloon crafting studio" className="rounded-3xl shadow-2xl w-full" />
             )}
           </motion.div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-white content-section">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
+            <h2 className="font-display text-4xl mb-4">Proudly serving the Kansas City metro</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mx-auto">
+              We create custom balloon decor for homes, storefronts, schools, offices, wedding venues, and event spaces across the metro. From Kansas City installs to Johnson County celebrations, our work is built around your space, your palette, and the kind of moment you want people to remember.
+            </p>
+          </motion.div>
+          <div className="flex flex-wrap justify-center gap-3 mt-10">
+            {LOCAL_SERVICE_AREAS.map((area) => (
+              <span key={area} className="rounded-full border border-border/70 bg-muted/30 px-4 py-2 text-sm font-semibold shadow-sm">
+                {area}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 

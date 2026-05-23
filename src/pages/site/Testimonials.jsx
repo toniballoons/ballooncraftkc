@@ -15,21 +15,30 @@ export default function Testimonials() {
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #fd79a8, #a29bfe)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
-  const domain = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
+  const domain = typeof window !== 'undefined' ? window.location.hostname : 'www.ballooncraftkc.com';
 
   useEffect(() => {
     const canonical = formatCanonicalUrl(domain, '/testimonials');
+    const pageTitle = 'Kansas City Balloon Decor Reviews | BalloonCraft KC';
+    const description = content.subtitle || 'Read BalloonCraft KC client reviews for weddings, birthdays, showers, school events, and corporate installs across the Kansas City metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
-    const setMeta = (prop, val) => {
-      let el = document.querySelector(`meta[property="${prop}"]`);
-      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+
+    document.title = pageTitle;
+
+    const setMeta = (attr, prop, val) => {
+      let el = document.querySelector(`meta[${attr}="${prop}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, prop); document.head.appendChild(el); }
       el.content = val;
     };
-    setMeta('og:title', content.title || 'Client Reviews — BalloonCraft');
-    setMeta('og:description', content.subtitle || 'See what our Kansas City clients say about our balloon decorations.');
-    setMeta('og:url', canonical);
+    setMeta('property', 'og:title', pageTitle);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:url', canonical);
+    setMeta('property', 'og:type', 'website');
+    setMeta('name', 'description', description);
+    setMeta('name', 'twitter:title', pageTitle);
+    setMeta('name', 'twitter:description', description);
     return () => { const el = document.querySelector('link[rel="canonical"]'); if (el) el.remove(); };
   }, [content, domain]);
 
@@ -52,6 +61,11 @@ export default function Testimonials() {
 
       <section className="py-20 bg-white content-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[1.75rem] border border-border/60 bg-muted/30 p-6 mb-8">
+            <p className="text-muted-foreground leading-relaxed">
+              These reviews reflect the kinds of installs BalloonCraft KC creates across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, and the surrounding metro, from birthdays and baby showers to school celebrations, grand openings, and polished corporate events.
+            </p>
+          </div>
           {isLoading ? (
             <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">Loading testimonials...</div>
           ) : testimonials.length === 0 ? (

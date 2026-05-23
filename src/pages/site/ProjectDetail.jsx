@@ -15,7 +15,7 @@ import { Calendar, MapPin, ArrowLeft, User, Quote } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 
-const DOMAIN = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
+const DOMAIN = typeof window !== 'undefined' ? window.location.hostname : 'www.ballooncraftkc.com';
 
 // ── Head tag injection helpers ────────────────────────────────
 
@@ -92,6 +92,10 @@ export default function ProjectDetail() {
 
     // Standard meta
     setMeta('description', description);
+    setMeta('twitter:title', pageTitle);
+    setMeta('twitter:description', description);
+    setMeta('twitter:image', ogImage);
+    setMeta('twitter:card', 'summary_large_image');
 
     // JSON-LD
     const jsonLd = buildJsonLd(project, {});
@@ -114,9 +118,9 @@ export default function ProjectDetail() {
 
   if (!project) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-      <h1 className="font-display text-3xl">Post Not Found</h1>
+      <h1 className="font-display text-3xl">Entry Not Found</h1>
       <Button asChild variant="outline" className="rounded-full">
-        <Link to="/projects"><ArrowLeft className="w-4 h-4 mr-2" /> Back to Portfolio</Link>
+        <Link to="/projects"><ArrowLeft className="w-4 h-4 mr-2" /> Back to Work & Updates</Link>
       </Button>
     </div>
   );
@@ -146,7 +150,7 @@ export default function ProjectDetail() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 content-section">
         <Button asChild variant="ghost" size="sm" className="mb-6">
-          <Link to="/projects"><ArrowLeft className="w-4 h-4 mr-2" /> Back to Portfolio</Link>
+          <Link to="/projects"><ArrowLeft className="w-4 h-4 mr-2" /> Back to Work & Updates</Link>
         </Button>
 
         {!project.featured_image && (

@@ -24,21 +24,34 @@ export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_type: '', event_date: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const domain = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
+  const domain = typeof window !== 'undefined' ? window.location.hostname : 'www.ballooncraftkc.com';
 
   useEffect(() => {
     const canonical = formatCanonicalUrl(domain, '/contact');
+    const pageTitle = 'Contact BalloonCraft KC | Kansas City Balloon Decor Quotes';
+    const description = content.subtitle || 'Contact BalloonCraft KC for custom balloon decor, event backdrops, and quote requests across Kansas City, Overland Park, Olathe, Lee\'s Summit, and the surrounding metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
-    const setMeta = (prop, val) => {
-      let el = document.querySelector(`meta[property="${prop}"]`);
-      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+
+    document.title = pageTitle;
+
+    const setMeta = (attr, prop, val) => {
+      let el = document.querySelector(`meta[${attr}="${prop}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, prop); document.head.appendChild(el); }
       el.content = val;
     };
-    setMeta('og:title', content.title || 'Contact Us — BalloonCraft');
-    setMeta('og:description', content.subtitle || 'Get in touch for balloon decorations in Kansas City.');
-    setMeta('og:url', canonical);
+    setMeta('property', 'og:title', pageTitle);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:url', canonical);
+    setMeta('property', 'og:type', 'website');
+    if (content.image) {
+      setMeta('property', 'og:image', content.image);
+      setMeta('name', 'twitter:image', content.image);
+    }
+    setMeta('name', 'description', description);
+    setMeta('name', 'twitter:title', pageTitle);
+    setMeta('name', 'twitter:description', description);
     return () => { const el = document.querySelector('link[rel="canonical"]'); if (el) el.remove(); };
   }, [content, domain]);
 
@@ -149,6 +162,12 @@ export default function Contact() {
             {content.image && (
               <img src={content.image} alt="Contact us" className="rounded-3xl shadow-xl mb-10 w-full" />
             )}
+            <div className="rounded-[1.75rem] border border-border/60 bg-muted/30 p-6 mb-8">
+              <h2 className="font-display text-2xl mb-3">Serving Kansas City and the surrounding metro</h2>
+              <p className="text-muted-foreground leading-relaxed">
+                Tell us about your event, venue, colors, and wishlist. We handle balloon arches, garlands, walls, backdrops, marquees, and custom installs for homes, venues, storefronts, schools, and corporate spaces across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, Lenexa, Leawood, Prairie Village, Shawnee, and nearby communities.
+              </p>
+            </div>
             <div className="space-y-6">
               {infoItems.filter(item => item.value).map((item, i) => (
                 <div key={i} className="flex items-start gap-4">

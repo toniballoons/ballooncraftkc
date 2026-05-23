@@ -12,13 +12,13 @@ export const DEFAULT_CONTENT = {
     show_floating_balloons: true,
   },
   about: {
-    title: "About Us",
-    subtitle: "Crafting Joy, One Balloon at a Time",
-    intro: "We are passionate balloon artists dedicated to turning ordinary spaces into extraordinary experiences. With years of expertise in balloon architecture, we bring color, wonder, and magic to every event we touch.",
+    title: "About BalloonCraft KC",
+    subtitle: "Custom balloon decor for Kansas City celebrations, installs, and event backdrops",
+    intro: "We are a Kansas City balloon decor studio focused on turning ordinary spaces into unforgettable event environments. From clean garlands and statement arches to full photo moments and branded installs, we design with equal parts artistry, structure, and event-day reliability.",
     story_title: "Our Story",
     story: "What started as a small passion project has blossomed into a full-service balloon decoration studio. Our team of creative artists combines technical skill with artistic vision to design breathtaking balloon installations that wow guests and create lasting memories. From intimate gatherings to grand celebrations, we approach every project with the same level of dedication and creativity.",
     mission_title: "Our Mission",
-    mission: "To spread joy and create magical moments through the art of balloon design. We believe every celebration deserves a touch of whimsy and wonder.",
+    mission: "To create polished, memorable balloon decor that helps Kansas City clients celebrate big moments, launch bold ideas, and host spaces that feel fully considered from the first photo to the final guest impression.",
     values: [
       { title: "Creativity", description: "Every design is custom-crafted to match your unique vision and theme." },
       { title: "Quality", description: "We use only premium-grade balloons and professional techniques for lasting beauty." },
@@ -35,7 +35,7 @@ export const DEFAULT_CONTENT = {
   },
   contact: {
     title: "Let's Create Something Amazing",
-    subtitle: "Ready to transform your event with stunning balloon decorations? We'd love to hear about your vision!",
+    subtitle: "Planning balloon decor in Kansas City, Overland Park, Olathe, Lee's Summit, or the surrounding metro? We'd love to hear about your event.",
     email: "hello@ballooncraftkc.com",
     phone: "(816) 555-0123",
     address: "Kansas City, MO Metro Area",
@@ -51,12 +51,12 @@ export const DEFAULT_CONTENT = {
   },
   testimonials: {
     title: "What Our Clients Say",
-    subtitle: "Don't just take our word for it — hear from the people who've experienced the magic!",
+    subtitle: "Reviews from BalloonCraft KC clients across birthdays, showers, weddings, school events, brand activations, and corporate installs.",
     bg_image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&auto=format&fit=crop',
   },
   projects: {
-    title: "Our Projects",
-    subtitle: "Browse through our portfolio of balloon installations and event decorations. Every project tells a story of creativity and celebration.",
+    title: "Portfolio, Announcements & Updates",
+    subtitle: "Browse BalloonCraft KC installs, launch announcements, event highlights, and business updates from weddings, birthdays, showers, schools, stores, and corporate events across the Kansas City metro.",
     categories_label: "Filter by Category",
   },
   privacy: {

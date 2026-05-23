@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'ballooncraftkc.com';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'www.ballooncraftkc.com';
   const baseUrl = `${protocol}://${host}`;
 
   const body = [

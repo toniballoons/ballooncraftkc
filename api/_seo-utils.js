@@ -3,7 +3,7 @@ import { DEFAULT_CONTENT } from '../src/lib/siteDefaults.js';
 
 export function getBaseUrl(req) {
   const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'ballooncraftkc.com';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'www.ballooncraftkc.com';
   return `${protocol}://${host}`;
 }
 

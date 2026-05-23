@@ -15,7 +15,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
-const DOMAIN = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
+const DOMAIN = typeof window !== 'undefined' ? window.location.hostname : 'www.ballooncraftkc.com';
 
 export default function Projects() {
   const { content } = useSiteContent('projects');
@@ -31,18 +31,26 @@ export default function Projects() {
   // 9.3 — Canonical + OG meta tags
   useEffect(() => {
     const canonical = formatCanonicalUrl(DOMAIN, '/projects');
+    const pageTitle = 'Kansas City Balloon Portfolio, Announcements & Updates | BalloonCraft KC';
+    const description = content.subtitle || 'Browse BalloonCraft KC portfolio entries, launch announcements, event installs, and business updates from across Kansas City, Overland Park, Olathe, Lee\'s Summit, and the surrounding metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
 
-    const setMeta = (prop, val) => {
-      let el = document.querySelector(`meta[property="${prop}"]`);
-      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+    document.title = pageTitle;
+
+    const setMeta = (attr, prop, val) => {
+      let el = document.querySelector(`meta[${attr}="${prop}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, prop); document.head.appendChild(el); }
       el.content = val;
     };
-    setMeta('og:title', content.title || 'Portfolio — BalloonCraft');
-    setMeta('og:description', content.subtitle || 'Browse our balloon decoration portfolio.');
-    setMeta('og:url', canonical);
+    setMeta('property', 'og:title', pageTitle);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:url', canonical);
+    setMeta('property', 'og:type', 'website');
+    setMeta('name', 'description', description);
+    setMeta('name', 'twitter:title', pageTitle);
+    setMeta('name', 'twitter:description', description);
 
     return () => {
       const el = document.querySelector('link[rel="canonical"]');
@@ -88,6 +96,11 @@ export default function Projects() {
 
       <section className="py-12 bg-white content-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[1.75rem] border border-border/60 bg-muted/30 p-6 mb-8">
+            <p className="text-muted-foreground leading-relaxed">
+              Explore a mix of real BalloonCraft KC installs, launch notes, event highlights, and business updates from across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, and nearby metro venues. Use the filters to zero in on balloon garlands, arches, walls, backdrops, custom installs, and the kinds of events or announcements that match what you want to see.
+            </p>
+          </div>
 
           {/* Search */}
           <div className="relative max-w-md mb-6">
@@ -95,7 +108,7 @@ export default function Projects() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="project-search"
-              placeholder="Search portfolio..."
+              placeholder="Search portfolio, announcements, and updates..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="pl-10 rounded-full"
@@ -179,7 +192,7 @@ export default function Projects() {
 
           {/* Results count */}
           <p className="text-sm text-muted-foreground mb-6" aria-live="polite">
-            {filtered.length} {filtered.length === 1 ? 'post' : 'posts'}{hasFilters ? ' matching your filters' : ''}
+            {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'}{hasFilters ? ' matching your filters' : ''}
           </p>
 
           {/* Grid */}
@@ -187,7 +200,7 @@ export default function Projects() {
             <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">Loading portfolio...</div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">
-              <p className="mb-3">No posts found matching your filters.</p>
+              <p className="mb-3">No entries found matching your filters.</p>
               {hasFilters && <button type="button" onClick={clearFilters} className="text-primary underline text-sm">Clear filters</button>}
             </div>
           ) : (
@@ -232,7 +245,7 @@ export default function Projects() {
                           )}
                         </div>
                         <div className="mt-4 flex items-center text-primary font-semibold text-sm">
-                          View Post <ArrowRight className="w-4 h-4 ml-1" />
+                          View Entry <ArrowRight className="w-4 h-4 ml-1" />
                         </div>
                       </div>
                     </div>

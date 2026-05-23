@@ -2,16 +2,22 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import * as Project from '@/entities/Project';
 import * as Testimonial from '@/entities/Testimonial';
+import { LOCAL_HOME_FAQS, LOCAL_SERVICE_AREAS, formatCanonicalUrl } from '@/lib/seo';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Star, ArrowRight, Sparkles, PartyPopper, Palette, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
 const ICON_MAP = [PartyPopper, Palette, Calendar];
+const HOME_TITLE = 'Kansas City Balloon Decor, Garlands & Event Backdrops | BalloonCraft KC';
+const HOME_DESCRIPTION = 'BalloonCraft KC creates custom balloon arches, garlands, walls, marquees, and event backdrops for weddings, birthdays, showers, school events, and corporate launches across Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, Prairie Village, Shawnee, and nearby Johnson County venues.';
+const HOME_KEYWORDS = 'Kansas City balloon decor, balloon garland Kansas City, balloon arch Kansas City, Overland Park balloon decor, Olathe balloon arch, Lee\'s Summit balloon garland, balloon wall Kansas City, corporate balloon decor Kansas City, wedding balloon decor Kansas City';
 
 function HeroSection({ content }) {
   const { theme } = useTheme();
@@ -113,7 +119,7 @@ function FeaturedProjectsSection({ content }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center mb-16">
           <h2 className="font-display text-4xl mb-4">{content.featured_projects_title || 'Featured Projects'}</h2>
-          <p className="text-muted-foreground text-lg">{content.featured_projects_subtitle || 'A glimpse of our recent balloon installations'}</p>
+          <p className="text-muted-foreground text-lg">{content.featured_projects_subtitle || 'A blend of recent installs, standout celebrations, and BalloonCraft KC updates'}</p>
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {projects.map((project, i) => (
@@ -137,7 +143,7 @@ function FeaturedProjectsSection({ content }) {
         </div>
         <div className="text-center mt-12">
           <Button asChild variant="outline" size="lg" className="rounded-full font-bold">
-            <Link to="/projects">View All Projects <ArrowRight className="w-4 h-4 ml-2" /></Link>
+            <Link to="/projects">See All Work & Updates <ArrowRight className="w-4 h-4 ml-2" /></Link>
           </Button>
         </div>
       </div>
@@ -186,6 +192,153 @@ function TestimonialsPreview({ content }) {
   );
 }
 
+function ServiceAreaSection() {
+  return (
+    <section className="py-20 bg-background">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center max-w-4xl mx-auto">
+          <h2 className="font-display text-4xl mb-4">Serving Kansas City celebrations across the metro</h2>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            BalloonCraft KC designs custom balloon decor for weddings, birthdays, baby showers, graduations, school events, brand activations, grand openings, and corporate installs throughout the Kansas City metro. We regularly serve venues, storefronts, homes, and event spaces across Missouri and Johnson County.
+          </p>
+        </motion.div>
+        <div className="flex flex-wrap justify-center gap-3 mt-10">
+          {LOCAL_SERVICE_AREAS.map((area) => (
+            <span key={area} className="rounded-full border border-border/70 bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-sm">
+              {area}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FaqSection() {
+  return (
+    <section className="py-20 bg-muted/30">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center mb-14">
+          <h2 className="font-display text-4xl mb-4">Kansas City balloon decor FAQs</h2>
+          <p className="text-muted-foreground text-lg">
+            Helpful answers for clients planning custom balloon installs, event backdrops, and statement decor in the KC metro.
+          </p>
+        </motion.div>
+        <div className="grid gap-5">
+          {LOCAL_HOME_FAQS.map((faq, index) => (
+            <motion.article
+              key={faq.question}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              className="rounded-[1.75rem] border border-border/70 bg-white p-6 shadow-sm"
+            >
+              <h3 className="font-bold text-lg">{faq.question}</h3>
+              <p className="text-muted-foreground leading-relaxed mt-3">{faq.answer}</p>
+            </motion.article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NewsletterSection() {
+  const { theme } = useTheme();
+  const [form, setForm] = React.useState({ firstName: '', email: '' });
+  const [submitted, setSubmitted] = React.useState(false);
+
+  const signupMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/newsletter-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          email: form.email,
+          source: 'homepage',
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to sign up right now.');
+      return data;
+    },
+    onSuccess: () => {
+      setSubmitted(true);
+      setForm({ firstName: '', email: '' });
+      toast.success('You are subscribed. Check your inbox for confirmation.');
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  return (
+    <section className="py-20 bg-background">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          transition={{ duration: 0.6 }}
+          className="rounded-[2rem] border shadow-xl overflow-hidden"
+          style={{ background: theme?.hero?.bg || 'linear-gradient(135deg, #ec4899, #f59e0b)' }}
+        >
+          <div className="bg-slate-950/45 backdrop-blur-sm px-6 py-12 sm:px-10 lg:px-12">
+            <div className="max-w-3xl">
+              <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-bold text-white">
+                <Sparkles className="w-4 h-4" />
+                BalloonCraft KC updates
+              </p>
+              <h2 className="font-display text-4xl text-white mt-5">Get launch news, event inspiration, and seasonal ideas</h2>
+              <p className="text-white/80 text-lg mt-4">
+                Join the BalloonCraft KC email list for tasteful updates only. No laggy unsubscribe forms, no waiting weeks. If you ever want out, it is immediate.
+              </p>
+            </div>
+
+            <div className="mt-8 rounded-[1.75rem] bg-white p-5 sm:p-6">
+              {submitted ? (
+                <div className="text-center py-6">
+                  <h3 className="font-display text-2xl">You are on the list</h3>
+                  <p className="text-muted-foreground mt-3">Your confirmation email is on the way.</p>
+                </div>
+              ) : (
+                <form
+                  className="grid gap-4 md:grid-cols-[0.8fr_1fr_auto]"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    signupMutation.mutate();
+                  }}
+                >
+                  <Input
+                    value={form.firstName}
+                    onChange={(event) => setForm({ ...form, firstName: event.target.value })}
+                    placeholder="First name"
+                    className="h-12 rounded-full"
+                  />
+                  <Input
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(event) => setForm({ ...form, email: event.target.value })}
+                    placeholder="Email address"
+                    className="h-12 rounded-full"
+                  />
+                  <Button type="submit" className="h-12 rounded-full px-8 font-bold" disabled={signupMutation.isPending || !form.email}>
+                    {signupMutation.isPending ? 'Joining...' : 'Join the list'}
+                  </Button>
+                </form>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 function CTASection() {
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #e91e63, #ff5722)';
@@ -207,12 +360,53 @@ function CTASection() {
 export default function Home() {
   const { content } = useSiteContent('hero');
 
+  React.useEffect(() => {
+    const domain = typeof window !== 'undefined' ? window.location.hostname : 'www.ballooncraftkc.com';
+    const canonical = formatCanonicalUrl(domain, '/');
+    const setMeta = (selector, attr, key, value) => {
+      let el = document.querySelector(selector);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', value);
+    };
+
+    document.title = HOME_TITLE;
+
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonical);
+
+    setMeta('meta[name="description"]', 'name', 'description', HOME_DESCRIPTION);
+    setMeta('meta[name="keywords"]', 'name', 'keywords', HOME_KEYWORDS);
+    setMeta('meta[property="og:title"]', 'property', 'og:title', HOME_TITLE);
+    setMeta('meta[property="og:description"]', 'property', 'og:description', HOME_DESCRIPTION);
+    setMeta('meta[property="og:url"]', 'property', 'og:url', canonical);
+    setMeta('meta[property="og:type"]', 'property', 'og:type', 'website');
+    if (content?.image) {
+      setMeta('meta[property="og:image"]', 'property', 'og:image', content.image);
+      setMeta('meta[name="twitter:image"]', 'name', 'twitter:image', content.image);
+    }
+    setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', HOME_TITLE);
+    setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', HOME_DESCRIPTION);
+    setMeta('meta[name="twitter:card"]', 'name', 'twitter:card', 'summary_large_image');
+  }, [content]);
+
   return (
     <>
       <HeroSection content={content} />
       <ServicesSection content={content} />
+      <ServiceAreaSection />
       <FeaturedProjectsSection content={content} />
       <TestimonialsPreview content={content} />
+      <FaqSection />
+      <NewsletterSection />
       <CTASection />
     </>
   );

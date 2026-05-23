@@ -44,6 +44,42 @@ export const GEO_CITIES = [
   'Other',
 ];
 
+export const LOCAL_SERVICE_AREAS = [
+  'Kansas City, MO',
+  'Overland Park, KS',
+  'Olathe, KS',
+  "Lee's Summit, MO",
+  'Lenexa, KS',
+  'Leawood, KS',
+  'Prairie Village, KS',
+  'Shawnee, KS',
+  'Independence, MO',
+  'Johnson County, KS',
+];
+
+export const LOCAL_HOME_FAQS = [
+  {
+    question: 'How far ahead should I book balloon decor in Kansas City?',
+    answer: 'For weddings, corporate installs, and large custom builds in the Kansas City metro, booking several weeks ahead is best. For smaller garlands or simple installs, earlier is still better so your event date stays open.',
+  },
+  {
+    question: 'Do you travel outside Kansas City for balloon arches and garlands?',
+    answer: 'Yes. BalloonCraft KC serves Kansas City, Overland Park, Olathe, Lee’s Summit, Lenexa, Leawood, Prairie Village, Shawnee, Independence, and nearby Johnson County venues.',
+  },
+  {
+    question: 'Can you handle corporate events, grand openings, and branded installs?',
+    answer: 'Yes. We design balloon walls, branded backdrops, entry installations, photo moments, and launch-day decor for stores, offices, schools, teams, and community events.',
+  },
+  {
+    question: 'Do you offer custom balloon backdrops for birthdays, showers, and weddings?',
+    answer: 'Yes. We create custom balloon garlands, arches, walls, backdrops, marquees, and other installs for birthdays, baby showers, weddings, graduations, holiday parties, and more.',
+  },
+  {
+    question: 'How long do balloon installations last?',
+    answer: 'Indoor installs usually hold up much longer than outdoor installs. Outdoor balloon decor depends on heat, wind, direct sun, and setup timing, so we plan designs around Kansas City weather and venue conditions.',
+  },
+];
+
 // ── Slug utilities ───────────────────────────────────────────
 
 /**
@@ -181,26 +217,46 @@ export function resolveOgImage(post, siteDefaultOg = '') {
  * Build a BlogPosting + LocalBusiness JSON-LD object for a post page.
  */
 export function buildJsonLd(post, siteContent = {}) {
-  const businessName = siteContent?.navbar?.brand || 'BalloonCraft';
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://ballooncraftkc.com';
+  const businessName = siteContent?.navbar?.brand || siteContent?.navbar?.logo_text || 'BalloonCraft KC';
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.ballooncraftkc.com';
   const locality = post.geo_city || 'Kansas City';
+  const keywords = [
+    ...(post.service_types || []),
+    ...(post.event_types || []),
+    post.geo_city,
+    ...(post.tags || []),
+  ].filter(Boolean);
 
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
+    '@id': `${siteUrl}/projects/${post.slug}#article`,
     headline: post.title || '',
     description: post.meta_description || post.excerpt || '',
     image: resolveOgImage(post),
     datePublished: post.publish_date || post.created_at || '',
     dateModified: post.updated_at || post.created_at || '',
+    mainEntityOfPage: `${siteUrl}/projects/${post.slug}`,
+    articleSection: post.category || 'Balloon Decor',
+    keywords: keywords.join(', '),
+    about: keywords.map((keyword) => ({
+      '@type': 'Thing',
+      name: keyword,
+    })),
     author: {
       '@type': 'Person',
       name: post.author || businessName,
     },
+    isPartOf: {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}#website`,
+      url: siteUrl,
+      name: businessName,
+    },
     publisher: {
       '@type': 'LocalBusiness',
+      '@id': `${siteUrl}#localbusiness`,
       name: businessName,
-      '@id': siteUrl,
       url: siteUrl,
       address: {
         '@type': 'PostalAddress',
@@ -320,6 +376,45 @@ export function appendGeoToTitle(metaTitle, geoCity) {
 // ── Sitemap builder ──────────────────────────────────────────
 
 const STATIC_PAGES = ['/', '/about', '/projects', '/testimonials', '/contact'];
+const STATIC_PAGE_DEFS = [
+  { path: '/', pageKey: 'hero', changefreq: 'weekly', priority: '1.0' },
+  { path: '/about', pageKey: 'about', changefreq: 'monthly', priority: '0.8' },
+  { path: '/projects', pageKey: 'projects', changefreq: 'weekly', priority: '0.9' },
+  { path: '/testimonials', pageKey: 'testimonials', changefreq: 'monthly', priority: '0.7' },
+  { path: '/contact', pageKey: 'contact', changefreq: 'monthly', priority: '0.8' },
+  { path: '/privacy', pageKey: 'privacy', changefreq: 'yearly', priority: '0.3' },
+  { path: '/terms', pageKey: 'terms', changefreq: 'yearly', priority: '0.3' },
+  { path: '/legal', pageKey: 'legal', changefreq: 'yearly', priority: '0.3' },
+];
+
+function escapeXml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function formatAbsoluteUrl(baseUrl, path) {
+  const normalizedBase = String(baseUrl || '').replace(/\/$/, '');
+  if (!path || path === '/') return `${normalizedBase}/`;
+  return `${normalizedBase}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
+function formatDateOnly(value) {
+  if (!value) return new Date().toISOString().split('T')[0];
+  return String(value).split('T')[0];
+}
+
+function createUrlNode({ loc, lastmod, changefreq, priority, images = [] }) {
+  const imageNodes = images
+    .filter(Boolean)
+    .map((imageUrl) => `\n    <image:image>\n      <image:loc>${escapeXml(imageUrl)}</image:loc>\n    </image:image>`)
+    .join('');
+
+  return `  <url>\n    <loc>${escapeXml(loc)}</loc>\n    <lastmod>${escapeXml(lastmod)}</lastmod>\n    <changefreq>${escapeXml(changefreq)}</changefreq>\n    <priority>${escapeXml(priority)}</priority>${imageNodes}\n  </url>`;
+}
 
 /**
  * Generate a sitemap XML string from published posts and static pages.
@@ -330,21 +425,74 @@ export function generateSitemapXml(posts, domain) {
       loc: formatCanonicalUrl(domain, path),
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'weekly',
+      priority: path === '/' ? '1.0' : '0.8',
     })),
     ...posts.map(p => ({
       loc: formatCanonicalUrl(domain, `/projects/${p.slug}`),
       lastmod: (p.updated_at || p.created_at || new Date().toISOString()).split('T')[0],
       changefreq: 'monthly',
+      priority: '0.8',
     })),
   ];
 
   const urlEntries = urls
-    .map(
-      u => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n  </url>`
-    )
+    .map((u) => createUrlNode(u))
     .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries}\n</urlset>`;
+}
+
+export function generateSitemapIndexXml(baseUrl) {
+  const normalizedBase = String(baseUrl || '').replace(/\/$/, '');
+  const entries = [
+    `${normalizedBase}/sitemaps/pages.xml`,
+    `${normalizedBase}/sitemaps/projects.xml`,
+  ]
+    .map((loc) => `  <sitemap>\n    <loc>${escapeXml(loc)}</loc>\n    <lastmod>${formatDateOnly()}</lastmod>\n  </sitemap>`)
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</sitemapindex>`;
+}
+
+export function generateStaticPageSitemapXml(baseUrl, pageUpdates = {}, pageContent = {}) {
+  const urls = STATIC_PAGE_DEFS.map((page) => {
+    const imageCandidate = page.pageKey === 'hero'
+      ? pageContent?.hero?.image
+      : pageContent?.[page.pageKey]?.image;
+
+    return {
+      loc: formatAbsoluteUrl(baseUrl, page.path),
+      lastmod: formatDateOnly(pageUpdates[page.pageKey]),
+      changefreq: page.changefreq,
+      priority: page.priority,
+      images: imageCandidate ? [imageCandidate] : [],
+    };
+  });
+
+  const urlEntries = urls.map((url) => createUrlNode(url)).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urlEntries}\n</urlset>`;
+}
+
+export function generateProjectSitemapXml(projects = [], baseUrl) {
+  const urls = projects.map((project) => {
+    const images = [
+      project.og_image,
+      project.featured_image,
+      ...(Array.isArray(project.gallery_images_meta) ? project.gallery_images_meta.map((image) => image?.url) : []),
+      ...(Array.isArray(project.gallery_images) ? project.gallery_images : []),
+    ].filter(Boolean);
+
+    return {
+      loc: formatAbsoluteUrl(baseUrl, `/projects/${project.slug}`),
+      lastmod: formatDateOnly(project.updated_at || project.publish_date || project.created_at),
+      changefreq: 'monthly',
+      priority: '0.8',
+      images: [...new Set(images)].slice(0, 8),
+    };
+  });
+
+  const urlEntries = urls.map((url) => createUrlNode(url)).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urlEntries}\n</urlset>`;
 }
 
 // ── Duplicate post helper ────────────────────────────────────
