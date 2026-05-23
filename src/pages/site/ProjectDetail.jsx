@@ -1,18 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import * as Project from '@/entities/Project';
-import { useSiteContent } from '@/lib/useSiteContent';
 import {
-  buildBreadcrumbJsonLd,
   buildJsonLd,
-  buildLocalBusinessJsonLd,
-  buildSeoKeywordSet,
   resolveOgImage,
   appendGeoToTitle,
   computeRelatedPosts,
 } from '@/lib/seo';
-import { usePageSeo } from '@/lib/usePageSeo';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,10 +15,45 @@ import { Calendar, MapPin, ArrowLeft, User, Quote } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 
+const DOMAIN = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
+
+// ── Head tag injection helpers ────────────────────────────────
+
+function setMeta(name, content, attr = 'name') {
+  if (!content) return;
+  let el = document.querySelector(`meta[${attr}="${name}"]`);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, name);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+}
+
+function setLink(rel, href) {
+  if (!href) return;
+  let el = document.querySelector(`link[rel="${rel}"]`);
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', rel);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', href);
+}
+
+function setJsonLd(id, data) {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('script');
+    el.setAttribute('type', 'application/ld+json');
+    el.setAttribute('id', id);
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(data);
+}
+
 export default function ProjectDetail() {
   const { slug } = useParams();
-  const { content: contactContent } = useSiteContent('contact');
-  const { content: footerContent } = useSiteContent('footer');
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['project-detail', slug],
@@ -37,50 +67,44 @@ export default function ProjectDetail() {
   });
 
   const project = projects[0];
-  const seoTitle = project
-    ? `${appendGeoToTitle(project.meta_title || project.title, project.geo_city)} | BalloonCraft KC`
-    : 'Balloon Decor Project | BalloonCraft KC';
-  const description = project?.meta_description || project?.excerpt || 'Explore custom balloon decor installations from BalloonCraft KC.';
-  const ogImage = project ? resolveOgImage(project, '/logo.png') : '/logo.png';
-  const projectKeywords = project
-    ? buildSeoKeywordSet(
-        project.focus_keyword ? [project.focus_keyword] : [],
-        project.service_types || [],
-        project.event_types || [],
-        project.tags || [],
-        project.geo_city ? [project.geo_city] : []
-      )
-    : [];
 
-  usePageSeo({
-    title: seoTitle,
-    description,
-    path: project ? `/projects/${project.slug}` : `/projects/${slug}`,
-    image: ogImage,
-    type: 'article',
-    keywords: projectKeywords,
-    schema: project ? [
-      buildBreadcrumbJsonLd([
-        { name: 'Home', path: '/' },
-        { name: 'Projects', path: '/projects' },
-        { name: project.title, path: `/projects/${project.slug}` },
-      ]),
-      buildJsonLd(project, {
-        footer: footerContent,
-      }),
-      buildLocalBusinessJsonLd({
-        title: 'BalloonCraft KC',
-        description,
-        path: `/projects/${project.slug}`,
-        image: ogImage,
-        contactContent,
-        footerContent,
-        serviceTypes: project.service_types || [],
-        eventTypes: project.event_types || [],
-        areaServed: project.geo_city ? [project.geo_city] : undefined,
-      }),
-    ] : [],
-  });
+  // ── 8.1 — Inject SEO head tags ────────────────────────────
+  useEffect(() => {
+    if (!project) return;
+
+    const ogImage = resolveOgImage(project);
+    const pageTitle = appendGeoToTitle(project.meta_title || project.title, project.geo_city);
+    const description = project.meta_description || project.excerpt || '';
+    const canonicalUrl = `https://${DOMAIN}/projects/${project.slug}`;
+
+    // Title
+    document.title = pageTitle;
+
+    // Canonical
+    setLink('canonical', canonicalUrl);
+
+    // OG tags
+    setMeta('og:title', pageTitle, 'property');
+    setMeta('og:description', description, 'property');
+    setMeta('og:image', ogImage, 'property');
+    setMeta('og:url', canonicalUrl, 'property');
+    setMeta('og:type', 'article', 'property');
+
+    // Standard meta
+    setMeta('description', description);
+
+    // JSON-LD
+    const jsonLd = buildJsonLd(project, {});
+    setJsonLd('post-jsonld', jsonLd);
+
+    return () => {
+      // Clean up on unmount
+      const canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) canonical.remove();
+      const jsonLdEl = document.getElementById('post-jsonld');
+      if (jsonLdEl) jsonLdEl.remove();
+    };
+  }, [project]);
 
   const relatedPosts = project ? computeRelatedPosts(project, allProjects) : [];
 
@@ -165,12 +189,6 @@ export default function ProjectDetail() {
           )}
         </div>
 
-        {project.excerpt && (
-          <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-            {project.excerpt}
-          </p>
-        )}
-
         {/* Content */}
         {project.content && (
           <div className="prose prose-lg max-w-none mb-12" dangerouslySetInnerHTML={{ __html: project.content }} />
@@ -205,9 +223,8 @@ export default function ProjectDetail() {
                 >
                   <img
                     src={item.url || item}
-                    alt={`${project.title} balloon decor in ${project.geo_city || 'Kansas City'} photo ${i + 1}`}
+                    alt={`${project.title} gallery ${i + 1}`}
                     className="rounded-2xl shadow-lg w-full aspect-square object-cover"
-                    decoding="async"
                   />
                   {item.label && (
                     <span className={`absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full text-white ${item.label === 'before' ? 'bg-blue-500' : 'bg-green-500'}`}>

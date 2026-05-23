@@ -1,18 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { usePageSeo } from '@/lib/usePageSeo';
 
 export default function PageNotFound() {
     const location = useLocation();
     const pageName = location.pathname.substring(1);
     const { isAuthenticated } = useAuth();
-
-    usePageSeo({
-        title: 'Page Not Found | BalloonCraft KC',
-        description: 'The requested page could not be found.',
-        path: location.pathname || '/404',
-        noindex: true,
-    });
 
     return (
         <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-pink-50 via-yellow-50 to-blue-50">

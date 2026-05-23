@@ -1,20 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import * as Project from '@/entities/Project';
-import {
-  SERVICE_TYPES,
-  EVENT_TYPES,
-  GEO_CITIES,
-  PRIMARY_EVENT_PHRASES,
-  PRIMARY_SERVICE_PHRASES,
-  buildBreadcrumbJsonLd,
-  buildLocalBusinessJsonLd,
-  buildProjectCollectionJsonLd,
-  buildSeoKeywordSet,
-  buildServiceJsonLd,
-} from '@/lib/seo';
-import { usePageSeo } from '@/lib/usePageSeo';
+import { SERVICE_TYPES, EVENT_TYPES, GEO_CITIES, formatCanonicalUrl } from '@/lib/seo';
 import { getHeroTextStyles } from '@/lib/accessibility';
 
 import { useSiteContent } from '@/lib/useSiteContent';
@@ -27,25 +15,10 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
-const PORTFOLIO_KEYWORDS = buildSeoKeywordSet(
-  PRIMARY_SERVICE_PHRASES,
-  PRIMARY_EVENT_PHRASES,
-  [
-    'balloon decor portfolio Kansas City',
-    'balloon arch portfolio Kansas City',
-    'balloon garland portfolio Kansas City',
-    'balloon wall portfolio Kansas City',
-    'Kansas City event decorations portfolio',
-    'balloon decor Overland Park portfolio',
-    'balloon decorator Olathe portfolio',
-  ]
-);
-const SEARCH_SUGGESTIONS = ['Balloon arch', 'Balloon garland', 'Wedding', 'Corporate', 'Grand opening', 'Overland Park'];
+const DOMAIN = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
 
 export default function Projects() {
   const { content } = useSiteContent('projects');
-  const { content: contactContent } = useSiteContent('contact');
-  const { content: footerContent } = useSiteContent('footer');
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #00b894, #74b9ff)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
@@ -54,6 +27,28 @@ export default function Projects() {
   const [serviceFilter, setServiceFilter] = useState('');
   const [eventFilter, setEventFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
+
+  // 9.3 — Canonical + OG meta tags
+  useEffect(() => {
+    const canonical = formatCanonicalUrl(DOMAIN, '/projects');
+    let linkEl = document.querySelector('link[rel="canonical"]');
+    if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
+    linkEl.href = canonical;
+
+    const setMeta = (prop, val) => {
+      let el = document.querySelector(`meta[property="${prop}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+      el.content = val;
+    };
+    setMeta('og:title', content.title || 'Portfolio — BalloonCraft');
+    setMeta('og:description', content.subtitle || 'Browse our balloon decoration portfolio.');
+    setMeta('og:url', canonical);
+
+    return () => {
+      const el = document.querySelector('link[rel="canonical"]');
+      if (el) el.remove();
+    };
+  }, [content]);
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['projects-public'],
@@ -64,12 +59,7 @@ export default function Projects() {
   const filtered = projects.filter(p => {
     const searchMatch = !search ||
       p.title?.toLowerCase().includes(search.toLowerCase()) ||
-      p.excerpt?.toLowerCase().includes(search.toLowerCase()) ||
-      (p.service_types || []).some(t => t.toLowerCase().includes(search.toLowerCase())) ||
-      (p.event_types || []).some(t => t.toLowerCase().includes(search.toLowerCase())) ||
-      (p.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase())) ||
-      p.geo_city?.toLowerCase().includes(search.toLowerCase()) ||
-      p.event_location?.toLowerCase().includes(search.toLowerCase());
+      p.tags?.some(t => t.toLowerCase().includes(search.toLowerCase()));
     const serviceMatch = !serviceFilter || (p.service_types || []).includes(serviceFilter);
     const eventMatch = !eventFilter || (p.event_types || []).includes(eventFilter);
     const cityMatch = !cityFilter || p.geo_city === cityFilter;
@@ -85,40 +75,6 @@ export default function Projects() {
     setCityFilter('');
   };
 
-  const seoTitle = 'Balloon Decor Portfolio | Kansas City Arches, Garlands & Backdrops';
-  const seoDescription = 'Browse BalloonCraft KC portfolio examples featuring balloon arches, garlands, walls, and custom installs across Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, and nearby metro events.';
-
-  usePageSeo({
-    title: seoTitle,
-    description: seoDescription,
-    path: '/projects',
-    keywords: PORTFOLIO_KEYWORDS,
-    schema: [
-      buildBreadcrumbJsonLd([
-        { name: 'Home', path: '/' },
-        { name: 'Projects', path: '/projects' },
-      ]),
-      buildLocalBusinessJsonLd({
-        title: 'BalloonCraft KC',
-        description: seoDescription,
-        path: '/projects',
-        contactContent,
-        footerContent,
-      }),
-      buildServiceJsonLd({
-        serviceName: 'Balloon decor portfolio and installation examples',
-        description: seoDescription,
-        path: '/projects',
-        footerContent,
-      }),
-      buildProjectCollectionJsonLd(projects, {
-        title: content.title || 'Our Projects',
-        description: seoDescription,
-        path: '/projects',
-      }),
-    ],
-  });
-
   return (
     <>
       <section className="relative py-24 overflow-hidden" style={{ background: heroBg }}>
@@ -132,11 +88,6 @@ export default function Projects() {
 
       <section className="py-12 bg-white content-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mb-8">
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              Explore balloon decor examples from across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, Shawnee, and nearby metro communities. This portfolio highlights balloon arches, balloon garlands, columns, walls, and event backdrops for weddings, birthday parties, baby showers, graduation celebrations, and corporate events.
-            </p>
-          </div>
 
           {/* Search */}
           <div className="relative max-w-md mb-6">
@@ -144,25 +95,11 @@ export default function Projects() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="project-search"
-              placeholder="Search balloon arches, garlands, weddings, corporate events..."
+              placeholder="Search portfolio..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="pl-10 rounded-full"
             />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 mb-8">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Popular searches</span>
-            {SEARCH_SUGGESTIONS.map(suggestion => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => setSearch(suggestion)}
-                className="rounded-full border border-border/50 bg-muted/15 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-              >
-                {suggestion}
-              </button>
-            ))}
           </div>
 
           {/* 9.1 — Service Type filter chips */}
@@ -242,7 +179,7 @@ export default function Projects() {
 
           {/* Results count */}
           <p className="text-sm text-muted-foreground mb-6" aria-live="polite">
-            {filtered.length} {filtered.length === 1 ? 'project' : 'projects'}{hasFilters ? ' matching your filters' : ''}
+            {filtered.length} {filtered.length === 1 ? 'post' : 'posts'}{hasFilters ? ' matching your filters' : ''}
           </p>
 
           {/* Grid */}
@@ -250,7 +187,7 @@ export default function Projects() {
             <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">Loading portfolio...</div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground" role="status" aria-live="polite">
-              <p className="mb-3">No projects found matching your filters.</p>
+              <p className="mb-3">No posts found matching your filters.</p>
               {hasFilters && <button type="button" onClick={clearFilters} className="text-primary underline text-sm">Clear filters</button>}
             </div>
           ) : (

@@ -1,72 +1,36 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
-import {
-  GEO_CITIES,
-  PRIMARY_EVENT_PHRASES,
-  PRIMARY_SERVICE_PHRASES,
-  buildBreadcrumbJsonLd,
-  buildLocalBusinessJsonLd,
-  buildSeoKeywordSet,
-  buildServiceJsonLd,
-} from '@/lib/seo';
-import { usePageSeo } from '@/lib/usePageSeo';
+import { formatCanonicalUrl } from '@/lib/seo';
 import { getHeroTextStyles } from '@/lib/accessibility';
 import { motion } from 'framer-motion';
-import { Heart, Award, Lightbulb, Clock, MapPin, Sparkles, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Heart, Award, Lightbulb, Clock } from 'lucide-react';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
 const iconMap = [Lightbulb, Award, Heart, Clock];
-const SERVICE_CITIES = GEO_CITIES.filter(city => city !== 'Other');
-const ABOUT_KEYWORDS = buildSeoKeywordSet(PRIMARY_SERVICE_PHRASES, PRIMARY_EVENT_PHRASES, [
-  'Kansas City balloon company',
-  'balloon decorator Kansas City',
-  'event balloon artist Kansas City',
-  'custom balloon installations Kansas City',
-  'balloon decor Overland Park',
-  'balloon installer Olathe',
-]);
 
 export default function About() {
   const { content } = useSiteContent('about');
-  const { content: contactContent } = useSiteContent('contact');
-  const { content: footerContent } = useSiteContent('footer');
   const { theme } = useTheme();
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #a29bfe, #fd79a8)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
-  const seoTitle = 'About BalloonCraft KC | Kansas City Balloon Decor Team';
-  const seoDescription = 'Learn about BalloonCraft KC, a balloon decor studio serving Kansas City, Overland Park, Olathe, Lee\'s Summit, and nearby metro events with custom arches, garlands, walls, and installations.';
+  const domain = typeof window !== 'undefined' ? window.location.hostname : 'ballooncraftkc.com';
 
-  usePageSeo({
-    title: seoTitle,
-    description: seoDescription,
-    path: '/about',
-    image: content.image || '/logo.png',
-    keywords: ABOUT_KEYWORDS,
-    schema: [
-      buildBreadcrumbJsonLd([
-        { name: 'Home', path: '/' },
-        { name: 'About', path: '/about' },
-      ]),
-      buildLocalBusinessJsonLd({
-        title: 'BalloonCraft KC',
-        description: seoDescription,
-        path: '/about',
-        image: content.image || '/logo.png',
-        contactContent,
-        footerContent,
-      }),
-      buildServiceJsonLd({
-        serviceName: 'Kansas City balloon decor team and installation services',
-        description: seoDescription,
-        path: '/about',
-        image: content.image || '/logo.png',
-        footerContent,
-      }),
-    ],
-  });
+  useEffect(() => {
+    const canonical = formatCanonicalUrl(domain, '/about');
+    let linkEl = document.querySelector('link[rel="canonical"]');
+    if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
+    linkEl.href = canonical;
+    const setMeta = (prop, val) => {
+      let el = document.querySelector(`meta[property="${prop}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+      el.content = val;
+    };
+    setMeta('og:title', content.title || 'About Us — BalloonCraft');
+    setMeta('og:description', content.subtitle || 'Learn about our balloon decoration team in Kansas City.');
+    setMeta('og:url', canonical);
+    return () => { const el = document.querySelector('link[rel="canonical"]'); if (el) el.remove(); };
+  }, [content, domain]);
 
   return (
     <>
@@ -92,64 +56,8 @@ export default function About() {
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
             {content.image && (
-              <img src={content.image} alt="BalloonCraft KC custom event balloon decor team" className="rounded-3xl shadow-2xl w-full" decoding="async" />
+              <img src={content.image} alt="Our balloon crafting studio" className="rounded-3xl shadow-2xl w-full" />
             )}
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-muted/25 content-section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 items-start">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary mb-5">
-                <Sparkles className="w-4 h-4" aria-hidden="true" />
-                Built for Kansas City celebrations
-              </span>
-              <h2 className="font-display text-4xl mb-5">A local balloon decor team focused on thoughtful installs and easy event support</h2>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                We partner with families, planners, schools, venues, and brands that want custom balloon decor without guesswork. Our work spans intimate at-home celebrations, elegant wedding styling, school and graduation installs, and large-format corporate balloon displays for launches, galas, and grand openings.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  'Organic balloon arches and garlands customized to your venue and color palette',
-                  'Balloon walls, branded backdrops, and focal-point installs for photos and guest flow',
-                  'Delivery, setup, and installation support across the KC metro',
-                  'A collaborative design process for birthdays, showers, weddings, and business events',
-                ].map(item => (
-                  <div key={item} className="rounded-2xl border border-border/50 bg-white p-4 text-sm text-muted-foreground shadow-sm">
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[2rem] border border-border/50 bg-white p-8 shadow-sm">
-              <h3 className="font-display text-2xl mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" aria-hidden="true" />
-                Service area
-              </h3>
-              <p className="text-muted-foreground mb-4">We regularly design balloon installations for venues and homes throughout the Kansas City metro, including:</p>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {SERVICE_CITIES.map(city => (
-                  <span key={city} className="rounded-full border border-border/50 bg-muted/20 px-3 py-1 text-sm">
-                    {city}
-                  </span>
-                ))}
-              </div>
-              <h3 className="font-display text-2xl mb-4">Common events we style</h3>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p>Wedding receptions and bridal showers</p>
-                <p>Birthday parties, baby showers, and graduations</p>
-                <p>Corporate events, galas, ribbon cuttings, and grand openings</p>
-                <p>School events, community celebrations, and holiday parties</p>
-              </div>
-              <div className="mt-8">
-                <Button asChild className="rounded-full font-bold">
-                  <Link to="/contact">Plan Your Event <ArrowRight className="w-4 h-4 ml-2" /></Link>
-                </Button>
-              </div>
-            </div>
           </motion.div>
         </div>
       </section>
