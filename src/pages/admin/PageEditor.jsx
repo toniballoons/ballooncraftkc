@@ -40,6 +40,7 @@ import MessagesAdmin from '@/pages/admin/MessagesAdmin';
 import ThemeSettings from '@/pages/admin/ThemeSettings';
 import SiteAssets from '@/pages/admin/SiteAssets';
 import Help from '@/pages/admin/Help';
+import { ADMIN_CMS_PATH } from '@/lib/adminNavigation';
 
 const PAGE_KEYS = ['hero', 'about', 'contact', 'testimonials', 'projects', 'navbar', 'footer', 'privacy', 'terms', 'legal'];
 
@@ -466,9 +467,12 @@ export default function PageEditor() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl">Admin Workspace</h1>
+        <h1 className="font-display text-3xl">Site Management / CMS</h1>
         <p className="text-muted-foreground mt-2 max-w-4xl">
-          This is the single admin home for BalloonCraft KC. Site edits, clients, contracts, messages, portfolio updates, theme settings, and help all live here now.
+          This is the single admin home for BalloonCraft KC. Site edits, clients, contracts, invoices, messages, portfolio updates, theme settings, and help all live here now under one CMS workspace.
+        </p>
+        <p className="text-muted-foreground mt-2 max-w-4xl text-sm">
+          Use this address as the admin home going forward: <span className="font-semibold">{ADMIN_CMS_PATH}</span>
         </p>
       </div>
 

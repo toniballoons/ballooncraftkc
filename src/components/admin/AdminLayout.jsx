@@ -9,18 +9,18 @@ import { useAuth } from '@/lib/AuthContext';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { ensureAccessibleColor } from '@/lib/accessibility';
+import { ADMIN_CMS_HOME, getAdminPanelHref, isAdminCmsPath } from '@/lib/adminNavigation';
 
-const NAV_ITEMS = [
-  { label: 'Overview',         href: '/admin/pages?panel=overview',     icon: LayoutDashboard, panel: 'overview' },
-  { label: 'Site Content',     href: '/admin/pages?panel=content',      icon: Settings, panel: 'content' },
-  { label: 'Pages & Nav',      href: '/admin/pages?panel=manage-pages', icon: PanelsTopLeft, panel: 'manage-pages' },
-  { label: 'Portfolio / Blog', href: '/admin/pages?panel=projects',     icon: FileText, panel: 'projects' },
-  { label: 'Client Admin',     href: '/admin/pages?panel=clients',      icon: ScrollText, panel: 'clients' },
-  { label: 'Testimonials',     href: '/admin/pages?panel=testimonials', icon: Star, panel: 'testimonials' },
-  { label: 'Messages',         href: '/admin/pages?panel=messages',     icon: Mail, panel: 'messages' },
-  { label: 'Theme',            href: '/admin/pages?panel=theme',        icon: Palette, panel: 'theme' },
-  { label: 'Site Assets',      href: '/admin/pages?panel=site',         icon: Image, panel: 'site' },
-  { label: 'Help',             href: '/admin/pages?panel=help',         icon: HelpCircle, panel: 'help' },
+const CMS_PANEL_ITEMS = [
+  { label: 'Site Content',     href: getAdminPanelHref('content'),      icon: Settings, panel: 'content' },
+  { label: 'Pages & Nav',      href: getAdminPanelHref('manage-pages'), icon: PanelsTopLeft, panel: 'manage-pages' },
+  { label: 'Portfolio / Blog', href: getAdminPanelHref('projects'),     icon: FileText, panel: 'projects' },
+  { label: 'Client Admin',     href: getAdminPanelHref('clients'),      icon: ScrollText, panel: 'clients' },
+  { label: 'Testimonials',     href: getAdminPanelHref('testimonials'), icon: Star, panel: 'testimonials' },
+  { label: 'Messages',         href: getAdminPanelHref('messages'),     icon: Mail, panel: 'messages' },
+  { label: 'Theme',            href: getAdminPanelHref('theme'),        icon: Palette, panel: 'theme' },
+  { label: 'Site Assets',      href: getAdminPanelHref('site'),         icon: Image, panel: 'site' },
+  { label: 'Help',             href: getAdminPanelHref('help'),         icon: HelpCircle, panel: 'help' },
 ];
 
 const SITE_LINKS = [
@@ -42,13 +42,14 @@ export default function AdminLayout() {
   const navTextColor = theme?.nav?.textColor || '#1a1a1a';
   const safeNavTextColor = ensureAccessibleColor(navTextColor, navBg);
   const routeSearch = new URLSearchParams(location.search);
-  const currentPanel = location.pathname === '/admin/pages'
+  const onCmsRoute = isAdminCmsPath(location.pathname);
+  const currentPanel = onCmsRoute
     ? routeSearch.get('panel') || (routeSearch.get('page') ? 'content' : 'overview')
     : null;
 
   useEffect(() => {
     setSidebarOpen(false);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     if (!sidebarOpen) return undefined;
@@ -121,13 +122,13 @@ export default function AdminLayout() {
               {/* Divider + admin controls */}
               <div className="flex items-center gap-1 ml-2 pl-2 border-l" style={{ borderColor: `${safeNavTextColor}30` }}>
                 <Link
-                  to="/admin/pages"
+                  to={ADMIN_CMS_HOME}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border"
-                  aria-current={location.pathname === '/admin/pages' ? 'page' : undefined}
+                  aria-current={currentPanel === 'overview' ? 'page' : undefined}
                   style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
-                  Admin
+                  Site Management
                 </Link>
                 <button
                   type="button"
@@ -167,29 +168,48 @@ export default function AdminLayout() {
           style={{ top: '80px' }}
         >
           <div className="flex items-center justify-between p-4 border-b">
-            <span className="font-display text-xl text-primary">Admin Panel</span>
+            <span className="font-display text-xl text-primary">Site Management / CMS</span>
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(false)} aria-label="Close admin navigation">
               <X className="w-5 h-5" aria-hidden="true" />
             </Button>
           </div>
-          <nav className="p-3 space-y-1 overflow-y-auto" aria-label="Admin sidebar">
-            {NAV_ITEMS.map(item => (
-              <Link
-                key={item.href}
-                to={item.href}
-                onClick={() => setSidebarOpen(false)}
-                aria-current={location.pathname === '/admin/pages' && currentPanel === item.panel ? 'page' : undefined}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  location.pathname === '/admin/pages' && currentPanel === item.panel
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="p-3 space-y-3 overflow-y-auto">
+            <Link
+              to={ADMIN_CMS_HOME}
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-primary/20 bg-primary/5 text-foreground transition-colors hover:bg-primary/10"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                <LayoutDashboard className="w-4 h-4" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm font-bold">Site Management / CMS</p>
+                <p className="text-xs text-muted-foreground">All admin tools live here</p>
+              </div>
+            </Link>
+
+            <nav className="space-y-1" aria-label="CMS tools">
+              <p className="px-4 pb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground/80">
+                CMS Tools
+              </p>
+              {CMS_PANEL_ITEMS.map(item => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  aria-current={currentPanel === item.panel ? 'page' : undefined}
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                    currentPanel === item.panel
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </aside>
 
         {/* Overlay for mobile */}
@@ -209,7 +229,7 @@ export default function AdminLayout() {
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} aria-label="Open admin navigation">
               <Menu className="w-5 h-5" aria-hidden="true" />
             </Button>
-            <span className="font-display text-lg text-primary">Admin Panel</span>
+            <span className="font-display text-lg text-primary">Site Management / CMS</span>
           </div>
           <main
             id="admin-main-content"
