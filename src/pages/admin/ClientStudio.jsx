@@ -364,6 +364,7 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
   const [editingTemplateId, setEditingTemplateId] = useState(null);
   const [uploadingTemplateDocument, setUploadingTemplateDocument] = useState(false);
   const [activeTemplateField, setActiveTemplateField] = useState('body_text');
+  const [selectedPlaceholderKey, setSelectedPlaceholderKey] = useState('client_name');
 
   const [packageForm, setPackageForm] = useState(emptyPackageForm);
   const [paymentForm, setPaymentForm] = useState(emptyPaymentForm);
@@ -506,6 +507,10 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
     groups[group].push(field);
     return groups;
   }, {}), []);
+  const placeholderOptions = useMemo(() => CONTRACT_PLACEHOLDERS.map((field) => ({
+    value: field.key,
+    label: `${field.group}: ${field.label}`,
+  })), []);
 
   const handleExport = (filename, rows, label) => {
     if (!rows.length) {
@@ -517,7 +522,7 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
     toast.success(`${label} export downloaded.`);
   };
 
-  const insertTemplatePlaceholder = async (placeholderKey) => {
+  const insertTemplatePlaceholder = async (placeholderKey = selectedPlaceholderKey) => {
     const token = `{{${placeholderKey}}}`;
 
     if (!activeTemplateField || !TEMPLATE_EDITOR_FIELDS.includes(activeTemplateField)) {
@@ -1290,10 +1295,37 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
 
               <div className="rounded-2xl border bg-muted/40 p-4 space-y-4">
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold">Simple template fields</p>
+                  <p className="text-sm font-semibold">Simple smart fields</p>
                   <p className="text-xs text-muted-foreground">
-                    Click a field below and it will drop into the template section you are currently editing. Right now, inserts go into
+                    Choose a saved client or invoice detail below and insert it into the template section you are currently editing. Right now, inserts go into
                     <span className="font-semibold text-foreground"> {activeTemplateField.replace(/_/g, ' ')}</span>.
+                  </p>
+                </div>
+                <div className="rounded-2xl border bg-white p-4 space-y-4">
+                  <div className="grid gap-4 lg:grid-cols-[1.2fr_auto]">
+                    <div className="space-y-2">
+                      <Label>Choose a saved field to insert</Label>
+                      <Select value={selectedPlaceholderKey} onValueChange={setSelectedPlaceholderKey}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {placeholderOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-end">
+                      <Button type="button" className="w-full lg:w-auto" onClick={() => insertTemplatePlaceholder()}>
+                        Insert selected field
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    BalloonCraft KC stores the technical code for you automatically. Toni does not need to type placeholder syntax by hand.
                   </p>
                 </div>
                 <div className="grid gap-4 lg:grid-cols-3">
@@ -1302,18 +1334,25 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
                       <p className="text-sm font-semibold">{groupName}</p>
                       <div className="space-y-2">
                         {fields.map((field) => (
-                          <button
-                            key={field.key}
-                            type="button"
-                            onClick={() => insertTemplatePlaceholder(field.key)}
-                            className="w-full rounded-2xl border px-3 py-3 text-left transition hover:bg-muted"
-                          >
-                            <span className="block text-sm font-semibold">{field.label}</span>
-                            <span className="mt-1 block text-xs text-muted-foreground">{field.help}</span>
-                            <span className="mt-2 inline-flex rounded-full bg-muted px-2 py-1 font-mono text-[11px] text-muted-foreground">
-                              {`{{${field.key}}}`}
-                            </span>
-                          </button>
+                          <div key={field.key} className="rounded-2xl border px-3 py-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <span className="block text-sm font-semibold">{field.label}</span>
+                                <span className="mt-1 block text-xs text-muted-foreground">{field.help}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedPlaceholderKey(field.key);
+                                  insertTemplatePlaceholder(field.key);
+                                }}
+                              >
+                                Use field
+                              </Button>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -1536,9 +1575,9 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
                             <Input value={field.anchor_hint || ''} onChange={(event) => updateTemplateSignerField(field.id, { anchor_hint: event.target.value })} placeholder="Bottom right signature line under payment terms" />
                           </div>
                           <div className="space-y-2">
-                            <Label>Prefill</Label>
+                            <Label>Auto-fill this answer with</Label>
                             <Select value={field.prefill_key || ''} onValueChange={(value) => updateTemplateSignerField(field.id, { prefill_key: value })}>
-                              <SelectTrigger><SelectValue placeholder="Choose optional prefill" /></SelectTrigger>
+                              <SelectTrigger><SelectValue placeholder="Choose saved info if this should fill itself in" /></SelectTrigger>
                               <SelectContent>
                                 {SIGNATURE_PREFILL_OPTIONS.map((option) => (
                                   <SelectItem key={option.value || 'none'} value={option.value}>{option.label}</SelectItem>

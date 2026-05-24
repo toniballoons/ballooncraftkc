@@ -158,17 +158,17 @@ export const SIGNATURE_FIELD_TYPES = [
 ];
 
 export const SIGNATURE_PREFILL_OPTIONS = [
-  { value: '', label: 'No prefill' },
-  { value: 'client_name', label: 'Client name' },
-  { value: 'business_name', label: 'Business name' },
-  { value: 'event_type', label: 'Event type' },
-  { value: 'event_date', label: 'Event date' },
-  { value: 'event_location', label: 'Event location' },
-  { value: 'contract_amount', label: 'Contract amount' },
-  { value: 'down_payment_amount', label: 'Down payment amount' },
-  { value: 'final_payment_amount', label: 'Final payment amount' },
-  { value: 'invoice_code', label: 'Invoice ID' },
-  { value: 'today', label: 'Today’s date' },
+  { value: '', label: 'Do not auto-fill' },
+  { value: 'client_name', label: 'Auto-fill with client name' },
+  { value: 'business_name', label: 'Auto-fill with business name' },
+  { value: 'event_type', label: 'Auto-fill with event type' },
+  { value: 'event_date', label: 'Auto-fill with event date' },
+  { value: 'event_location', label: 'Auto-fill with event location' },
+  { value: 'contract_amount', label: 'Auto-fill with full contract amount' },
+  { value: 'down_payment_amount', label: 'Auto-fill with down payment amount' },
+  { value: 'final_payment_amount', label: 'Auto-fill with final payment amount' },
+  { value: 'invoice_code', label: 'Auto-fill with invoice ID' },
+  { value: 'today', label: 'Auto-fill with today’s date' },
 ];
 
 export const GENERATED_DOCUMENT_TARGET = 'generated_agreement';
