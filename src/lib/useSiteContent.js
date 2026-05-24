@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import * as SiteContent from '@/entities/SiteContent';
 import { DEFAULT_CONTENT } from './siteDefaults';
+import {
+  getCachedSiteContent,
+  getCachedSiteContentMap,
+  setCachedSiteContent,
+  setCachedSiteContentMap,
+} from './siteContentCache';
 
 export function useSiteContent(pageKey) {
   const { data, isLoading } = useQuery({
@@ -8,11 +14,16 @@ export function useSiteContent(pageKey) {
     queryFn: async () => {
       const results = await SiteContent.filter({ page_key: pageKey });
       if (results.length > 0 && results[0].content_json) {
-        return JSON.parse(results[0].content_json);
+        const parsed = JSON.parse(results[0].content_json);
+        setCachedSiteContent(pageKey, parsed);
+        return parsed;
       }
-      return DEFAULT_CONTENT[pageKey] || {};
+      const fallback = DEFAULT_CONTENT[pageKey] || {};
+      setCachedSiteContent(pageKey, fallback);
+      return fallback;
     },
-    initialData: DEFAULT_CONTENT[pageKey] || {},
+    initialData: () => getCachedSiteContent(pageKey),
+    staleTime: 1000 * 60 * 5,
   });
 
   return { content: data, isLoading };
@@ -29,9 +40,11 @@ export function useAllSiteContent() {
           contentMap[item.page_key] = JSON.parse(item.content_json);
         }
       });
+      setCachedSiteContentMap(contentMap);
       return contentMap;
     },
-    initialData: DEFAULT_CONTENT,
+    initialData: () => getCachedSiteContentMap(),
+    staleTime: 1000 * 60 * 5,
   });
 
   return { content: data, isLoading };

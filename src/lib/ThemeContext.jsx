@@ -5,8 +5,8 @@ import * as SiteTheme from '@/entities/SiteTheme';
 import { getThemeById, THEMES } from './themes';
 
 const CACHE_KEY = 'ballooncraftkc_new_design_theme';
-const THEME_SETTINGS_KEY = 'new_design_theme_settings';
-const DEFAULT_THEME_ID = import.meta.env.VITE_NEW_DESIGN_ACTIVE_THEME || 'rainbow_birthday';
+export const THEME_SETTINGS_KEY = 'new_design_theme_settings';
+export const DEFAULT_THEME_ID = import.meta.env.VITE_NEW_DESIGN_ACTIVE_THEME || 'rainbow_birthday';
 const LEGACY_THEME_ID_MAP = {
   black_tie: 'black_tie_gala',
   circus_fun: 'carnival_big_top',
@@ -64,7 +64,7 @@ function getCachedThemeId() {
   return getStoredValue(CACHE_KEY) || DEFAULT_THEME_ID;
 }
 
-function normalizeThemeId(id) {
+export function normalizeThemeId(id) {
   if (!id) return DEFAULT_THEME_ID;
 
   if (THEMES.some((theme) => theme.id === id)) {
