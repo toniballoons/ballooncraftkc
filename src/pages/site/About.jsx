@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { LOCAL_EVENT_HIGHLIGHTS, LOCAL_SERVICE_AREAS, LOCAL_SERVICE_HIGHLIGHTS, formatCanonicalUrl } from '@/lib/seo';
 import { getHeroTextStyles } from '@/lib/accessibility';
 import { motion } from 'framer-motion';
 import { Heart, Award, Lightbulb, Clock, Store, PartyPopper, School } from 'lucide-react';
+import { supabase } from '@/api/supabaseClient';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
 const iconMap = [Lightbulb, Award, Heart, Clock];
@@ -16,6 +18,31 @@ export default function About() {
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #a29bfe, #fd79a8)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
   const domain = typeof window !== 'undefined' ? window.location.hostname : 'www.ballooncraftkc.com';
+  const { data: publicStaff = [] } = useQuery({
+    queryKey: ['public-about-staff'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('staff_members')
+        .select('id, display_name, title, photo_url, public_bio, sort_order')
+        .eq('show_on_about_page', true)
+        .eq('employment_status', 'active')
+        .order('sort_order', { ascending: true })
+        .order('display_name', { ascending: true });
+
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    initialData: [],
+  });
+
+  const publicTeam = publicStaff.length > 0
+    ? publicStaff.map((member) => ({
+        name: member.display_name,
+        role: member.title,
+        photo: member.photo_url,
+        bio: member.public_bio,
+      }))
+    : content.team || [];
 
   useEffect(() => {
     const canonical = formatCanonicalUrl(domain, '/about');
@@ -190,12 +217,12 @@ export default function About() {
       </section>
 
       {/* Team */}
-      {content.team && content.team.length > 0 && (
+      {publicTeam && publicTeam.length > 0 && (
         <section className="py-20 bg-white content-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="font-display text-4xl text-center mb-16">{content.team_title}</motion.h2>
             <div className="flex flex-wrap justify-center gap-8 max-w-5xl mx-auto">
-              {content.team.map((member, i) => (
+              {publicTeam.map((member, i) => (
                 <motion.div
                   key={i}
                   initial="hidden" whileInView="visible" viewport={{ once: true }}

@@ -26,6 +26,7 @@ import * as InvoicePayment from '@/entities/InvoicePayment';
 import * as ContractTemplate from '@/entities/ContractTemplate';
 import * as ContractPackage from '@/entities/ContractPackage';
 import { useAuth } from '@/lib/AuthContext';
+import { authedJson } from '@/lib/authedFetch';
 import {
   CONTRACT_PLACEHOLDERS,
   DEFAULT_CONTRACT_TEMPLATE,
@@ -654,15 +655,10 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
 
   const sendPackageMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/send-client-package', {
+      return authedJson('/api/send-client-package', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(packageForm),
       });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to send delivery.');
-      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-contract-packages'] });
@@ -675,9 +671,8 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
 
   const recordPaymentMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/record-invoice-payment', {
+      return authedJson('/api/record-invoice-payment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           invoiceId: paymentForm.invoiceId,
           amount: paymentForm.amount,
@@ -689,10 +684,6 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
           sendReceipt: paymentForm.sendReceipt,
         }),
       });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to record payment.');
-      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-invoices'] });

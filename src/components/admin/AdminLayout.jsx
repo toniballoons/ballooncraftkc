@@ -4,6 +4,8 @@ import {
   LayoutDashboard, FileText, Mail, Settings, Menu, X,
   Star, Palette, Image, HelpCircle, LogOut, PanelsTopLeft,
   ClipboardSignature,
+  CalendarDays,
+  UsersRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
@@ -12,16 +14,18 @@ import { useTheme } from '@/lib/ThemeContext';
 import { ensureAccessibleColor } from '@/lib/accessibility';
 
 const NAV_ITEMS = [
-  { label: 'CMS / Site Management', href: '/admin',       icon: Settings },
-  { label: 'Client Studio', href: '/admin?panel=clients', icon: ClipboardSignature },
-  { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard },
-  { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft },
-  { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText },
-  { label: 'Testimonials',   href: '/admin/testimonials', icon: Star },
-  { label: 'Messages',       href: '/admin/messages',     icon: Mail },
-  { label: 'Theme',          href: '/admin/theme',        icon: Palette },
-  { label: 'Site Assets',    href: '/admin/site',         icon: Image },
-  { label: 'Help',           href: '/admin/help',         icon: HelpCircle },
+  { label: 'CMS / Site Management', href: '/admin',       icon: Settings, permission: 'site' },
+  { label: 'Client Studio', href: '/admin?panel=clients', icon: ClipboardSignature, permission: 'clients' },
+  { label: 'Scheduling Calendar', href: '/admin/schedule', icon: CalendarDays, permission: 'schedule' },
+  { label: 'Account & Team', href: '/admin/account', icon: UsersRound, permission: 'account' },
+  { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard, permission: 'site' },
+  { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft, permission: 'site' },
+  { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText, permission: 'site' },
+  { label: 'Testimonials',   href: '/admin/testimonials', icon: Star, permission: 'site' },
+  { label: 'Messages',       href: '/admin/messages',     icon: Mail, permission: 'messages' },
+  { label: 'Theme',          href: '/admin/theme',        icon: Palette, permission: 'site' },
+  { label: 'Site Assets',    href: '/admin/site',         icon: Image, permission: 'site' },
+  { label: 'Help',           href: '/admin/help',         icon: HelpCircle, permission: 'site' },
 ];
 
 const SITE_LINKS = [
@@ -35,13 +39,15 @@ const SITE_LINKS = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, profile, hasPermission, adminHomePath } = useAuth();
   const { content: navContent } = useSiteContent('navbar');
   const { theme } = useTheme();
 
   const navBg = theme?.nav?.bg || 'rgba(255,255,255,0.97)';
   const navTextColor = theme?.nav?.textColor || '#1a1a1a';
   const safeNavTextColor = ensureAccessibleColor(navTextColor, navBg);
+
+  const visibleNavItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
   const isNavItemActive = (href) => {
     const [pathname, rawSearch] = href.split('?');
@@ -129,13 +135,27 @@ export default function AdminLayout() {
               {/* Divider + admin controls */}
               <div className="flex items-center gap-1 ml-2 pl-2 border-l" style={{ borderColor: `${safeNavTextColor}30` }}>
                 <Link
-                  to="/admin"
+                  to={adminHomePath}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border"
-                  aria-current={location.pathname === '/admin' ? 'page' : undefined}
+                  aria-current={location.pathname === '/admin' || location.pathname === adminHomePath ? 'page' : undefined}
                   style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
                 >
                   <Settings className="w-3.5 h-3.5" aria-hidden="true" />
                   CMS
+                </Link>
+                <Link
+                  to="/admin/account"
+                  className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs font-semibold border"
+                  style={{ background: '#fff', color: '#111', borderColor: 'rgba(0,0,0,0.15)' }}
+                >
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile.display_name || 'Profile'} className="w-5 h-5 rounded-full object-cover" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold">
+                      {(profile?.display_name || profile?.email || 'A')[0]}
+                    </span>
+                  )}
+                  {profile?.display_name || 'My account'}
                 </Link>
                 <button
                   type="button"
@@ -181,7 +201,7 @@ export default function AdminLayout() {
             </Button>
           </div>
           <nav className="p-3 space-y-1 overflow-y-auto" aria-label="Admin sidebar">
-            {NAV_ITEMS.map(item => (
+            {visibleNavItems.map(item => (
               <Link
                 key={item.href}
                 to={item.href}

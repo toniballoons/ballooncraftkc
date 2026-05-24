@@ -7,11 +7,15 @@ import {
   insertContractPackage,
   sendPackageEmail,
 } from './_client-ops.js';
+import { requireAdminSession, sendAdminError } from './_admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const session = await requireAdminSession(req, { permission: 'clients' });
+  if (session.error) return sendAdminError(res, session.error);
 
   const { clientId, invoiceId, templateId, packetTitle, emailStage = 'downpayment' } = req.body || {};
   if (!clientId || !invoiceId || !templateId) {

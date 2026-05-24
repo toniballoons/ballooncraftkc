@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ContactSubmission from '@/entities/ContactSubmission';
+import { authedJson } from '@/lib/authedFetch';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -98,9 +99,8 @@ function MessageDialog({ message: m, onClose, onStatusChange, onDelete }) {
     setReplySending(true);
     setReplyError('');
     try {
-      const res = await fetch('/api/send-reply', {
+      await authedJson('/api/send-reply', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           to_name: m.name,
           to_email: m.email,
@@ -108,10 +108,6 @@ function MessageDialog({ message: m, onClose, onStatusChange, onDelete }) {
           original_message: m.message,
         }),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to send');
-      }
       onStatusChange(m.id, 'replied');
       setReplySent(true);
       toast.success(`Reply sent to ${m.email}`);

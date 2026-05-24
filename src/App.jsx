@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-d
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import PermissionGate from '@/components/PermissionGate';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import { MotionConfig } from 'framer-motion';
@@ -21,6 +22,8 @@ import LegalPage from '@/pages/site/LegalPage';
 
 // Admin pages
 import AdminLayout from '@/components/admin/AdminLayout';
+import AdminHome from '@/pages/admin/AdminHome';
+import AccountAdmin from '@/pages/admin/AccountAdmin';
 import Dashboard from '@/pages/admin/Dashboard';
 import PageEditor from '@/pages/admin/PageEditor';
 import ProjectsAdmin from '@/pages/admin/ProjectsAdmin';
@@ -31,6 +34,7 @@ import SiteAssets from '@/pages/admin/SiteAssets';
 import Login from '@/pages/admin/Login';
 import Help from '@/pages/admin/Help';
 import PagesManager from '@/pages/admin/PagesManager';
+import ScheduleAdmin from '@/pages/admin/ScheduleAdmin';
 import ClientPackage from '@/pages/site/ClientPackage';
 import Unsubscribe from '@/pages/site/Unsubscribe';
 
@@ -66,17 +70,19 @@ function App() {
                 {/* Admin panel — protected */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<PageEditor />} />
+                    <Route index element={<AdminHome />} />
                     <Route path="pages" element={<Navigate to="/admin" replace />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="projects" element={<ProjectsAdmin />} />
-                    <Route path="testimonials" element={<TestimonialsAdmin />} />
-                    <Route path="messages" element={<MessagesAdmin />} />
-                    <Route path="clients" element={<Navigate to="/admin?panel=clients" replace />} />
-                    <Route path="theme" element={<ThemeSettings />} />
-                    <Route path="site" element={<SiteAssets />} />
-                    <Route path="manage-pages" element={<PagesManager />} />
-                    <Route path="help" element={<Help />} />
+                    <Route path="dashboard" element={<PermissionGate permission="site"><Dashboard /></PermissionGate>} />
+                    <Route path="projects" element={<PermissionGate permission="site"><ProjectsAdmin /></PermissionGate>} />
+                    <Route path="testimonials" element={<PermissionGate permission="site"><TestimonialsAdmin /></PermissionGate>} />
+                    <Route path="messages" element={<PermissionGate permission="messages"><MessagesAdmin /></PermissionGate>} />
+                    <Route path="clients" element={<PermissionGate permission="clients"><Navigate to="/admin?panel=clients" replace /></PermissionGate>} />
+                    <Route path="schedule" element={<PermissionGate permission="schedule"><ScheduleAdmin /></PermissionGate>} />
+                    <Route path="account" element={<AccountAdmin />} />
+                    <Route path="theme" element={<PermissionGate permission="site"><ThemeSettings /></PermissionGate>} />
+                    <Route path="site" element={<PermissionGate permission="site"><SiteAssets /></PermissionGate>} />
+                    <Route path="manage-pages" element={<PermissionGate permission="site"><PagesManager /></PermissionGate>} />
+                    <Route path="help" element={<PermissionGate permission="site"><Help /></PermissionGate>} />
                   </Route>
                 </Route>
 

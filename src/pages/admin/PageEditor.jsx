@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SiteContent from '@/entities/SiteContent';
 
@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, Eye, Code, RotateCcw, ExternalLink, ClipboardSignature, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import HeroEditor from '@/components/admin/HeroEditor';
 import AboutEditor from '@/components/admin/AboutEditor';
 import ContactFormEditor from '@/components/admin/ContactFormEditor';
@@ -68,6 +69,7 @@ function EditorForPage({ pageKey, content, setContent }) {
 }
 
 export default function PageEditor() {
+  const { hasPermission } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [showCode, setShowCode] = useState(false);
@@ -77,8 +79,10 @@ export default function PageEditor() {
   const activePanel = searchParams.get('panel') === 'clients' ? 'clients' : 'content';
   const activePageKey = PAGE_KEYS.includes(searchParams.get('page')) ? searchParams.get('page') : 'hero';
   const activeClientTab = CLIENT_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'overview';
+  const canManageSite = hasPermission('site');
+  const canManageClients = hasPermission('clients');
 
-  const updateWorkspace = (panel, pageKey = activePageKey, clientTab = activeClientTab) => {
+  const updateWorkspace = useCallback((panel, pageKey = activePageKey, clientTab = activeClientTab) => {
     const nextParams = new URLSearchParams(searchParams);
 
     if (panel === 'clients') {
@@ -96,7 +100,20 @@ export default function PageEditor() {
     }
 
     setSearchParams(nextParams, { replace: true });
-  };
+  }, [activeClientTab, activePageKey, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (activePanel === 'clients' && !canManageClients) {
+      const nextPanel = canManageSite ? 'content' : null;
+      if (nextPanel) {
+        updateWorkspace('content', activePageKey, activeClientTab);
+      }
+    }
+
+    if (activePanel === 'content' && !canManageSite && canManageClients) {
+      updateWorkspace('clients', activePageKey, activeClientTab);
+    }
+  }, [activePanel, activeClientTab, activePageKey, canManageClients, canManageSite, updateWorkspace]);
 
   // Wrap setContent to track unsaved changes
   const handleContentChange = (newContent) => {
@@ -155,7 +172,7 @@ export default function PageEditor() {
             Manage public site content, client invoicing, secure document delivery, and hosted signing from one admin workspace.
           </p>
         </div>
-        {activePanel === 'content' ? (
+        {activePanel === 'content' && canManageSite ? (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleReset}>
               <RotateCcw className="w-4 h-4 mr-1" /> Reset
@@ -177,12 +194,13 @@ export default function PageEditor() {
 
       <Tabs value={activePanel} onValueChange={(value) => updateWorkspace(value, activePageKey)}>
         <TabsList className="h-auto flex-wrap justify-start">
-          <TabsTrigger value="content">Site Content</TabsTrigger>
-          <TabsTrigger value="clients">Client Studio</TabsTrigger>
+          {canManageSite ? <TabsTrigger value="content">Site Content</TabsTrigger> : null}
+          {canManageClients ? <TabsTrigger value="clients">Client Studio</TabsTrigger> : null}
         </TabsList>
       </Tabs>
 
       <div className="grid gap-4 lg:grid-cols-2">
+        {canManageSite ? (
         <Card className={activePanel === 'content' ? 'border-primary/40 bg-primary/5' : ''}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -199,7 +217,9 @@ export default function PageEditor() {
             </Button>
           </CardContent>
         </Card>
+        ) : null}
 
+        {canManageClients ? (
         <Card className={activePanel === 'clients' ? 'border-primary/40 bg-primary/5' : ''}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -221,6 +241,7 @@ export default function PageEditor() {
             </div>
           </CardContent>
         </Card>
+        ) : null}
       </div>
 
       {/* Unsaved changes banner */}
@@ -233,13 +254,13 @@ export default function PageEditor() {
         </div>
       )}
 
-      {activePanel === 'clients' ? (
+      {activePanel === 'clients' && canManageClients ? (
         <ClientStudio
           embedded
           initialTab={activeClientTab}
           onNavigateTab={(tab) => updateWorkspace('clients', activePageKey, tab)}
         />
-      ) : (
+      ) : canManageSite ? (
         <>
           {/* Page tabs */}
           <div className="overflow-x-auto">
@@ -298,7 +319,7 @@ export default function PageEditor() {
             </Card>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }
