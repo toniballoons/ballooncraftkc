@@ -54,6 +54,10 @@ export function getAdminRecipients() {
   ].filter(Boolean))];
 }
 
+export function getPrimaryAdminRecipient() {
+  return process.env.CONTACT_EMAIL_TO || DEFAULT_ADMIN_RECIPIENT;
+}
+
 export function getMailFrom() {
   return process.env.CONTACT_EMAIL_FROM || DEFAULT_FROM;
 }
