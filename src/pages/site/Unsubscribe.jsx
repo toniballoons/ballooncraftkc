@@ -20,7 +20,7 @@ const REASONS = [
 ];
 
 async function fetchSubscriber(token) {
-  const response = await fetch(`/api/newsletter-unsubscribe?token=${encodeURIComponent(token)}`);
+  const response = await fetch(`/api/newsletter?action=preview&token=${encodeURIComponent(token)}`);
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || 'Unable to load unsubscribe details.');
   return data;
@@ -49,10 +49,11 @@ export default function Unsubscribe() {
 
   const unsubscribeMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/newsletter-unsubscribe', {
+      const response = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'unsubscribe',
           token: accessToken,
           reason,
           note,

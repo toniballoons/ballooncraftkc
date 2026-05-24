@@ -106,12 +106,12 @@ export default function AccountAdmin() {
 
   const accountQuery = useQuery({
     queryKey: ['account-settings'],
-    queryFn: () => authedJson('/api/account-settings'),
+    queryFn: () => authedJson('/api/admin?action=account'),
   });
 
   const teamQuery = useQuery({
     queryKey: ['team-members'],
-    queryFn: () => authedJson('/api/team-members'),
+    queryFn: () => authedJson('/api/admin?action=team'),
     enabled: isAdmin,
     initialData: { members: [] },
   });
@@ -135,7 +135,7 @@ export default function AccountAdmin() {
         throw new Error('New password and confirmation password do not match.');
       }
 
-      return authedJson('/api/account-settings', {
+      return authedJson('/api/admin?action=account', {
         method: 'PATCH',
         body: JSON.stringify({
           displayName: accountForm.displayName,
@@ -158,7 +158,7 @@ export default function AccountAdmin() {
   });
 
   const teamMutation = useMutation({
-    mutationFn: async () => authedJson('/api/team-members', {
+    mutationFn: async () => authedJson('/api/admin?action=team', {
       method: 'POST',
       body: JSON.stringify(teamForm),
     }),

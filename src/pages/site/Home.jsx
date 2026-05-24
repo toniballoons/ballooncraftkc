@@ -279,10 +279,11 @@ function NewsletterSection() {
 
   const signupMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/newsletter-signup', {
+      const response = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'signup',
           firstName: form.firstName,
           email: form.email,
           source: 'homepage',

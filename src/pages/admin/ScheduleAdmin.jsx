@@ -161,7 +161,7 @@ export default function ScheduleAdmin() {
 
   const scheduleQuery = useQuery({
     queryKey: ['admin-schedule'],
-    queryFn: () => authedJson('/api/schedule-admin'),
+    queryFn: () => authedJson('/api/admin?action=schedule'),
   });
 
   useEffect(() => {
@@ -204,7 +204,7 @@ export default function ScheduleAdmin() {
   );
 
   const saveSettingsMutation = useMutation({
-    mutationFn: async () => authedJson('/api/schedule-admin', {
+    mutationFn: async () => authedJson('/api/admin?action=schedule', {
       method: 'POST',
       body: JSON.stringify({
         type: 'settings',
@@ -220,7 +220,7 @@ export default function ScheduleAdmin() {
   });
 
   const saveEntryMutation = useMutation({
-    mutationFn: async () => authedJson('/api/schedule-admin', {
+    mutationFn: async () => authedJson('/api/admin?action=schedule', {
       method: 'POST',
       body: JSON.stringify({
         type: 'entry',
@@ -251,7 +251,7 @@ export default function ScheduleAdmin() {
   });
 
   const deleteEntryMutation = useMutation({
-    mutationFn: async (entryId) => authedJson('/api/schedule-admin', {
+    mutationFn: async (entryId) => authedJson('/api/admin?action=schedule', {
       method: 'DELETE',
       body: JSON.stringify({ entryId }),
     }),
