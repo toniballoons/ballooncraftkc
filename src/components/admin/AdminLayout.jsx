@@ -227,6 +227,21 @@ export default function AdminLayout() {
           >
             <Outlet />
           </main>
+          <div className="px-4 pb-4 sm:px-6 lg:px-8">
+            <div className="border-t pt-3 text-center">
+              <p className="text-[11px] text-muted-foreground">
+                Site design by{' '}
+                <a
+                  href="https://facebook.com/scorptonic"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  Christopher D.
+                </a>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

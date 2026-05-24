@@ -94,8 +94,20 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t mt-8 pt-6 text-center text-sm opacity-40" style={{ borderColor: `${footerText}20` }}>
-          {content.copyright}
+        <div className="border-t mt-8 pt-6 text-center space-y-2" style={{ borderColor: `${footerText}20` }}>
+          <p className="text-sm opacity-40">{content.copyright}</p>
+          <p className="text-[11px] opacity-60">
+            Site design by{' '}
+            <a
+              href="https://facebook.com/scorptonic"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:opacity-100"
+              style={{ color: footerAccent }}
+            >
+              Christopher D.
+            </a>
+          </p>
         </div>
       </div>
     </footer>
