@@ -6,15 +6,21 @@
 // ── Controlled vocabulary ────────────────────────────────────
 
 export const SERVICE_TYPES = [
+  'Organic Balloon Garland',
   'Balloon Arch',
   'Balloon Garland',
   'Balloon Column',
+  'Entrance Install',
   'Balloon Wall',
   'Photo Backdrop',
+  'Step-and-Repeat Frame',
   'Balloon Sculpture',
   'Balloon Bouquet',
   'Balloon Ceiling',
+  'Table Centerpieces',
   'Marquee Letters',
+  'Grab-and-Go Garland',
+  'Branded Corporate Install',
   'Custom Installation',
 ];
 
@@ -23,11 +29,20 @@ export const EVENT_TYPES = [
   'Birthday',
   'Corporate',
   'Baby Shower',
+  'Bridal Shower',
+  'Engagement Party',
   'Graduation',
+  'Prom',
+  'Homecoming',
+  'Grand Opening',
+  'Retail Launch',
   'Office Party',
   'Community Event',
   'Gala',
   'Brand Activation',
+  'Fundraiser',
+  'Sports Banquet',
+  'School Event',
   'Holiday',
 ];
 
@@ -37,10 +52,16 @@ export const GEO_CITIES = [
   'Olathe',
   "Lee's Summit",
   'Independence',
+  'Blue Springs',
+  'Liberty',
   'Lenexa',
   'Shawnee',
+  'Parkville',
+  'North Kansas City',
   'Prairie Village',
   'Leawood',
+  'Belton',
+  'Raymore',
   'Other',
 ];
 
@@ -49,12 +70,56 @@ export const LOCAL_SERVICE_AREAS = [
   'Overland Park, KS',
   'Olathe, KS',
   "Lee's Summit, MO",
+  'Blue Springs, MO',
+  'Liberty, MO',
   'Lenexa, KS',
   'Leawood, KS',
+  'Parkville, MO',
+  'North Kansas City, MO',
   'Prairie Village, KS',
   'Shawnee, KS',
   'Independence, MO',
+  'Belton, MO',
+  'Raymore, MO',
   'Johnson County, KS',
+];
+
+export const LOCAL_SERVICE_HIGHLIGHTS = [
+  {
+    title: 'Statement balloon arches and organic garlands',
+    description: 'Full, photo-ready installs for entryways, dessert tables, staircases, stages, and focal walls.',
+  },
+  {
+    title: 'Backdrops, walls, and branded photo moments',
+    description: 'Custom balloon walls, step-and-repeat styling, and event backdrops that make guests stop and take photos.',
+  },
+  {
+    title: 'Grand openings, retail launches, and brand activations',
+    description: 'High-impact decor for storefronts, ribbon cuttings, office parties, and promotional events that need energy and visibility.',
+  },
+  {
+    title: 'Weddings, showers, birthdays, and milestone parties',
+    description: 'Romantic, playful, or over-the-top installs tailored to the tone of your celebration and venue.',
+  },
+  {
+    title: 'School events, proms, graduations, and community celebrations',
+    description: 'Decor that fills gyms, auditoriums, halls, and outdoor spaces with color, spirit, and crowd-pleasing scale.',
+  },
+  {
+    title: 'Delivery, setup, styling, and teardown planning',
+    description: 'From design through install-day logistics, BalloonCraft KC handles the details so your event feels polished and easy.',
+  },
+];
+
+export const LOCAL_EVENT_HIGHLIGHTS = [
+  'Weddings and rehearsal dinners',
+  'Birthdays and anniversary parties',
+  'Baby showers and bridal showers',
+  'Graduations, proms, and homecomings',
+  'Grand openings and retail launches',
+  'Corporate parties and branded activations',
+  'School events and sports banquets',
+  'Galas, fundraisers, and community celebrations',
 ];
 
 export const LOCAL_HOME_FAQS = [
@@ -73,6 +138,14 @@ export const LOCAL_HOME_FAQS = [
   {
     question: 'Do you offer custom balloon backdrops for birthdays, showers, and weddings?',
     answer: 'Yes. We create custom balloon garlands, arches, walls, backdrops, marquees, and other installs for birthdays, baby showers, weddings, graduations, holiday parties, and more.',
+  },
+  {
+    question: 'Do you decorate schools, proms, graduations, and community events?',
+    answer: 'Yes. BalloonCraft KC creates large-scale decor for school dances, graduation parties, spirit events, banquets, fundraisers, and community celebrations across the KC metro.',
+  },
+  {
+    question: 'Can BalloonCraft KC provide setup help beyond just dropping off balloons?',
+    answer: 'Yes. We can handle design planning, delivery, on-site installation, styling, and event-ready placement so the final result feels complete and polished.',
   },
   {
     question: 'How long do balloon installations last?',

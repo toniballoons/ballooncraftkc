@@ -5,19 +5,19 @@ import { useTheme } from '@/lib/ThemeContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as Project from '@/entities/Project';
 import * as Testimonial from '@/entities/Testimonial';
-import { LOCAL_HOME_FAQS, LOCAL_SERVICE_AREAS, formatCanonicalUrl } from '@/lib/seo';
+import { LOCAL_EVENT_HIGHLIGHTS, LOCAL_HOME_FAQS, LOCAL_SERVICE_AREAS, LOCAL_SERVICE_HIGHLIGHTS, formatCanonicalUrl } from '@/lib/seo';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, ArrowRight, Sparkles, PartyPopper, Palette, Calendar } from 'lucide-react';
+import { Star, ArrowRight, Sparkles, PartyPopper, Palette, Calendar, Store, School, HeartHandshake } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
-const ICON_MAP = [PartyPopper, Palette, Calendar];
-const HOME_TITLE = 'Kansas City Balloon Decor, Garlands & Event Backdrops | BalloonCraft KC';
-const HOME_DESCRIPTION = 'BalloonCraft KC creates custom balloon arches, garlands, walls, marquees, and event backdrops for weddings, birthdays, showers, school events, and corporate launches across Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, Prairie Village, Shawnee, and nearby Johnson County venues.';
-const HOME_KEYWORDS = 'Kansas City balloon decor, balloon garland Kansas City, balloon arch Kansas City, Overland Park balloon decor, Olathe balloon arch, Lee\'s Summit balloon garland, balloon wall Kansas City, corporate balloon decor Kansas City, wedding balloon decor Kansas City';
+const ICON_MAP = [PartyPopper, Palette, Calendar, Store, School, HeartHandshake];
+const HOME_TITLE = 'Kansas City Balloon Decor for Weddings, Birthdays, Stores & Corporate Events | BalloonCraft KC';
+const HOME_DESCRIPTION = 'BalloonCraft KC creates exciting balloon arches, organic garlands, backdrops, balloon walls, marquees, and branded event installs for weddings, birthdays, showers, graduations, school events, grand openings, and corporate parties across Kansas City, Overland Park, Olathe, Lee\'s Summit, Lenexa, Leawood, Blue Springs, Liberty, and the surrounding metro.';
+const HOME_KEYWORDS = 'Kansas City balloon decor, balloon arch Kansas City, organic balloon garland Kansas City, balloon backdrop Kansas City, balloon wall Kansas City, wedding balloon decor Kansas City, birthday balloon decor Kansas City, corporate balloon decor Kansas City, grand opening balloons Kansas City, Overland Park balloon decor, Olathe balloon arch, Lee\'s Summit balloon garland';
 
 function HeroSection({ content }) {
   const { theme } = useTheme();
@@ -73,20 +73,17 @@ function HeroSection({ content }) {
 }
 
 function ServicesSection({ content }) {
-  const services = content.services?.length ? content.services : [
-    { title: 'Event Decorations', description: 'Stunning balloon arches, columns, and centerpieces for any celebration.' },
-    { title: 'Custom Designs', description: 'Unique balloon sculptures and installations tailored to your theme.' },
-    { title: 'Full Service', description: 'From consultation to setup and teardown — we handle everything.' },
-  ];
+  const cmsServices = Array.isArray(content.services) ? content.services.filter((service) => service?.title && service?.description) : [];
+  const services = [...cmsServices, ...LOCAL_SERVICE_HIGHLIGHTS].slice(0, 6);
 
   return (
     <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center mb-16">
-          <h2 className="font-display text-4xl mb-4">{content.services_title || 'What We Do'}</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{content.services_subtitle || 'Bringing your balloon dreams to life with professional artistry and attention to detail'}</p>
+          <h2 className="font-display text-4xl mb-4">{content.services_title || 'Balloon decor that feels bigger, bolder, and photo-ready'}</h2>
+          <p className="text-muted-foreground text-lg max-w-3xl mx-auto">{content.services_subtitle || 'From elegant wedding installs to high-energy retail launches, BalloonCraft KC builds custom decor that transforms venues, storefronts, party rooms, school spaces, and corporate events across the metro.'}</p>
         </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {services.map((s, i) => (
             <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6, delay: i * 0.15 }} className="text-center p-8 rounded-3xl bg-muted/30 border border-border/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
@@ -94,6 +91,36 @@ function ServicesSection({ content }) {
               </div>
               <h3 className="font-bold text-xl mb-3">{s.title}</h3>
               <p className="text-muted-foreground leading-relaxed">{s.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EventTypesSection() {
+  return (
+    <section className="py-20 bg-muted/30">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center max-w-4xl mx-auto">
+          <h2 className="font-display text-4xl mb-4">Made for every kind of celebration and spotlight moment</h2>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            BalloonCraft KC is built for more than one type of party. We style romantic wedding scenes, playful birthdays, polished corporate installs, school-event entrances, grand openings, community celebrations, and all the in-between moments that deserve a room with energy.
+          </p>
+        </motion.div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mt-12">
+          {LOCAL_EVENT_HIGHLIGHTS.map((eventType, index) => (
+            <motion.div
+              key={eventType}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              className="rounded-[1.75rem] border border-border/70 bg-white p-5 shadow-sm"
+            >
+              <p className="font-semibold">{eventType}</p>
             </motion.div>
           ))}
         </div>
@@ -197,9 +224,9 @@ function ServiceAreaSection() {
     <section className="py-20 bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center max-w-4xl mx-auto">
-          <h2 className="font-display text-4xl mb-4">Serving Kansas City celebrations across the metro</h2>
+          <h2 className="font-display text-4xl mb-4">Serving Kansas City, Johnson County, and the wider metro</h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            BalloonCraft KC designs custom balloon decor for weddings, birthdays, baby showers, graduations, school events, brand activations, grand openings, and corporate installs throughout the Kansas City metro. We regularly serve venues, storefronts, homes, and event spaces across Missouri and Johnson County.
+            BalloonCraft KC designs custom balloon decor for weddings, birthdays, showers, graduations, school events, proms, storefront launches, corporate installs, and branded celebrations throughout the Kansas City metro. We regularly style venues, homes, schools, storefronts, offices, and event spaces across Missouri and Johnson County.
           </p>
         </motion.div>
         <div className="flex flex-wrap justify-center gap-3 mt-10">
@@ -346,10 +373,10 @@ function CTASection() {
     <section className="py-20 text-white relative overflow-hidden" style={{ background: heroBg }} aria-labelledby="home-cta-title">
       <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
-          <h2 id="home-cta-title" className="font-display text-4xl sm:text-5xl mb-6">Ready to Party?</h2>
-          <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Let's create something extraordinary for your next event. Get in touch and let the magic begin!</p>
+          <h2 id="home-cta-title" className="font-display text-4xl sm:text-5xl mb-6">Ready for a room that actually makes people say wow?</h2>
+          <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Tell BalloonCraft KC about your colors, venue, guest count, and dream setup. We’ll help turn the idea into a statement piece people photograph the second they walk in.</p>
           <Button asChild size="lg" className="rounded-full text-base px-10 font-bold bg-white text-primary hover:bg-white/90">
-            <Link to="/contact">Contact Us Today <ArrowRight className="w-4 h-4 ml-2" /></Link>
+            <Link to="/contact">Start Your Event Design <ArrowRight className="w-4 h-4 ml-2" /></Link>
           </Button>
         </motion.div>
       </div>
@@ -402,6 +429,7 @@ export default function Home() {
     <>
       <HeroSection content={content} />
       <ServicesSection content={content} />
+      <EventTypesSection />
       <ServiceAreaSection />
       <FeaturedProjectsSection content={content} />
       <TestimonialsPreview content={content} />

@@ -28,8 +28,8 @@ export default function Contact() {
 
   useEffect(() => {
     const canonical = formatCanonicalUrl(domain, '/contact');
-    const pageTitle = 'Contact BalloonCraft KC | Kansas City Balloon Decor Quotes';
-    const description = content.subtitle || 'Contact BalloonCraft KC for custom balloon decor, event backdrops, and quote requests across Kansas City, Overland Park, Olathe, Lee\'s Summit, and the surrounding metro.';
+    const pageTitle = 'Contact BalloonCraft KC | Balloon Arches, Garlands & Event Backdrops in Kansas City';
+    const description = 'Contact BalloonCraft KC for balloon arches, organic garlands, event backdrops, balloon walls, marquees, school-event decor, and corporate installs across Kansas City, Overland Park, Olathe, Lee’s Summit, and the surrounding metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
@@ -165,8 +165,22 @@ export default function Contact() {
             <div className="rounded-[1.75rem] border border-border/60 bg-muted/30 p-6 mb-8">
               <h2 className="font-display text-2xl mb-3">Serving Kansas City and the surrounding metro</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Tell us about your event, venue, colors, and wishlist. We handle balloon arches, garlands, walls, backdrops, marquees, and custom installs for homes, venues, storefronts, schools, and corporate spaces across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, Lenexa, Leawood, Prairie Village, Shawnee, and nearby communities.
+                Tell us about your event, venue, colors, and wishlist. We handle balloon arches, organic garlands, walls, backdrops, marquee moments, branded installs, and custom event styling for homes, venues, storefronts, schools, and corporate spaces across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, Lenexa, Leawood, Prairie Village, Shawnee, Blue Springs, Liberty, and nearby communities.
               </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 mb-8">
+              <div className="rounded-[1.75rem] border border-border/60 bg-white p-5 shadow-sm">
+                <h3 className="font-bold text-lg mb-3">Popular service requests</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Balloon arches, organic garlands, balloon walls, photo backdrops, marquee letters, school-event decor, grand opening installs, and branded corporate displays.
+                </p>
+              </div>
+              <div className="rounded-[1.75rem] border border-border/60 bg-white p-5 shadow-sm">
+                <h3 className="font-bold text-lg mb-3">Common event types</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Weddings, birthdays, showers, graduations, proms, homecomings, office parties, retail launches, community events, galas, and fundraisers.
+                </p>
+              </div>
             </div>
             <div className="space-y-6">
               {infoItems.filter(item => item.value).map((item, i) => (

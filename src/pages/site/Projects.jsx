@@ -31,8 +31,8 @@ export default function Projects() {
   // 9.3 — Canonical + OG meta tags
   useEffect(() => {
     const canonical = formatCanonicalUrl(DOMAIN, '/projects');
-    const pageTitle = 'Kansas City Balloon Portfolio, Announcements & Updates | BalloonCraft KC';
-    const description = content.subtitle || 'Browse BalloonCraft KC portfolio entries, launch announcements, event installs, and business updates from across Kansas City, Overland Park, Olathe, Lee\'s Summit, and the surrounding metro.';
+    const pageTitle = 'Kansas City Balloon Install Portfolio, Decor Ideas & Event Updates | BalloonCraft KC';
+    const description = 'Browse BalloonCraft KC balloon installs, decor ideas, event highlights, launches, and announcements featuring arches, garlands, backdrops, branded installs, and celebration styling across Kansas City and the surrounding metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
@@ -98,7 +98,7 @@ export default function Projects() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-[1.75rem] border border-border/60 bg-muted/30 p-6 mb-8">
             <p className="text-muted-foreground leading-relaxed">
-              Explore a mix of real BalloonCraft KC installs, launch notes, event highlights, and business updates from across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, and nearby metro venues. Use the filters to zero in on balloon garlands, arches, walls, backdrops, custom installs, and the kinds of events or announcements that match what you want to see.
+              Explore a mix of real BalloonCraft KC installs, launch notes, event highlights, and business updates from across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, and nearby metro venues. This page blends portfolio work with announcements and inspiration, so you can browse balloon garlands, arches, walls, backdrops, marquee moments, branded installs, and the event types or cities that fit your vision.
             </p>
           </div>
 

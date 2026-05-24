@@ -138,6 +138,7 @@ const emptyPaymentForm = {
   paidAt: new Date().toISOString().slice(0, 10),
   sendReceipt: true,
 };
+const TEMPLATE_EDITOR_FIELDS = ['subject_line', 'document_title', 'intro_text', 'body_text', 'closing_text'];
 
 function serializeCsvValue(value) {
   const normalized = value == null
@@ -362,6 +363,7 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
   const [templateForm, setTemplateForm] = useState(emptyTemplateForm);
   const [editingTemplateId, setEditingTemplateId] = useState(null);
   const [uploadingTemplateDocument, setUploadingTemplateDocument] = useState(false);
+  const [activeTemplateField, setActiveTemplateField] = useState('body_text');
 
   const [packageForm, setPackageForm] = useState(emptyPackageForm);
   const [paymentForm, setPaymentForm] = useState(emptyPaymentForm);
@@ -498,6 +500,13 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
     onNavigateTab?.(nextTab);
   };
 
+  const placeholderGroups = useMemo(() => CONTRACT_PLACEHOLDERS.reduce((groups, field) => {
+    const group = field.group || 'Template fields';
+    if (!groups[group]) groups[group] = [];
+    groups[group].push(field);
+    return groups;
+  }, {}), []);
+
   const handleExport = (filename, rows, label) => {
     if (!rows.length) {
       toast.info(`No ${label.toLowerCase()} records are available to export yet.`);
@@ -506,6 +515,31 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
 
     downloadCsvFile(filename, rows);
     toast.success(`${label} export downloaded.`);
+  };
+
+  const insertTemplatePlaceholder = async (placeholderKey) => {
+    const token = `{{${placeholderKey}}}`;
+
+    if (!activeTemplateField || !TEMPLATE_EDITOR_FIELDS.includes(activeTemplateField)) {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(token);
+        toast.success('Placeholder copied.');
+      }
+      return;
+    }
+
+    setTemplateForm((current) => {
+      const existingValue = current[activeTemplateField] || '';
+      const prefix = existingValue && !existingValue.endsWith(' ') && !existingValue.endsWith('\n') ? ' ' : '';
+
+      return {
+        ...current,
+        [activeTemplateField]: `${existingValue}${prefix}${token}`,
+      };
+    });
+
+    const activeFieldLabel = CONTRACT_PLACEHOLDERS.find((field) => field.key === placeholderKey)?.label || 'Placeholder';
+    toast.success(`${activeFieldLabel} inserted into ${activeTemplateField.replace(/_/g, ' ')}.`);
   };
 
   const clientMutation = useMutation({
@@ -1254,13 +1288,35 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
                 </div>
               </div>
 
-              <div className="rounded-2xl border bg-muted/40 p-4 space-y-2">
-                <p className="text-sm font-semibold">Available placeholders</p>
-                <div className="flex flex-wrap gap-2">
-                  {CONTRACT_PLACEHOLDERS.map((field) => (
-                    <span key={field.key} className="rounded-full bg-white border px-3 py-1 text-xs font-mono">
-                      {`{{${field.key}}}`}
-                    </span>
+              <div className="rounded-2xl border bg-muted/40 p-4 space-y-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Simple template fields</p>
+                  <p className="text-xs text-muted-foreground">
+                    Click a field below and it will drop into the template section you are currently editing. Right now, inserts go into
+                    <span className="font-semibold text-foreground"> {activeTemplateField.replace(/_/g, ' ')}</span>.
+                  </p>
+                </div>
+                <div className="grid gap-4 lg:grid-cols-3">
+                  {Object.entries(placeholderGroups).map(([groupName, fields]) => (
+                    <div key={groupName} className="rounded-2xl border bg-white p-4 space-y-3">
+                      <p className="text-sm font-semibold">{groupName}</p>
+                      <div className="space-y-2">
+                        {fields.map((field) => (
+                          <button
+                            key={field.key}
+                            type="button"
+                            onClick={() => insertTemplatePlaceholder(field.key)}
+                            className="w-full rounded-2xl border px-3 py-3 text-left transition hover:bg-muted"
+                          >
+                            <span className="block text-sm font-semibold">{field.label}</span>
+                            <span className="mt-1 block text-xs text-muted-foreground">{field.help}</span>
+                            <span className="mt-2 inline-flex rounded-full bg-muted px-2 py-1 font-mono text-[11px] text-muted-foreground">
+                              {`{{${field.key}}}`}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -1288,26 +1344,49 @@ export default function ClientStudio({ embedded = false, initialTab = 'overview'
               </div>
               <div className="space-y-2">
                 <Label>Fallback subject line</Label>
-                <Input value={templateForm.subject_line} onChange={(event) => setTemplateForm({ ...templateForm, subject_line: event.target.value })} />
+                <Input
+                  value={templateForm.subject_line}
+                  onFocus={() => setActiveTemplateField('subject_line')}
+                  onChange={(event) => setTemplateForm({ ...templateForm, subject_line: event.target.value })}
+                />
                 <p className="text-xs text-muted-foreground">
                   Downpayment and final-payment invoice emails use automatic BalloonCraft KC subject lines. This stays available as a fallback for future non-invoice delivery sends.
                 </p>
               </div>
               <div className="space-y-2">
                 <Label>Document title</Label>
-                <Input value={templateForm.document_title} onChange={(event) => setTemplateForm({ ...templateForm, document_title: event.target.value })} />
+                <Input
+                  value={templateForm.document_title}
+                  onFocus={() => setActiveTemplateField('document_title')}
+                  onChange={(event) => setTemplateForm({ ...templateForm, document_title: event.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Intro text</Label>
-                <Textarea rows={4} value={templateForm.intro_text} onChange={(event) => setTemplateForm({ ...templateForm, intro_text: event.target.value })} />
+                <Textarea
+                  rows={4}
+                  value={templateForm.intro_text}
+                  onFocus={() => setActiveTemplateField('intro_text')}
+                  onChange={(event) => setTemplateForm({ ...templateForm, intro_text: event.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Agreement body</Label>
-                <Textarea rows={14} value={templateForm.body_text} onChange={(event) => setTemplateForm({ ...templateForm, body_text: event.target.value })} />
+                <Textarea
+                  rows={14}
+                  value={templateForm.body_text}
+                  onFocus={() => setActiveTemplateField('body_text')}
+                  onChange={(event) => setTemplateForm({ ...templateForm, body_text: event.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Closing text</Label>
-                <Textarea rows={4} value={templateForm.closing_text} onChange={(event) => setTemplateForm({ ...templateForm, closing_text: event.target.value })} />
+                <Textarea
+                  rows={4}
+                  value={templateForm.closing_text}
+                  onFocus={() => setActiveTemplateField('closing_text')}
+                  onChange={(event) => setTemplateForm({ ...templateForm, closing_text: event.target.value })}
+                />
               </div>
 
               <div className="rounded-2xl border bg-muted/30 p-4 space-y-4">

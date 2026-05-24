@@ -19,8 +19,8 @@ export default function Testimonials() {
 
   useEffect(() => {
     const canonical = formatCanonicalUrl(domain, '/testimonials');
-    const pageTitle = 'Kansas City Balloon Decor Reviews | BalloonCraft KC';
-    const description = content.subtitle || 'Read BalloonCraft KC client reviews for weddings, birthdays, showers, school events, and corporate installs across the Kansas City metro.';
+    const pageTitle = 'Kansas City Balloon Decor Reviews for Weddings, Parties & Corporate Events | BalloonCraft KC';
+    const description = 'Read BalloonCraft KC reviews from clients booking balloon arches, garlands, backdrops, school-event decor, birthday installs, shower decor, branded activations, and corporate event styling across the Kansas City metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
@@ -63,7 +63,7 @@ export default function Testimonials() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-[1.75rem] border border-border/60 bg-muted/30 p-6 mb-8">
             <p className="text-muted-foreground leading-relaxed">
-              These reviews reflect the kinds of installs BalloonCraft KC creates across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, and the surrounding metro, from birthdays and baby showers to school celebrations, grand openings, and polished corporate events.
+              These reviews reflect the kinds of installs BalloonCraft KC creates across Kansas City, Overland Park, Olathe, Lee&apos;s Summit, and the surrounding metro, from birthdays and baby showers to school celebrations, grand openings, wedding weekends, polished corporate events, and high-energy branded moments.
             </p>
           </div>
           {isLoading ? (

@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
-import { LOCAL_SERVICE_AREAS, formatCanonicalUrl } from '@/lib/seo';
+import { LOCAL_EVENT_HIGHLIGHTS, LOCAL_SERVICE_AREAS, LOCAL_SERVICE_HIGHLIGHTS, formatCanonicalUrl } from '@/lib/seo';
 import { getHeroTextStyles } from '@/lib/accessibility';
 import { motion } from 'framer-motion';
-import { Heart, Award, Lightbulb, Clock } from 'lucide-react';
+import { Heart, Award, Lightbulb, Clock, Store, PartyPopper, School } from 'lucide-react';
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0 } };
 const iconMap = [Lightbulb, Award, Heart, Clock];
+const specialtyIcons = [PartyPopper, Store, School];
 
 export default function About() {
   const { content } = useSiteContent('about');
@@ -18,8 +19,8 @@ export default function About() {
 
   useEffect(() => {
     const canonical = formatCanonicalUrl(domain, '/about');
-    const pageTitle = 'About BalloonCraft KC | Kansas City Balloon Decor Team';
-    const description = content.subtitle || 'Learn about BalloonCraft KC, a Kansas City balloon decor studio serving weddings, birthdays, showers, schools, and corporate events across the metro.';
+    const pageTitle = 'About BalloonCraft KC | Kansas City Balloon Decor for Parties, Weddings & Brand Events';
+    const description = 'Learn about BalloonCraft KC, a Kansas City balloon decor studio creating arches, garlands, balloon walls, backdrops, and branded event installs for weddings, birthdays, school events, corporate parties, and grand openings across the metro.';
     let linkEl = document.querySelector('link[rel="canonical"]');
     if (!linkEl) { linkEl = document.createElement('link'); linkEl.rel = 'canonical'; document.head.appendChild(linkEl); }
     linkEl.href = canonical;
@@ -75,12 +76,81 @@ export default function About() {
         </div>
       </section>
 
+      <section className="py-20 bg-muted/30 content-section">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }} className="text-center max-w-4xl mx-auto mb-14">
+            <h2 className="font-display text-4xl mb-4">What we create and where it shows up</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              BalloonCraft KC is not limited to one look or one type of event. We build polished installs for elegant venues, playful parties, schools that need scale, and brands that want a memorable launch-day atmosphere.
+            </p>
+          </motion.div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              {
+                title: 'Celebrations with personality',
+                description: 'Weddings, birthdays, baby showers, bridal showers, anniversaries, and milestone events that need color, shape, and a real focal point.',
+              },
+              {
+                title: 'Retail and brand moments',
+                description: 'Grand openings, pop-ups, product launches, office parties, and branded installs that help businesses look lively, polished, and camera-ready.',
+              },
+              {
+                title: 'Schools and community spaces',
+                description: 'Proms, graduations, school spirit events, fundraisers, banquets, and community celebrations that need impact at larger scale.',
+              },
+            ].map((item, index) => {
+              const Icon = specialtyIcons[index % specialtyIcons.length];
+              return (
+                <motion.div
+                  key={item.title}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={fadeUp}
+                  transition={{ duration: 0.6, delay: index * 0.08 }}
+                  className="rounded-3xl border border-border/60 bg-white p-8 shadow-sm"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5">
+                    <Icon className="w-7 h-7" aria-hidden="true" />
+                  </div>
+                  <h3 className="font-bold text-xl mb-3">{item.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2 mt-12">
+            <div className="rounded-[1.75rem] border border-border/60 bg-white p-6">
+              <h3 className="font-display text-2xl mb-4">Popular BalloonCraft KC services</h3>
+              <div className="grid gap-3">
+                {LOCAL_SERVICE_HIGHLIGHTS.slice(0, 4).map((service) => (
+                  <div key={service.title} className="rounded-2xl border border-border/60 bg-muted/20 px-4 py-3">
+                    <p className="font-semibold">{service.title}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-[1.75rem] border border-border/60 bg-white p-6">
+              <h3 className="font-display text-2xl mb-4">Events we regularly decorate</h3>
+              <div className="flex flex-wrap gap-3">
+                {LOCAL_EVENT_HIGHLIGHTS.map((eventType) => (
+                  <span key={eventType} className="rounded-full border border-border/70 bg-muted/20 px-4 py-2 text-sm font-semibold">
+                    {eventType}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 bg-white content-section">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
             <h2 className="font-display text-4xl mb-4">Proudly serving the Kansas City metro</h2>
             <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mx-auto">
-              We create custom balloon decor for homes, storefronts, schools, offices, wedding venues, and event spaces across the metro. From Kansas City installs to Johnson County celebrations, our work is built around your space, your palette, and the kind of moment you want people to remember.
+              We create custom balloon decor for homes, storefronts, schools, offices, wedding venues, banquet halls, and event spaces across the metro. From Kansas City installs to Johnson County celebrations, our work is built around your space, your palette, and the kind of moment you want people to remember the second they walk in.
             </p>
           </motion.div>
           <div className="flex flex-wrap justify-center gap-3 mt-10">

@@ -134,20 +134,20 @@ export function computeInvoiceStatus(invoice, payments = []) {
 }
 
 export const CONTRACT_PLACEHOLDERS = [
-  { key: 'client_name', label: 'Client name' },
-  { key: 'business_name', label: 'Business name' },
-  { key: 'event_type', label: 'Event type' },
-  { key: 'event_date', label: 'Event date' },
-  { key: 'event_location', label: 'Event location' },
-  { key: 'service_summary', label: 'Service summary' },
-  { key: 'contract_amount', label: 'Contract amount' },
-  { key: 'down_payment_amount', label: 'Down payment amount' },
-  { key: 'down_payment_due_date', label: 'Down payment due date' },
-  { key: 'final_payment_amount', label: 'Final payment amount' },
-  { key: 'final_payment_due_date', label: 'Final payment due date' },
-  { key: 'invoice_code', label: 'Invoice ID' },
-  { key: 'payment_instructions', label: 'Payment instructions' },
-  { key: 'additional_terms', label: 'Additional terms' },
+  { key: 'client_name', label: 'Client name', group: 'Client & event details', help: 'Pulls in the client contact name.' },
+  { key: 'business_name', label: 'Business name', group: 'Client & event details', help: 'Pulls in the client business name when one exists.' },
+  { key: 'event_type', label: 'Event type', group: 'Client & event details', help: 'Wedding, birthday, grand opening, corporate event, and so on.' },
+  { key: 'event_date', label: 'Event date', group: 'Client & event details', help: 'Uses the saved event date from the invoice.' },
+  { key: 'event_location', label: 'Event location', group: 'Client & event details', help: 'Uses the event venue or address from the invoice.' },
+  { key: 'service_summary', label: 'Services included', group: 'Client & event details', help: 'Pulls in the invoice service summary or scope of work.' },
+  { key: 'contract_amount', label: 'Full contract amount', group: 'Pricing & payment schedule', help: 'Shows the full event total.' },
+  { key: 'down_payment_amount', label: 'Down payment amount', group: 'Pricing & payment schedule', help: 'Shows the deposit amount due to book the event.' },
+  { key: 'down_payment_due_date', label: 'Down payment due date', group: 'Pricing & payment schedule', help: 'Shows when the deposit must be paid.' },
+  { key: 'final_payment_amount', label: 'Final payment amount', group: 'Pricing & payment schedule', help: 'Shows the remaining balance due after the deposit.' },
+  { key: 'final_payment_due_date', label: 'Final payment due date', group: 'Pricing & payment schedule', help: 'Shows when the remaining balance is due.' },
+  { key: 'invoice_code', label: 'Invoice ID', group: 'Pricing & payment schedule', help: 'Pulls in the generated BalloonCraft KC invoice code.' },
+  { key: 'payment_instructions', label: 'Payment instructions', group: 'Payment notes & terms', help: 'Includes Venmo, Cash App, Zelle, or any custom payment directions.' },
+  { key: 'additional_terms', label: 'Additional terms', group: 'Payment notes & terms', help: 'Adds extra event-specific terms from the invoice.' },
 ];
 
 export const SIGNATURE_FIELD_TYPES = [
