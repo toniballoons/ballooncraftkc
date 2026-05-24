@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Mail, Settings, Menu, X,
   Star, Palette, Image, HelpCircle, LogOut, PanelsTopLeft,
+  ClipboardSignature,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
@@ -12,6 +13,7 @@ import { ensureAccessibleColor } from '@/lib/accessibility';
 
 const NAV_ITEMS = [
   { label: 'CMS / Site Management', href: '/admin',       icon: Settings },
+  { label: 'Client Studio', href: '/admin?panel=clients', icon: ClipboardSignature },
   { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard },
   { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft },
   { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText },
@@ -40,13 +42,16 @@ export default function AdminLayout() {
   const navBg = theme?.nav?.bg || 'rgba(255,255,255,0.97)';
   const navTextColor = theme?.nav?.textColor || '#1a1a1a';
   const safeNavTextColor = ensureAccessibleColor(navTextColor, navBg);
-  const currentAdminUrl = `${location.pathname}${location.search}`;
 
   const isNavItemActive = (href) => {
     const [pathname, rawSearch] = href.split('?');
     if (pathname !== location.pathname) return false;
-    if (!rawSearch) return true;
-    return currentAdminUrl === href;
+    if (!rawSearch) return location.search === '';
+
+    const targetParams = new URLSearchParams(rawSearch);
+    const currentParams = new URLSearchParams(location.search);
+
+    return Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
   };
 
   useEffect(() => {

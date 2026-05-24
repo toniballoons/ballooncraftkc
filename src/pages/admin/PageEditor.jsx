@@ -6,7 +6,7 @@ import { DEFAULT_CONTENT } from '@/lib/siteDefaults';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, Eye, Code, RotateCcw, ExternalLink } from 'lucide-react';
+import { Save, Eye, Code, RotateCcw, ExternalLink, ClipboardSignature, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSearchParams } from 'react-router-dom';
 import HeroEditor from '@/components/admin/HeroEditor';
@@ -38,6 +38,7 @@ const PREVIEW_URLS = {
   privacy: '/privacy', terms: '/terms', legal: '/legal',
   navbar: '/', footer: '/',
 };
+const CLIENT_TABS = ['overview', 'clients', 'invoices', 'contracts', 'packages', 'payments', 'reports'];
 
 function JsonEditor({ value, onChange }) {
   const [text, setText] = useState(JSON.stringify(value, null, 2));
@@ -75,15 +76,22 @@ export default function PageEditor() {
   const [isDirty, setIsDirty] = useState(false);
   const activePanel = searchParams.get('panel') === 'clients' ? 'clients' : 'content';
   const activePageKey = PAGE_KEYS.includes(searchParams.get('page')) ? searchParams.get('page') : 'hero';
+  const activeClientTab = CLIENT_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'overview';
 
-  const updateWorkspace = (panel, pageKey = activePageKey) => {
+  const updateWorkspace = (panel, pageKey = activePageKey, clientTab = activeClientTab) => {
     const nextParams = new URLSearchParams(searchParams);
 
     if (panel === 'clients') {
       nextParams.set('panel', 'clients');
+      if (clientTab && clientTab !== 'overview') {
+        nextParams.set('tab', clientTab);
+      } else {
+        nextParams.delete('tab');
+      }
       nextParams.delete('page');
     } else {
       nextParams.delete('panel');
+      nextParams.delete('tab');
       nextParams.set('page', pageKey);
     }
 
@@ -170,9 +178,50 @@ export default function PageEditor() {
       <Tabs value={activePanel} onValueChange={(value) => updateWorkspace(value, activePageKey)}>
         <TabsList className="h-auto flex-wrap justify-start">
           <TabsTrigger value="content">Site Content</TabsTrigger>
-          <TabsTrigger value="clients">Documents & Invoicing</TabsTrigger>
+          <TabsTrigger value="clients">Client Studio</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className={activePanel === 'content' ? 'border-primary/40 bg-primary/5' : ''}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <FileText className="w-4 h-4" />
+              Public Site Content
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Edit the homepage, page copy, navigation, footer, legal pages, and public-facing CMS content.
+            </p>
+            <Button variant={activePanel === 'content' ? 'default' : 'outline'} onClick={() => updateWorkspace('content', activePageKey)}>
+              Open site content tools
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className={activePanel === 'clients' ? 'border-primary/40 bg-primary/5' : ''}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ClipboardSignature className="w-4 h-4" />
+              Client Studio
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Register clients, create invoices, build agreements, send official BalloonCraft KC document deliveries, and export reports.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant={activePanel === 'clients' ? 'default' : 'outline'} onClick={() => updateWorkspace('clients', activePageKey, activeClientTab)}>
+                Open client studio
+              </Button>
+              <Button variant="ghost" onClick={() => updateWorkspace('clients', activePageKey, 'reports')}>
+                Open reports
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Unsaved changes banner */}
       {activePanel === 'content' && isDirty && (
@@ -185,7 +234,11 @@ export default function PageEditor() {
       )}
 
       {activePanel === 'clients' ? (
-        <ClientStudio embedded />
+        <ClientStudio
+          embedded
+          initialTab={activeClientTab}
+          onNavigateTab={(tab) => updateWorkspace('clients', activePageKey, tab)}
+        />
       ) : (
         <>
           {/* Page tabs */}

@@ -1,11 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {
+  BarChart3,
   BadgeDollarSign,
   BriefcaseBusiness,
   ClipboardSignature,
   Copy,
+  Download,
   ExternalLink,
   FileUp,
   MailCheck,
@@ -61,6 +63,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 const CLIENT_STATUSES = ['lead', 'quoted', 'booked', 'active', 'completed'];
 const INVOICE_STATUSES = ['draft', 'sent', 'viewed', 'pending_payment', 'partially_paid', 'deposit_paid', 'paid'];
 const PAYMENT_METHODS = ['venmo', 'cash_app', 'zelle', 'cash', 'check', 'bank_transfer', 'other'];
+const CLIENT_STUDIO_TABS = ['overview', 'clients', 'invoices', 'contracts', 'packages', 'payments', 'reports'];
 const PACKAGE_STATUSES = {
   sent: 'bg-slate-900 text-white',
   viewed: 'bg-sky-600 text-white',
@@ -136,6 +139,41 @@ const emptyPaymentForm = {
   sendReceipt: true,
 };
 
+function serializeCsvValue(value) {
+  const normalized = value == null
+    ? ''
+    : Array.isArray(value)
+      ? value.join(', ')
+      : String(value);
+
+  return `"${normalized.replace(/"/g, '""')}"`;
+}
+
+function downloadCsvFile(filename, rows) {
+  if (typeof window === 'undefined' || !rows.length) return false;
+
+  const headers = Array.from(rows.reduce((set, row) => {
+    Object.keys(row).forEach((key) => set.add(key));
+    return set;
+  }, new Set()));
+
+  const csv = [
+    headers.map(serializeCsvValue).join(','),
+    ...rows.map((row) => headers.map((header) => serializeCsvValue(row[header])).join(',')),
+  ].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const link = window.document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  window.document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+  return true;
+}
+
 function SetupRequired({ error }) {
   return (
     <Card className="border-amber-300 bg-amber-50">
@@ -163,6 +201,25 @@ function OverviewCard({ icon: Icon, title, value, detail }) {
           <p className="text-2xl font-bold mt-1">{value}</p>
           <p className="text-sm text-muted-foreground mt-1">{detail}</p>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function QuickActionCard({ icon: Icon, title, detail, actionLabel, onAction }) {
+  return (
+    <Card>
+      <CardContent className="p-5 space-y-4">
+        <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+          <Icon className="w-5 h-5" />
+        </div>
+        <div className="space-y-1">
+          <p className="font-semibold">{title}</p>
+          <p className="text-sm text-muted-foreground">{detail}</p>
+        </div>
+        <Button variant="outline" className="w-full justify-center" onClick={onAction}>
+          {actionLabel}
+        </Button>
       </CardContent>
     </Card>
   );
@@ -291,9 +348,10 @@ function DocumentPreview({ template, client, invoice, packetTitle }) {
   );
 }
 
-export default function ClientStudio({ embedded = false }) {
+export default function ClientStudio({ embedded = false, initialTab = 'overview', onNavigateTab }) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState(CLIENT_STUDIO_TABS.includes(initialTab) ? initialTab : 'overview');
 
   const [clientForm, setClientForm] = useState(emptyClientForm);
   const [editingClientId, setEditingClientId] = useState(null);
@@ -307,6 +365,10 @@ export default function ClientStudio({ embedded = false }) {
 
   const [packageForm, setPackageForm] = useState(emptyPackageForm);
   const [paymentForm, setPaymentForm] = useState(emptyPaymentForm);
+
+  useEffect(() => {
+    setActiveTab(CLIENT_STUDIO_TABS.includes(initialTab) ? initialTab : 'overview');
+  }, [initialTab]);
 
   const queryOptions = { initialData: [], retry: false };
 
@@ -363,6 +425,88 @@ export default function ClientStudio({ embedded = false }) {
   const selectedPackageClient = clients.find((client) => client.id === packageForm.clientId);
   const selectedPackageInvoice = invoices.find((invoice) => invoice.id === packageForm.invoiceId);
   const selectedPackageTemplate = templates.find((template) => template.id === packageForm.templateId);
+  const totalCollected = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const outstandingInvoices = invoices.filter((invoice) => (invoiceSummaries[invoice.id]?.balance ?? 0) > 0).length;
+  const openedDeliveries = packages.filter((packet) => Boolean(packet.viewed_at) && !packet.signed_at).length;
+  const signedDeliveries = packages.filter((packet) => Boolean(packet.signed_at) || packet.status === 'signed').length;
+
+  const clientReportRows = useMemo(() => clients.map((client) => ({
+    client_code: client.client_code,
+    status: client.status,
+    contact_name: client.contact_name,
+    business_name: client.business_name || '',
+    email: client.email || '',
+    phone: client.phone || '',
+    event_type: client.event_type || '',
+    event_date: client.event_date || '',
+    venue_name: client.venue_name || '',
+    guest_count: client.guest_count ?? '',
+    created_at: client.created_at || '',
+  })), [clients]);
+
+  const invoiceReportRows = useMemo(() => invoices.map((invoice) => {
+    const client = clients.find((item) => item.id === invoice.client_id);
+    const summary = invoiceSummaries[invoice.id] || computeInvoiceStatus(invoice, payments);
+
+    return {
+      invoice_code: invoice.invoice_code,
+      invoice_title: invoice.invoice_title,
+      client_name: client?.contact_name || '',
+      client_email: client?.email || '',
+      event_type: invoice.event_type || '',
+      event_date: invoice.event_date || '',
+      status: summary.status,
+      contract_amount: Number(invoice.contract_amount || 0).toFixed(2),
+      balance_remaining: Number(summary.balance || 0).toFixed(2),
+      sent_at: invoice.sent_at || '',
+      created_at: invoice.created_at || '',
+    };
+  }), [clients, invoiceSummaries, invoices, payments]);
+
+  const paymentReportRows = useMemo(() => payments.map((payment) => {
+    const invoice = invoices.find((item) => item.id === payment.invoice_id);
+    const client = clients.find((item) => item.id === invoice?.client_id);
+
+    return {
+      transaction_code: payment.transaction_code,
+      confirmation_code: payment.confirmation_code,
+      client_name: client?.contact_name || '',
+      client_email: client?.email || '',
+      invoice_code: invoice?.invoice_code || '',
+      invoice_title: invoice?.invoice_title || '',
+      amount: Number(payment.amount || 0).toFixed(2),
+      payment_method: payment.payment_method || '',
+      paid_at: payment.paid_at || '',
+      receipt_sent: payment.email_receipt_sent ? 'yes' : 'no',
+      source_reference: payment.source_reference || '',
+    };
+  }), [clients, invoices, payments]);
+
+  const deliveryReportRows = useMemo(() => packages.map((packet) => ({
+    package_code: packet.package_code,
+    packet_title: packet.packet_title,
+    recipient_name: packet.recipient_name || '',
+    recipient_email: packet.recipient_email || '',
+    status: packet.status || '',
+    viewed_at: packet.viewed_at || '',
+    signed_at: packet.signed_at || '',
+    created_at: packet.created_at || '',
+  })), [packages]);
+
+  const handleClientStudioTabChange = (nextTab) => {
+    setActiveTab(nextTab);
+    onNavigateTab?.(nextTab);
+  };
+
+  const handleExport = (filename, rows, label) => {
+    if (!rows.length) {
+      toast.info(`No ${label.toLowerCase()} records are available to export yet.`);
+      return;
+    }
+
+    downloadCsvFile(filename, rows);
+    toast.success(`${label} export downloaded.`);
+  };
 
   const clientMutation = useMutation({
     mutationFn: async () => {
@@ -694,6 +838,14 @@ export default function ClientStudio({ embedded = false }) {
           <p className="text-muted-foreground mt-1">
             Register clients, build invoices, place signing checkpoints, send official BalloonCraft KC document deliveries, and track every completed copy from this CMS workspace.
           </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={() => handleClientStudioTabChange('packages')}>
+              Send client delivery
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => handleClientStudioTabChange('reports')}>
+              Open reports
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -719,14 +871,130 @@ export default function ClientStudio({ embedded = false }) {
         <OverviewCard icon={MailCheck} title="Deliveries" value={packages.length} detail="Sent, opened, and signed document deliveries" />
       </div>
 
-      <Tabs defaultValue="clients" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleClientStudioTabChange} className="space-y-6">
         <TabsList className="h-auto flex-wrap justify-start">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="clients">Clients</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
           <TabsTrigger value="contracts">Agreement Builder</TabsTrigger>
           <TabsTrigger value="packages">Deliveries</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <QuickActionCard
+              icon={BriefcaseBusiness}
+              title="Register client"
+              detail="Create the client record first so their event details and contact info stay tied to every invoice and document."
+              actionLabel="Open client records"
+              onAction={() => handleClientStudioTabChange('clients')}
+            />
+            <QuickActionCard
+              icon={ReceiptText}
+              title="Create invoice"
+              detail="Build the custom event invoice with the contract amount, deposit amount, final payment date, and payment links."
+              actionLabel="Open invoices"
+              onAction={() => handleClientStudioTabChange('invoices')}
+            />
+            <QuickActionCard
+              icon={ClipboardSignature}
+              title="Build agreement"
+              detail="Write the BalloonCraft KC agreement, upload supporting documents, and mark where the client signs, initials, dates, or types."
+              actionLabel="Open agreement builder"
+              onAction={() => handleClientStudioTabChange('contracts')}
+            />
+            <QuickActionCard
+              icon={MailCheck}
+              title="Send official delivery"
+              detail="Package the invoice and documents into BalloonCraft KC’s secure signing link, then email it directly to the client."
+              actionLabel="Open deliveries"
+              onAction={() => handleClientStudioTabChange('packages')}
+            />
+            <QuickActionCard
+              icon={Wallet}
+              title="Record payment"
+              detail="Track deposits, final payments, transaction IDs, and confirmation codes after Toni confirms payment outside the site."
+              actionLabel="Open payments"
+              onAction={() => handleClientStudioTabChange('payments')}
+            />
+            <QuickActionCard
+              icon={BarChart3}
+              title="Download reports"
+              detail="Export client, invoice, payment, and delivery reports so the business always has a clean operations record."
+              actionLabel="Open reports"
+              onAction={() => handleClientStudioTabChange('reports')}
+            />
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle>BalloonCraft KC client workflow</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <div className="rounded-2xl border bg-primary/5 p-4 space-y-3">
+                  <p className="font-semibold text-primary">How to send a complete BalloonCraft KC client package</p>
+                  <div className="grid gap-2 text-muted-foreground">
+                    <p><strong>Step 1:</strong> Register the client and save their event details.</p>
+                    <p><strong>Step 2:</strong> Create the invoice with deposit and final-payment amounts.</p>
+                    <p><strong>Step 3:</strong> Build the agreement and upload any addendums or support files.</p>
+                    <p><strong>Step 4:</strong> Mark every signature, initial, date, or text checkpoint the client must complete.</p>
+                    <p><strong>Step 5:</strong> Send the official BalloonCraft KC delivery link for review, signing, and payment follow-through.</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl border p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Open invoices</p>
+                    <p className="text-2xl font-bold mt-2">{outstandingInvoices}</p>
+                    <p className="text-muted-foreground mt-1">Invoices still carrying a remaining balance.</p>
+                  </div>
+                  <div className="rounded-2xl border p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Signed deliveries</p>
+                    <p className="text-2xl font-bold mt-2">{signedDeliveries}</p>
+                    <p className="text-muted-foreground mt-1">Completed document deliveries returned through the Signature Center.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>What clients receive</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <div className="rounded-2xl border bg-muted/30 p-4 space-y-2">
+                  <p className="font-semibold">Official BalloonCraft KC delivery email</p>
+                  <p className="text-muted-foreground">
+                    The client gets a branded email that opens BalloonCraft KC’s secure document center instead of a generic third-party signing page.
+                  </p>
+                </div>
+                <div className="rounded-2xl border bg-muted/30 p-4 space-y-2">
+                  <p className="font-semibold">Hosted signing center</p>
+                  <p className="text-muted-foreground">
+                    They can review the invoice, generated agreement, uploaded documents, payment instructions, required checkpoints, and final signature all from one link.
+                  </p>
+                </div>
+                <div className="rounded-2xl border bg-muted/30 p-4 space-y-2">
+                  <p className="font-semibold">Completed copy returned automatically</p>
+                  <p className="text-muted-foreground">
+                    Once signed, BalloonCraft KC stores the completion record and emails the finished copy back to the client.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={() => handleClientStudioTabChange('packages')}>
+                    Start a delivery
+                  </Button>
+                  <Button variant="outline" onClick={() => handleClientStudioTabChange('contracts')}>
+                    Configure document fields
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="clients" className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <Card>
@@ -1561,6 +1829,79 @@ export default function ClientStudio({ embedded = false }) {
               })}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <OverviewCard icon={BriefcaseBusiness} title="Client records" value={clients.length} detail="Saved lead and booking profiles" />
+            <OverviewCard icon={ReceiptText} title="Open balances" value={outstandingInvoices} detail="Invoices still awaiting payment" />
+            <OverviewCard icon={Wallet} title="Collected" value={formatMoney(totalCollected)} detail="Recorded payments across all invoices" />
+            <OverviewCard icon={MailCheck} title="Opened deliveries" value={openedDeliveries} detail="Client deliveries viewed but not yet signed" />
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Export business reports</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-2xl border bg-primary/5 p-4 text-sm text-muted-foreground">
+                  Download clean CSV reports for clients, invoices, payments, and document deliveries. These exports are immediate and reflect exactly what BalloonCraft KC has stored right now.
+                </div>
+                <div className="grid gap-3">
+                  <Button variant="outline" className="justify-between" onClick={() => handleExport('ballooncraftkc-clients.csv', clientReportRows, 'Client report')}>
+                    Download client report
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" className="justify-between" onClick={() => handleExport('ballooncraftkc-invoices.csv', invoiceReportRows, 'Invoice report')}>
+                    Download invoice report
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" className="justify-between" onClick={() => handleExport('ballooncraftkc-payments.csv', paymentReportRows, 'Payment report')}>
+                    Download payment report
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" className="justify-between" onClick={() => handleExport('ballooncraftkc-deliveries.csv', deliveryReportRows, 'Delivery report')}>
+                    Download delivery report
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Operations snapshot</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl border p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Clients registered</p>
+                    <p className="text-2xl font-bold mt-2">{clients.length}</p>
+                    <p className="text-muted-foreground mt-1">Every saved lead, quote, and booked event profile.</p>
+                  </div>
+                  <div className="rounded-2xl border p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground font-semibold">Deliveries completed</p>
+                    <p className="text-2xl font-bold mt-2">{signedDeliveries}</p>
+                    <p className="text-muted-foreground mt-1">Document deliveries already signed and returned.</p>
+                  </div>
+                </div>
+                <div className="rounded-2xl border bg-muted/30 p-4 space-y-2">
+                  <p className="font-semibold">What belongs in these reports</p>
+                  <p className="text-muted-foreground">
+                    Use the client export for CRM cleanup, the invoice export for event balances, the payment export for reconciliation,
+                    and the delivery export to monitor which agreements are still waiting on a review or signature.
+                  </p>
+                </div>
+                <div className="rounded-2xl border bg-muted/30 p-4 space-y-2">
+                  <p className="font-semibold">Suggested admin workflow</p>
+                  <p className="text-muted-foreground">
+                    After sending a delivery, come back here to track signatures, record payments, and download updated reports whenever you need a fresh operational snapshot.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
