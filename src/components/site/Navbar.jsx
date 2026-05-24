@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
+import FlashSaleBanner from '@/components/shared/FlashSaleBanner';
+import { isFlashSaleActive, normalizeFlashSale } from '@/lib/flashSale';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 
@@ -9,6 +11,7 @@ export default function Navbar() {
   const { content } = useSiteContent('navbar');
   const { theme } = useTheme();
   const [open, setOpen] = useState(false);
+  const [now, setNow] = useState(() => new Date());
   const location = useLocation();
 
   const navBg = theme?.nav?.bg || 'rgba(255,255,255,0.92)';
@@ -16,6 +19,18 @@ export default function Navbar() {
   const logoColor = theme?.nav?.logoColor || '#e91e63';
   const navStyle = theme?.nav?.style || 'default';
   const isGlass = navStyle === 'glassmorphism' || navStyle === 'transparent-elegant';
+  const flashSale = normalizeFlashSale(content.flash_sale);
+  const flashSaleActive = isFlashSaleActive(flashSale, now);
+
+  useEffect(() => {
+    if (!flashSaleActive) return undefined;
+
+    const timer = window.setInterval(() => {
+      setNow(new Date());
+    }, 30000);
+
+    return () => window.clearInterval(timer);
+  }, [flashSaleActive]);
 
   return (
     <nav
@@ -27,6 +42,7 @@ export default function Navbar() {
         borderBottom: `1px solid ${textColor}18`,
       }}
     >
+      <FlashSaleBanner flashSale={flashSale} now={now} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3">

@@ -1,3 +1,5 @@
+import { DEFAULT_FLASH_SALE } from './flashSale';
+
 // Default content for all site pages - used when no DB content exists yet
 
 export const DEFAULT_CONTENT = {
@@ -157,6 +159,7 @@ export const DEFAULT_CONTENT = {
   },
   navbar: {
     logo_text: "BalloonCraft",
+    flash_sale: DEFAULT_FLASH_SALE,
     links: [
       { label: "Home", href: "/" },
       { label: "About", href: "/about" },

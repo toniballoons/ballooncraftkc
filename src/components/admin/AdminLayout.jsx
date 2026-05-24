@@ -8,7 +8,9 @@ import {
   UsersRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import FlashSaleBanner from '@/components/shared/FlashSaleBanner';
 import { useAuth } from '@/lib/AuthContext';
+import { isFlashSaleActive, normalizeFlashSale } from '@/lib/flashSale';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { ensureAccessibleColor } from '@/lib/accessibility';
@@ -38,6 +40,7 @@ const SITE_LINKS = [
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [now, setNow] = useState(() => new Date());
   const location = useLocation();
   const { logout, profile, hasPermission, adminHomePath } = useAuth();
   const { content: navContent } = useSiteContent('navbar');
@@ -46,6 +49,8 @@ export default function AdminLayout() {
   const navBg = theme?.nav?.bg || 'rgba(255,255,255,0.97)';
   const navTextColor = theme?.nav?.textColor || '#1a1a1a';
   const safeNavTextColor = ensureAccessibleColor(navTextColor, navBg);
+  const flashSale = normalizeFlashSale(navContent.flash_sale);
+  const flashSaleActive = isFlashSaleActive(flashSale, now);
 
   const visibleNavItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
@@ -77,6 +82,16 @@ export default function AdminLayout() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sidebarOpen]);
 
+  useEffect(() => {
+    if (!flashSaleActive) return undefined;
+
+    const timer = window.setInterval(() => {
+      setNow(new Date());
+    }, 30000);
+
+    return () => window.clearInterval(timer);
+  }, [flashSaleActive]);
+
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col">
       <a
@@ -94,6 +109,7 @@ export default function AdminLayout() {
           borderBottom: `1px solid ${safeNavTextColor}18`,
         }}
       >
+        <FlashSaleBanner flashSale={flashSale} now={now} />
         <div className="max-w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
 
@@ -192,7 +208,7 @@ export default function AdminLayout() {
         <aside
           id="admin-sidebar"
           className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-border transform transition-transform lg:translate-x-0 lg:static lg:top-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-          style={{ top: '80px' }}
+          style={{ top: flashSaleActive ? '124px' : '80px' }}
         >
           <div className="flex items-center justify-between p-4 border-b">
             <span className="font-display text-xl text-primary">CMS / Site Management</span>
