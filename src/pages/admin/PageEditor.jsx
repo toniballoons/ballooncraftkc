@@ -3,6 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as SiteContent from '@/entities/SiteContent';
 
 import { DEFAULT_CONTENT } from '@/lib/siteDefaults';
+import {
+  CMS_CONTENT_PAGE_KEYS,
+  CMS_CONTENT_PAGE_LABELS,
+  CMS_CONTENT_PREVIEW_URLS,
+  isCmsContentPageKey,
+} from '@/lib/cmsPages';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,28 +25,6 @@ import FooterEditor from '@/components/admin/FooterEditor';
 import GenericPageEditor from '@/components/admin/GenericPageEditor';
 import ClientStudio from '@/pages/admin/ClientStudio';
 
-const PAGE_KEYS = ['hero', 'about', 'contact', 'testimonials', 'projects', 'gallery', 'navbar', 'footer', 'privacy', 'terms', 'legal'];
-
-const PAGE_LABELS = {
-  hero: '🏠 Hero',
-  about: '👥 About',
-  contact: '📬 Contact',
-  testimonials: '⭐ Testimonials',
-  projects: '🖼️ Projects',
-  gallery: '🖼️ Gallery',
-  navbar: '🔗 Navbar',
-  footer: '🦶 Footer',
-  privacy: '🔒 Privacy',
-  terms: '📄 Terms',
-  legal: '⚖️ Legal',
-};
-
-const PREVIEW_URLS = {
-  hero: '/', about: '/about', contact: '/contact',
-  testimonials: '/testimonials', projects: '/projects', gallery: '/gallery',
-  privacy: '/privacy', terms: '/terms', legal: '/legal',
-  navbar: '/', footer: '/',
-};
 const CLIENT_TABS = ['overview', 'clients', 'invoices', 'contracts', 'packages', 'payments', 'reports'];
 
 function JsonEditor({ value, onChange }) {
@@ -80,7 +64,7 @@ export default function PageEditor() {
   const [dbRecordId, setDbRecordId] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
   const activePanel = searchParams.get('panel') === 'clients' ? 'clients' : 'content';
-  const activePageKey = PAGE_KEYS.includes(searchParams.get('page')) ? searchParams.get('page') : 'hero';
+  const activePageKey = isCmsContentPageKey(searchParams.get('page')) ? searchParams.get('page') : 'hero';
   const activeClientTab = CLIENT_TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'overview';
   const canManageSite = hasPermission('site');
   const canManageClients = hasPermission('clients');
@@ -269,9 +253,9 @@ export default function PageEditor() {
           <div className="overflow-x-auto">
             <Tabs value={activePageKey} onValueChange={(value) => updateWorkspace('content', value)}>
               <TabsList className="flex w-max gap-1 h-auto p-1">
-                {PAGE_KEYS.map((key) => (
+                {CMS_CONTENT_PAGE_KEYS.map((key) => (
                   <TabsTrigger key={key} value={key} className="text-xs whitespace-nowrap">
-                    {PAGE_LABELS[key]}
+                    {CMS_CONTENT_PAGE_LABELS[key]}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -282,9 +266,9 @@ export default function PageEditor() {
             {/* Editor column */}
             <Card>
               <CardHeader className="pb-3 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm">{PAGE_LABELS[activePageKey]}</CardTitle>
+                <CardTitle className="text-sm">{CMS_CONTENT_PAGE_LABELS[activePageKey]}</CardTitle>
                 <a
-                  href={PREVIEW_URLS[activePageKey] || '/'}
+                  href={CMS_CONTENT_PREVIEW_URLS[activePageKey] || '/'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
@@ -314,9 +298,9 @@ export default function PageEditor() {
                       <div className="w-3 h-3 rounded-full bg-yellow-400" />
                       <div className="w-3 h-3 rounded-full bg-green-400" />
                     </div>
-                    <span className="text-xs text-muted-foreground ml-2">{PREVIEW_URLS[activePageKey] || '/'}</span>
+                    <span className="text-xs text-muted-foreground ml-2">{CMS_CONTENT_PREVIEW_URLS[activePageKey] || '/'}</span>
                   </div>
-                  <iframe src={PREVIEW_URLS[activePageKey] || '/'} className="w-full h-full border-none" title="Preview" />
+                  <iframe src={CMS_CONTENT_PREVIEW_URLS[activePageKey] || '/'} className="w-full h-full border-none" title="Preview" />
                 </div>
               </CardContent>
             </Card>

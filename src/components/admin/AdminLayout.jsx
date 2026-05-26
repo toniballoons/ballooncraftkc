@@ -6,6 +6,7 @@ import {
   ClipboardSignature,
   CalendarDays,
   UsersRound,
+  Images,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FlashSaleBanner from '@/components/shared/FlashSaleBanner';
@@ -14,6 +15,7 @@ import { isFlashSaleActive, normalizeFlashSale } from '@/lib/flashSale';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 import { ensureAccessibleColor } from '@/lib/accessibility';
+import { getCmsEditorHref } from '@/lib/cmsPages';
 
 const NAV_ITEMS = [
   { label: 'CMS / Site Management', href: '/admin',       icon: Settings, permission: 'site' },
@@ -21,6 +23,7 @@ const NAV_ITEMS = [
   { label: 'Scheduling Calendar', href: '/admin/schedule', icon: CalendarDays, permission: 'schedule' },
   { label: 'Account & Team', href: '/admin/account', icon: UsersRound, permission: 'account' },
   { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard, permission: 'site' },
+  { label: 'Gallery',        href: getCmsEditorHref('gallery'), icon: Images, permission: 'site' },
   { label: 'Manage Pages',   href: '/admin/manage-pages', icon: PanelsTopLeft, permission: 'site' },
   { label: 'Portfolio / Blog', href: '/admin/projects',   icon: FileText, permission: 'site' },
   { label: 'Testimonials',   href: '/admin/testimonials', icon: Star, permission: 'site' },

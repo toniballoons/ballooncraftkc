@@ -5,13 +5,9 @@ import PageEditor from '@/pages/admin/PageEditor';
 
 export default function AdminHome() {
   const location = useLocation();
-  const { hasPermission, adminHomePath, isLoadingAuth } = useAuth();
+  const { hasPermission, adminHomePath } = useAuth();
   const params = new URLSearchParams(location.search);
   const requestedPanel = params.get('panel');
-
-  if (isLoadingAuth) {
-    return null;
-  }
 
   if (requestedPanel === 'clients' && hasPermission('clients')) {
     return <PageEditor />;

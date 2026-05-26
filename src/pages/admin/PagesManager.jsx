@@ -13,20 +13,14 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { CMS_CONTENT_PAGES, getCmsEditorHref } from '@/lib/cmsPages';
 
-const BUILTIN_SECTIONS = [
-  { key: 'hero', label: '🏠 Hero', url: '/', editable: true },
-  { key: 'about', label: '👥 About', url: '/about', editable: true },
-  { key: 'contact', label: '📬 Contact', url: '/contact', editable: true },
-  { key: 'testimonials', label: '⭐ Testimonials', url: '/testimonials', editable: true },
-  { key: 'projects', label: '🖼️ Projects', url: '/projects', editable: true },
-  { key: 'gallery', label: '🖼️ Gallery', url: '/gallery', editable: true },
-  { key: 'navbar', label: '🔗 Navbar', url: null, editable: true },
-  { key: 'footer', label: '🦶 Footer', url: null, editable: true },
-  { key: 'privacy', label: '🔒 Privacy Policy', url: '/privacy', editable: true },
-  { key: 'terms', label: '📄 Terms of Service', url: '/terms', editable: true },
-  { key: 'legal', label: '⚖️ Legal Disclaimer', url: '/legal', editable: true },
-];
+const BUILTIN_SECTIONS = CMS_CONTENT_PAGES.map((page) => ({
+  key: page.key,
+  label: page.label,
+  url: page.previewUrl,
+  editable: page.editable,
+}));
 
 function PageRow({ page, isBuiltin, onEdit, onDelete, onToggleVisible, onDuplicate }) {
   const url = page.slug || (BUILTIN_SECTIONS.find(s => s.key === page.page_key)?.url);
@@ -66,7 +60,7 @@ function PageRow({ page, isBuiltin, onEdit, onDelete, onToggleVisible, onDuplica
           </Button>
         )}
       </div>
-      <Link to={`/admin?page=${page.page_key}`}>
+      <Link to={getCmsEditorHref(page.page_key)}>
         <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
           <ChevronRight className="w-4 h-4" />
         </Button>
