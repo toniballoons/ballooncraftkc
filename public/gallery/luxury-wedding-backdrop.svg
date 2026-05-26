@@ -1,0 +1,37 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" fill="#F6EEE8"/>
+  <rect y="620" width="1200" height="280" fill="#EAD9CC"/>
+  <rect x="335" y="180" width="530" height="470" rx="42" fill="#FFF9F3" stroke="#D9C0AE" stroke-width="6"/>
+  <rect x="300" y="680" width="600" height="28" rx="14" fill="#C6A78F" opacity="0.45"/>
+  <rect x="465" y="520" width="270" height="90" rx="18" fill="#EEDFCF"/>
+  <rect x="490" y="545" width="220" height="14" rx="7" fill="#D9C0AE"/>
+  <rect x="525" y="575" width="150" height="14" rx="7" fill="#D9C0AE"/>
+  <circle cx="335" cy="300" r="54" fill="#F1D7D8"/>
+  <circle cx="375" cy="245" r="48" fill="#E7C69B"/>
+  <circle cx="430" cy="210" r="42" fill="#F5EBDD"/>
+  <circle cx="495" cy="195" r="52" fill="#EFD5BE"/>
+  <circle cx="560" cy="208" r="45" fill="#F1D7D8"/>
+  <circle cx="620" cy="238" r="39" fill="#FFF4E8"/>
+  <circle cx="673" cy="280" r="50" fill="#D8B79B"/>
+  <circle cx="725" cy="246" r="37" fill="#F1D7D8"/>
+  <circle cx="782" cy="232" r="46" fill="#E7C69B"/>
+  <circle cx="840" cy="270" r="41" fill="#FFF4E8"/>
+  <circle cx="865" cy="332" r="56" fill="#EFD5BE"/>
+  <circle cx="866" cy="394" r="45" fill="#F1D7D8"/>
+  <circle cx="846" cy="448" r="36" fill="#FFF4E8"/>
+  <circle cx="812" cy="505" r="54" fill="#E7C69B"/>
+  <circle cx="760" cy="540" r="40" fill="#D8B79B"/>
+  <circle cx="410" cy="515" r="44" fill="#F5EBDD"/>
+  <circle cx="352" cy="470" r="58" fill="#EFD5BE"/>
+  <circle cx="325" cy="410" r="46" fill="#FFF4E8"/>
+  <circle cx="320" cy="350" r="36" fill="#D8B79B"/>
+  <rect x="392" y="322" width="72" height="184" rx="22" fill="#F3E4D6"/>
+  <rect x="462" y="298" width="76" height="208" rx="24" fill="#F8EBDD"/>
+  <rect x="536" y="285" width="78" height="221" rx="24" fill="#F3E4D6"/>
+  <rect x="612" y="298" width="76" height="208" rx="24" fill="#F8EBDD"/>
+  <rect x="686" y="322" width="72" height="184" rx="22" fill="#F3E4D6"/>
+  <circle cx="460" cy="680" r="54" fill="#F1D7D8"/>
+  <circle cx="740" cy="680" r="54" fill="#F1D7D8"/>
+  <circle cx="450" cy="630" r="22" fill="#B8A081"/>
+  <circle cx="750" cy="630" r="22" fill="#B8A081"/>
+</svg>

@@ -1,12 +1,6 @@
 import { GEO_CITIES } from '../src/lib/seo.js';
+import { DEFAULT_CONTACT_CONTENT } from '../src/lib/siteDefaults.js';
 import { createSupabaseAdminClient, parseSiteContentRows } from './_seo-utils.js';
-
-const DEFAULT_CONTACT_CONTENT = {
-  email: 'hello@ballooncraftkc.com',
-  phone: '(816) 555-0123',
-  address: 'Kansas City, MO Metro Area',
-  hours: 'Mon-Fri: 9am-6pm | Sat: 10am-4pm',
-};
 
 const DEFAULT_FOOTER_CONTENT = {
   company_name: 'BalloonCraft KC',

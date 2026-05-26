@@ -13,12 +13,13 @@ import { useAuth } from '@/lib/AuthContext';
 import HeroEditor from '@/components/admin/HeroEditor';
 import AboutEditor from '@/components/admin/AboutEditor';
 import ContactFormEditor from '@/components/admin/ContactFormEditor';
+import GalleryEditor from '@/components/admin/GalleryEditor';
 import NavbarEditor from '@/components/admin/NavbarEditor';
 import FooterEditor from '@/components/admin/FooterEditor';
 import GenericPageEditor from '@/components/admin/GenericPageEditor';
 import ClientStudio from '@/pages/admin/ClientStudio';
 
-const PAGE_KEYS = ['hero', 'about', 'contact', 'testimonials', 'projects', 'navbar', 'footer', 'privacy', 'terms', 'legal'];
+const PAGE_KEYS = ['hero', 'about', 'contact', 'testimonials', 'projects', 'gallery', 'navbar', 'footer', 'privacy', 'terms', 'legal'];
 
 const PAGE_LABELS = {
   hero: '🏠 Hero',
@@ -26,6 +27,7 @@ const PAGE_LABELS = {
   contact: '📬 Contact',
   testimonials: '⭐ Testimonials',
   projects: '🖼️ Projects',
+  gallery: '🖼️ Gallery',
   navbar: '🔗 Navbar',
   footer: '🦶 Footer',
   privacy: '🔒 Privacy',
@@ -35,7 +37,7 @@ const PAGE_LABELS = {
 
 const PREVIEW_URLS = {
   hero: '/', about: '/about', contact: '/contact',
-  testimonials: '/testimonials', projects: '/projects',
+  testimonials: '/testimonials', projects: '/projects', gallery: '/gallery',
   privacy: '/privacy', terms: '/terms', legal: '/legal',
   navbar: '/', footer: '/',
 };
@@ -63,6 +65,7 @@ function EditorForPage({ pageKey, content, setContent }) {
   if (pageKey === 'hero') return <HeroEditor content={content} setContent={setContent} />;
   if (pageKey === 'about') return <AboutEditor content={content} setContent={setContent} />;
   if (pageKey === 'contact') return <ContactFormEditor content={content} setContent={setContent} />;
+  if (pageKey === 'gallery') return <GalleryEditor content={content} setContent={setContent} />;
   if (pageKey === 'navbar') return <NavbarEditor content={content} setContent={setContent} />;
   if (pageKey === 'footer') return <FooterEditor content={content} setContent={setContent} />;
   return <GenericPageEditor content={content} setContent={setContent} pageKey={pageKey} />;

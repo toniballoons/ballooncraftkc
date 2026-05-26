@@ -254,7 +254,7 @@ export default function AccountAdmin() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Phone</Label>
-                  <Input value={accountForm.phone} onChange={(event) => setAccountForm({ ...accountForm, phone: event.target.value })} placeholder="(816) 555-0123" />
+                  <Input value={accountForm.phone} onChange={(event) => setAccountForm({ ...accountForm, phone: event.target.value })} placeholder="816-313-8355" />
                 </div>
               </div>
 

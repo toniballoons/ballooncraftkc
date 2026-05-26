@@ -16,6 +16,7 @@ import {
   isFlashSaleActive,
   normalizeFlashSale,
 } from '@/lib/flashSale';
+import { ensurePrimaryNavLinks } from '@/lib/siteDefaults';
 
 const OFFER_TYPE_OPTIONS = [
   { value: 'percent', label: 'Percent off' },
@@ -32,7 +33,7 @@ const MENTION_CHANNEL_OPTIONS = [
 
 export default function NavbarEditor({ content, setContent }) {
   const update = (key, val) => setContent(prev => ({ ...prev, [key]: val }));
-  const links = content.links || [];
+  const links = ensurePrimaryNavLinks(content.links || []);
   const flashSale = normalizeFlashSale(content.flash_sale);
   const flashSaleActive = isFlashSaleActive(flashSale);
   const countdownLabel = getFlashSaleCountdownLabel(flashSale);
@@ -92,8 +93,22 @@ export default function NavbarEditor({ content, setContent }) {
                   <button type="button" onClick={() => moveDown(i)} disabled={i===links.length-1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs leading-none" aria-label={`Move ${link.label || 'navigation link'} down`}>▼</button>
                 </div>
                 <Input value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} placeholder="Label" className="flex-1 h-8 text-sm" />
-                <Input value={link.href} onChange={e => updateLink(i, 'href', e.target.value)} placeholder="/page" className="flex-1 h-8 text-sm" />
-                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeLink(i)} aria-label={`Remove ${link.label || 'navigation link'}`}>
+                <Input
+                  value={link.href}
+                  onChange={e => updateLink(i, 'href', e.target.value)}
+                  placeholder="/page"
+                  className="flex-1 h-8 text-sm"
+                  disabled={link.href === '/gallery'}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 flex-shrink-0"
+                  onClick={() => removeLink(i)}
+                  aria-label={`Remove ${link.label || 'navigation link'}`}
+                  disabled={link.href === '/gallery'}
+                  title={link.href === '/gallery' ? 'Gallery is a built-in navigation page' : undefined}
+                >
                   <Trash2 className="w-3.5 h-3.5 text-destructive" />
                 </Button>
               </CardContent>

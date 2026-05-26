@@ -448,11 +448,12 @@ export function appendGeoToTitle(metaTitle, geoCity) {
 
 // ── Sitemap builder ──────────────────────────────────────────
 
-const STATIC_PAGES = ['/', '/about', '/projects', '/testimonials', '/contact'];
+const STATIC_PAGES = ['/', '/about', '/projects', '/gallery', '/testimonials', '/contact'];
 const STATIC_PAGE_DEFS = [
   { path: '/', pageKey: 'hero', changefreq: 'weekly', priority: '1.0' },
   { path: '/about', pageKey: 'about', changefreq: 'monthly', priority: '0.8' },
   { path: '/projects', pageKey: 'projects', changefreq: 'weekly', priority: '0.9' },
+  { path: '/gallery', pageKey: 'gallery', changefreq: 'weekly', priority: '0.8' },
   { path: '/testimonials', pageKey: 'testimonials', changefreq: 'monthly', priority: '0.7' },
   { path: '/contact', pageKey: 'contact', changefreq: 'monthly', priority: '0.8' },
   { path: '/privacy', pageKey: 'privacy', changefreq: 'yearly', priority: '0.3' },
@@ -531,6 +532,8 @@ export function generateStaticPageSitemapXml(baseUrl, pageUpdates = {}, pageCont
   const urls = STATIC_PAGE_DEFS.map((page) => {
     const imageCandidate = page.pageKey === 'hero'
       ? pageContent?.hero?.image
+      : page.pageKey === 'gallery'
+        ? pageContent?.gallery?.items?.[0]?.url
       : pageContent?.[page.pageKey]?.image;
 
     return {

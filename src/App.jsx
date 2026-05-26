@@ -15,6 +15,7 @@ import SiteLayout from '@/components/site/SiteLayout';
 import Home from '@/pages/site/Home';
 import About from '@/pages/site/About';
 import Projects from '@/pages/site/Projects';
+import Gallery from '@/pages/site/Gallery';
 import ProjectDetail from '@/pages/site/ProjectDetail';
 import Testimonials from '@/pages/site/Testimonials';
 import Contact from '@/pages/site/Contact';
@@ -52,6 +53,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/projects" element={<Projects />} />
+                  <Route path="/gallery" element={<Gallery />} />
                   <Route path="/projects/:slug" element={<ProjectDetail />} />
                   <Route path="/testimonials" element={<Testimonials />} />
                   <Route path="/contact" element={<Contact />} />

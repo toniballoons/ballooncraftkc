@@ -4,6 +4,7 @@ import { Menu, X } from 'lucide-react';
 
 import FlashSaleBanner from '@/components/shared/FlashSaleBanner';
 import { isFlashSaleActive, normalizeFlashSale } from '@/lib/flashSale';
+import { ensurePrimaryNavLinks } from '@/lib/siteDefaults';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
 
@@ -21,6 +22,7 @@ export default function Navbar() {
   const isGlass = navStyle === 'glassmorphism' || navStyle === 'transparent-elegant';
   const flashSale = normalizeFlashSale(content.flash_sale);
   const flashSaleActive = isFlashSaleActive(flashSale, now);
+  const navLinks = ensurePrimaryNavLinks(content.links || []);
 
   useEffect(() => {
     if (!flashSaleActive) return undefined;
@@ -55,7 +57,7 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
-            {(content.links || []).map((link, index) => {
+            {navLinks.map((link, index) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
@@ -103,7 +105,7 @@ export default function Navbar() {
           className="md:hidden border-t pb-4"
           style={{ background: navBg, borderColor: `${textColor}18` }}
         >
-          {(content.links || []).map((link, index) => (
+          {navLinks.map((link, index) => (
             <Link
               key={index}
               to={link.href}

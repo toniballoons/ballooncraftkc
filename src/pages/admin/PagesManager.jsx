@@ -20,6 +20,7 @@ const BUILTIN_SECTIONS = [
   { key: 'contact', label: '📬 Contact', url: '/contact', editable: true },
   { key: 'testimonials', label: '⭐ Testimonials', url: '/testimonials', editable: true },
   { key: 'projects', label: '🖼️ Projects', url: '/projects', editable: true },
+  { key: 'gallery', label: '🖼️ Gallery', url: '/gallery', editable: true },
   { key: 'navbar', label: '🔗 Navbar', url: null, editable: true },
   { key: 'footer', label: '🦶 Footer', url: null, editable: true },
   { key: 'privacy', label: '🔒 Privacy Policy', url: '/privacy', editable: true },

@@ -1,5 +1,45 @@
 import { DEFAULT_FLASH_SALE } from './flashSale';
 
+export const DEFAULT_NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Projects", href: "/projects" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Testimonials", href: "/testimonials" },
+  { label: "Contact", href: "/contact" },
+];
+
+export function ensurePrimaryNavLinks(links = []) {
+  const existing = Array.isArray(links) ? links : [];
+  const used = new Set();
+  const merged = [];
+
+  DEFAULT_NAV_LINKS.forEach((defaultLink) => {
+    const matching = existing.find((link) => link?.href === defaultLink.href);
+    if (matching) {
+      merged.push(matching);
+      used.add(matching);
+    } else {
+      merged.push(defaultLink);
+    }
+  });
+
+  existing.forEach((link) => {
+    if (link && !used.has(link)) {
+      merged.push(link);
+    }
+  });
+
+  return merged;
+}
+
+export const DEFAULT_CONTACT_CONTENT = {
+  email: "tonihall015@gmail.com",
+  phone: "816-313-8355",
+  address: "Kansas City, MO Metro Area",
+  hours: "Mon-Fri: 9am-6pm | Sat: 10am-4pm",
+};
+
 // Default content for all site pages - used when no DB content exists yet
 
 export const DEFAULT_CONTENT = {
@@ -38,10 +78,7 @@ export const DEFAULT_CONTENT = {
   contact: {
     title: "Let's Create Something Amazing",
     subtitle: "Planning balloon decor in Kansas City, Overland Park, Olathe, Lee's Summit, or the surrounding metro? Tell us about your event and let’s build something people remember.",
-    email: "hello@ballooncraftkc.com",
-    phone: "(816) 555-0123",
-    address: "Kansas City, MO Metro Area",
-    hours: "Mon-Fri: 9am-6pm | Sat: 10am-4pm",
+    ...DEFAULT_CONTACT_CONTENT,
     image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&auto=format&fit=crop',
     form_success_message: "Thank you for reaching out! We'll get back to you within 24 hours.",
     social_links: {
@@ -60,6 +97,43 @@ export const DEFAULT_CONTENT = {
     title: "Portfolio, Announcements & Updates",
     subtitle: "Browse BalloonCraft KC installs, launch announcements, event highlights, decor ideas, and business updates from weddings, birthdays, showers, schools, stores, grand openings, and corporate events across the Kansas City metro.",
     categories_label: "Filter by Category",
+  },
+  gallery: {
+    title: "Balloon Decor Gallery",
+    subtitle: "Browse colorful BalloonCraft KC inspiration for weddings, birthdays, baby showers, school events, grand openings, and polished brand moments across the Kansas City metro.",
+    intro: "This gallery is built to spark ideas fast. Explore curated BalloonCraft KC looks ranging from luxe neutral installs and playful birthday builds to storefront launches, shower backdrops, school photo moments, and corporate event styling. Toni can swap every image, rewrite every caption, and rearrange the order any time from the CMS.",
+    items: [
+      {
+        url: "/gallery/luxury-wedding-backdrop.svg",
+        title: "Luxury wedding welcome backdrop",
+        description: "Soft champagne, blush, and pearl balloon styling designed for upscale receptions, sweetheart tables, and romantic entrance moments.",
+      },
+      {
+        url: "/gallery/storefront-grand-opening.svg",
+        title: "Grand opening storefront install",
+        description: "A bold retail-ready entrance piece built to stop traffic, frame ribbon cuttings, and make new businesses feel busy from the first photo.",
+      },
+      {
+        url: "/gallery/birthday-cake-color-pop.svg",
+        title: "Playful birthday statement wall",
+        description: "A cheerful candy-color photo moment with layered balloons, pedestal styling, and cake-table energy for unforgettable birthday parties.",
+      },
+      {
+        url: "/gallery/baby-shower-clouds.svg",
+        title: "Baby shower cloud garland",
+        description: "A dreamy pastel setup with floating balloon clusters, soft florals, and a clean focal wall for showers, sprinkles, and gender reveals.",
+      },
+      {
+        url: "/gallery/school-spirit-stage.svg",
+        title: "School spirit stage install",
+        description: "Large-scale balloons with team colors and high-visibility framing for proms, graduations, banquets, and school celebration photos.",
+      },
+      {
+        url: "/gallery/corporate-photo-moment.svg",
+        title: "Corporate brand photo moment",
+        description: "A polished branded backdrop with balanced color blocking and event-ready styling for launches, mixers, office parties, and sponsor walls.",
+      },
+    ],
   },
   privacy: {
     title: "Privacy Policy",
@@ -160,13 +234,7 @@ export const DEFAULT_CONTENT = {
   navbar: {
     logo_text: "BalloonCraft",
     flash_sale: DEFAULT_FLASH_SALE,
-    links: [
-      { label: "Home", href: "/" },
-      { label: "About", href: "/about" },
-      { label: "Projects", href: "/projects" },
-      { label: "Testimonials", href: "/testimonials" },
-      { label: "Contact", href: "/contact" }
-    ]
+    links: DEFAULT_NAV_LINKS,
   },
   footer: {
     company_name: "BalloonCraft KC",
