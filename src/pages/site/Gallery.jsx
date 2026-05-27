@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Camera, Sparkles } from 'lucide-react';
+import { ArrowRight, Camera } from 'lucide-react';
 
 import { useSiteContent } from '@/lib/useSiteContent';
 import { useTheme } from '@/lib/ThemeContext';
@@ -110,21 +110,17 @@ export default function Gallery() {
                   viewport={{ once: true }}
                   variants={fadeUp}
                   transition={{ duration: 0.55, delay: (index % 3) * 0.08 }}
-                  className="overflow-hidden rounded-[2rem] border border-border/50 bg-white shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                  className="group overflow-hidden rounded-[2rem] border border-border/50 bg-white shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                 >
                   <div className="aspect-[4/3] overflow-hidden bg-muted/30">
                     <img
                       src={item.url}
                       alt={item.title || `BalloonCraft KC gallery inspiration ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                       loading="lazy"
                     />
                   </div>
                   <div className="p-6 space-y-3">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Gallery look {index + 1}
-                    </div>
                     <h2 className="text-2xl font-bold leading-tight">
                       {item.title || `Balloon decor look ${index + 1}`}
                     </h2>
