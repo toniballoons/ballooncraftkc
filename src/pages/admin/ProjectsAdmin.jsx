@@ -1,7 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Project from '@/entities/Project';
-import { uploadFile } from '@/lib/uploadFile';
 import {
   autoFillSeoFields,
   resolveUniqueSlug,
@@ -22,11 +21,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Pencil, Trash2, Image, Copy, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 import MarkdownEditor from '@/components/admin/MarkdownEditor';
 import DraggableGallery from '@/components/admin/DraggableGallery';
+import ImageUploadField from '@/components/admin/ImageUploadField';
 import FocusKeywordPanel from '@/components/admin/FocusKeywordPanel';
 import SeoPreviewPanel from '@/components/admin/SeoPreviewPanel';
 import CharCounter from '@/components/admin/CharCounter';
@@ -52,7 +52,6 @@ export default function ProjectsAdmin() {
   const [slugError, setSlugError] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('published');
-  const featuredImageInputRef = useRef(null);
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['admin-projects'],
@@ -127,17 +126,6 @@ export default function ProjectsAdmin() {
     setTagsInput((p.tags || []).join(', '));
     setSlugError('');
     setEditOpen(true);
-  };
-
-  const handleFeaturedImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const { file_url } = await uploadFile(file);
-      setForm(prev => ({ ...prev, featured_image: file_url }));
-    } catch (err) {
-      toast.error(err.message);
-    }
   };
 
   const handleSlugBlur = () => {
@@ -309,25 +297,16 @@ export default function ProjectsAdmin() {
             />
 
             {/* Featured Image */}
-            <div className="space-y-3">
-              <Label>Featured Image</Label>
-              <div className="flex items-center gap-4">
-                {form.featured_image && <img src={form.featured_image} alt="" className="w-32 h-24 rounded-xl object-cover" />}
-                <label
-                  className="cursor-pointer bg-muted rounded-xl px-4 py-2 text-sm font-semibold hover:bg-muted/80 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-                  tabIndex={0}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      featuredImageInputRef.current?.click();
-                    }
-                  }}
-                >
-                  <Image className="w-4 h-4" /> Upload
-                  <input type="file" accept="image/*" className="sr-only" onChange={handleFeaturedImageUpload} ref={featuredImageInputRef} />
-                </label>
-              </div>
-            </div>
+            <ImageUploadField
+              label="Featured Image"
+              value={form.featured_image}
+              onChange={(featured_image) => setForm((prev) => ({ ...prev, featured_image }))}
+              editorPreset="landscape"
+              aspectRatio="aspect-video"
+              cameraFacing="environment"
+              buttonLabel="Choose featured image"
+              helperText="Upload from a phone or desktop, crop it for the post card, and keep BalloonCraft KC project previews clean across the site."
+            />
 
             {/* 5.3 — DraggableGallery */}
             <div className="space-y-3">

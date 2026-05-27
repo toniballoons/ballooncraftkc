@@ -1,5 +1,7 @@
 import { requireAdminSession, sendAdminError } from './_admin.js';
 
+const SITE_ASSETS_BUCKET = 'site-assets';
+
 function pickProfileFields(row, fallbackUser) {
   return {
     id: row?.id || fallbackUser?.id || null,
@@ -15,6 +17,23 @@ function pickProfileFields(row, fallbackUser) {
     can_manage_clients: row?.can_manage_clients === true,
     can_manage_schedule: row?.can_manage_schedule === true,
   };
+}
+
+function makeStoragePath(fileName = 'upload-file') {
+  const safeName = String(fileName)
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'upload-file';
+
+  return `admin-assets/${new Date().toISOString().slice(0, 10)}/${Date.now()}-${safeName}`;
+}
+
+async function readRawBody(req) {
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
 }
 
 function deriveAccessProfile({ fullAdmin = false, canManageMessages = false, canManageSite = false, canManageClients = false, canManageSchedule = false }) {
@@ -597,6 +616,38 @@ async function handleSchedulePost(req, res, session) {
   return res.status(200).json({ success: true, entry: savedEntry });
 }
 
+async function handleUploadImage(req, res, session) {
+  const { supabase } = session;
+  const fileName = req.headers['x-upload-filename'] || req.headers['X-Upload-Filename'] || 'upload-file';
+  const contentType = req.headers['content-type'] || 'application/octet-stream';
+  const bytes = await readRawBody(req);
+
+  if (!bytes.length) {
+    return res.status(400).json({ error: 'Upload body was empty.' });
+  }
+
+  const path = makeStoragePath(fileName);
+  const { error: uploadError } = await supabase.storage
+    .from(SITE_ASSETS_BUCKET)
+    .upload(path, bytes, {
+      upsert: true,
+      contentType,
+      cacheControl: '3600',
+    });
+
+  if (uploadError) {
+    return res.status(400).json({ error: uploadError.message });
+  }
+
+  const { data } = supabase.storage.from(SITE_ASSETS_BUCKET).getPublicUrl(path);
+
+  return res.status(200).json({
+    success: true,
+    file_url: data.publicUrl,
+    path,
+  });
+}
+
 export default async function handler(req, res) {
   const action = req.query?.action || req.body?.action;
 
@@ -622,6 +673,13 @@ export default async function handler(req, res) {
     if (req.method === 'GET') return handleScheduleGet(req, res, session);
     if (req.method === 'POST') return handleSchedulePost(req, res, session);
     if (req.method === 'DELETE') return handleScheduleDelete(req, res, session);
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (action === 'upload-image') {
+    const session = await requireAdminSession(req, { permission: 'account' });
+    if (session.error) return sendAdminError(res, session.error);
+    if (req.method === 'POST') return handleUploadImage(req, res, session);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 

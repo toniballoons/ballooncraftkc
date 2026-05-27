@@ -1,9 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Testimonial from '@/entities/Testimonial';
-import { uploadFile } from '@/lib/uploadFile';
 
 import { Button } from '@/components/ui/button';
+import ImageUploadField from '@/components/admin/ImageUploadField';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Pencil, Trash2, Star, Image, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 const empty = { name: '', role: '', quote: '', rating: 5, avatar_url: '', featured: false, status: 'approved' };
@@ -22,7 +22,6 @@ export default function TestimonialsAdmin() {
   const [editOpen, setEditOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [editingId, setEditingId] = useState(null);
-  const avatarInputRef = useRef(null);
 
   const { data: testimonials = [] } = useQuery({
     queryKey: ['admin-testimonials'],
@@ -82,17 +81,6 @@ export default function TestimonialsAdmin() {
       Testimonial.update(b.id, { ...b }),
     ]);
     queryClient.invalidateQueries({ queryKey: ['admin-testimonials'] });
-  };
-
-  const handleAvatar = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const { file_url } = await uploadFile(file);
-      setForm(prev => ({ ...prev, avatar_url: file_url }));
-    } catch (err) {
-      toast.error(err.message);
-    }
   };
 
   return (
@@ -161,23 +149,16 @@ export default function TestimonialsAdmin() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Avatar</Label>
-              <div className="flex items-center gap-3">
-                {form.avatar_url && <img src={form.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />}
-                <label
-                  className="cursor-pointer bg-muted rounded-lg px-3 py-1.5 text-sm flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-                  tabIndex={0}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      avatarInputRef.current?.click();
-                    }
-                  }}
-                >
-                  <Image className="w-4 h-4" /> Upload
-                  <input type="file" accept="image/*" className="sr-only" onChange={handleAvatar} ref={avatarInputRef} />
-                </label>
-              </div>
+              <ImageUploadField
+                label="Avatar"
+                value={form.avatar_url}
+                onChange={(avatar_url) => setForm({ ...form, avatar_url })}
+                shape="avatar"
+                editorPreset="avatar"
+                cameraFacing="user"
+                buttonLabel="Choose avatar"
+                helperText="Upload a client photo, use the camera, crop it for mobile, or paste a direct image URL."
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Status</Label>

@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, KeyRound, Mail, ShieldCheck, UserRoundPlus, Users } from 'lucide-react';
+import { KeyRound, Mail, ShieldCheck, UserRoundPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/lib/AuthContext';
 import { authedJson } from '@/lib/authedFetch';
 import { describeAccessLevel } from '@/lib/adminPermissions';
-import { uploadFile } from '@/lib/uploadFile';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import ImageUploadField from '@/components/admin/ImageUploadField';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -101,8 +101,6 @@ export default function AccountAdmin() {
     confirmPassword: '',
   });
   const [teamForm, setTeamForm] = useState(emptyTeamForm);
-  const accountAvatarInputRef = useRef(null);
-  const teamAvatarInputRef = useRef(null);
 
   const accountQuery = useQuery({
     queryKey: ['account-settings'],
@@ -172,30 +170,6 @@ export default function AccountAdmin() {
     onError: (error) => toast.error(error.message),
   });
 
-  const handleAccountAvatarUpload = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      const { file_url } = await uploadFile(file);
-      setAccountForm((current) => ({ ...current, avatarUrl: file_url }));
-      toast.success('Profile photo uploaded.');
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const handleTeamAvatarUpload = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      const { file_url } = await uploadFile(file);
-      setTeamForm((current) => ({ ...current, photoUrl: file_url }));
-      toast.success('Employee photo uploaded.');
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
   const members = teamQuery.data?.members || [];
   const sortedMembers = useMemo(
     () => [...members].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || (a.display_name || '').localeCompare(b.display_name || '')),
@@ -226,18 +200,16 @@ export default function AccountAdmin() {
               <CardTitle className="flex items-center gap-2"><ShieldCheck className="w-5 h-5" /> Toni’s account details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="flex flex-wrap items-center gap-4">
-                <AvatarPreview src={accountForm.avatarUrl} label={accountForm.displayName || accountForm.email} />
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Upload a new photo or paste an image URL for Toni’s admin profile.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" type="button" onClick={() => accountAvatarInputRef.current?.click()}>
-                      <Camera className="w-4 h-4 mr-2" /> Upload photo
-                    </Button>
-                  </div>
-                </div>
-                <input ref={accountAvatarInputRef} type="file" accept="image/*" className="sr-only" onChange={handleAccountAvatarUpload} />
-              </div>
+              <ImageUploadField
+                label="Profile photo"
+                value={accountForm.avatarUrl}
+                onChange={(avatarUrl) => setAccountForm({ ...accountForm, avatarUrl })}
+                shape="avatar"
+                editorPreset="avatar"
+                cameraFacing="user"
+                buttonLabel="Choose photo"
+                helperText="Upload from Toni’s phone or computer, use the camera directly, crop it, and keep the admin profile photo looking clean."
+              />
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
@@ -256,11 +228,6 @@ export default function AccountAdmin() {
                   <Label>Phone</Label>
                   <Input value={accountForm.phone} onChange={(event) => setAccountForm({ ...accountForm, phone: event.target.value })} placeholder="816-313-8355" />
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Profile photo URL</Label>
-                <Input value={accountForm.avatarUrl} onChange={(event) => setAccountForm({ ...accountForm, avatarUrl: event.target.value })} placeholder="https://..." />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -307,16 +274,16 @@ export default function AccountAdmin() {
               <CardTitle className="flex items-center gap-2"><UserRoundPlus className="w-5 h-5" /> {teamForm.staffId ? 'Edit employee or staff login' : 'Create a new employee'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="flex flex-wrap items-center gap-4">
-                <AvatarPreview src={teamForm.photoUrl} label={teamForm.displayName || 'Employee'} />
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">This photo can be used internally and, if enabled, on the public About page.</p>
-                  <Button variant="outline" type="button" onClick={() => teamAvatarInputRef.current?.click()}>
-                    <Camera className="w-4 h-4 mr-2" /> Upload employee photo
-                  </Button>
-                </div>
-                <input ref={teamAvatarInputRef} type="file" accept="image/*" className="sr-only" onChange={handleTeamAvatarUpload} />
-              </div>
+              <ImageUploadField
+                label="Employee photo"
+                value={teamForm.photoUrl}
+                onChange={(photoUrl) => setTeamForm({ ...teamForm, photoUrl })}
+                shape="avatar"
+                editorPreset="avatar"
+                cameraFacing="user"
+                buttonLabel="Choose employee photo"
+                helperText="This image can stay internal, or Toni can also show it publicly on the About page for this employee."
+              />
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
@@ -354,11 +321,6 @@ export default function AccountAdmin() {
                   <Label>About-page order</Label>
                   <Input type="number" value={teamForm.sortOrder} onChange={(event) => setTeamForm({ ...teamForm, sortOrder: Number(event.target.value) || 0 })} />
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Photo URL</Label>
-                <Input value={teamForm.photoUrl} onChange={(event) => setTeamForm({ ...teamForm, photoUrl: event.target.value })} placeholder="https://..." />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">

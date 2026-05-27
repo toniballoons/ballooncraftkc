@@ -1,22 +1,41 @@
-import { supabase } from '@/api/supabaseClient';
+import { authedFetch } from '@/lib/authedFetch';
 
-const BUCKET = 'site-assets';
+function safeUploadName(file) {
+  return String(file?.name || 'upload-file')
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'upload-file';
+}
 
 /**
- * Uploads a File to Supabase Storage and returns its public URL.
+ * Uploads an admin-managed asset through the authenticated server upload endpoint
+ * so storage RLS never blocks CMS changes from the browser.
  * @param {File} file
- * @returns {Promise<{ file_url: string }>}
+ * @returns {Promise<{ file_url: string, path?: string }>}
  */
 export async function uploadFile(file) {
-  const path = `${Date.now()}-${file.name}`;
+  if (!(file instanceof File || file instanceof Blob)) {
+    throw new Error('A valid file is required for upload.');
+  }
 
-  const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, file, { upsert: true });
+  const response = await authedFetch('/api/admin?action=upload-image', {
+    method: 'POST',
+    headers: {
+      'Content-Type': file.type || 'application/octet-stream',
+      'X-Upload-Filename': safeUploadName(file),
+    },
+    body: file,
+  });
 
-  if (uploadError) throw new Error(uploadError.message);
+  const payload = await response.json().catch(() => ({}));
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  if (!response.ok) {
+    throw new Error(payload.error || 'Upload failed.');
+  }
 
-  return { file_url: data.publicUrl };
+  if (!payload.file_url) {
+    throw new Error('Upload finished without a file URL.');
+  }
+
+  return payload;
 }

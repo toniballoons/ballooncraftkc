@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { uploadFile } from '@/lib/uploadFile';
-import { GripVertical, X, Plus } from 'lucide-react';
+import { Camera, GripVertical, X, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
@@ -15,6 +15,7 @@ export default function DraggableGallery({ images = [], onChange }) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState([]);
   const uploadInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -131,20 +132,28 @@ export default function DraggableGallery({ images = [], onChange }) {
               {provided.placeholder}
 
               {/* Upload button */}
-              <label
-                className={`w-28 h-28 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-muted/70 transition-colors flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
-                tabIndex={0}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    openUploadPicker();
-                  }
-                }}
-              >
-                <Plus className="w-5 h-5 text-muted-foreground mb-1" />
+              <div className={`w-28 min-h-28 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 p-3 hover:bg-muted/70 transition-colors flex-shrink-0 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <Plus className="w-5 h-5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground text-center px-1">
                   {uploading ? 'Uploading…' : 'Add photos'}
                 </span>
+                <div className="flex flex-col gap-2 w-full">
+                  <button
+                    type="button"
+                    className="rounded-lg border bg-background px-2 py-1.5 text-[11px] font-semibold hover:bg-muted"
+                    onClick={openUploadPicker}
+                  >
+                    Library
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg border bg-background px-2 py-1.5 text-[11px] font-semibold hover:bg-muted flex items-center justify-center gap-1"
+                    onClick={() => cameraInputRef.current?.click()}
+                  >
+                    <Camera className="w-3 h-3" />
+                    Camera
+                  </button>
+                </div>
                 <input
                   type="file"
                   accept="image/*"
@@ -154,7 +163,16 @@ export default function DraggableGallery({ images = [], onChange }) {
                   disabled={uploading}
                   ref={uploadInputRef}
                 />
-              </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="sr-only"
+                  onChange={handleFiles}
+                  disabled={uploading}
+                  ref={cameraInputRef}
+                />
+              </div>
             </div>
           )}
         </Droppable>

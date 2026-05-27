@@ -1,11 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { GripVertical, ImagePlus, Trash2, Upload } from 'lucide-react';
+import { Camera, ChevronDown, ChevronUp, GripVertical, ImagePlus, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { uploadFile } from '@/lib/uploadFile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ImageUploadField from '@/components/admin/ImageUploadField';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,9 +23,8 @@ export default function GalleryEditor({ content, setContent }) {
   const update = (key, value) => setContent((prev) => ({ ...prev, [key]: value }));
   const items = Array.isArray(content.items) ? content.items : [];
   const addInputRef = useRef(null);
-  const replaceInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
-  const [replacingIndex, setReplacingIndex] = useState(null);
 
   const updateItems = (nextItems) => update('items', nextItems);
   const updateItem = (index, key, value) => {
@@ -40,6 +40,15 @@ export default function GalleryEditor({ content, setContent }) {
 
   const removeItem = (index) => {
     updateItems(items.filter((_, itemIndex) => itemIndex !== index));
+  };
+
+  const moveItem = (index, direction) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= items.length) return;
+
+    const reordered = [...items];
+    [reordered[index], reordered[nextIndex]] = [reordered[nextIndex], reordered[index]];
+    updateItems(reordered);
   };
 
   const handleDragEnd = (result) => {
@@ -73,29 +82,6 @@ export default function GalleryEditor({ content, setContent }) {
     updateItems(nextItems);
     setUploading(false);
     event.target.value = '';
-  };
-
-  const openReplacePicker = (index) => {
-    setReplacingIndex(index);
-    replaceInputRef.current?.click();
-  };
-
-  const handleReplaceFile = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file || replacingIndex === null) return;
-
-    setUploading(true);
-    try {
-      const { file_url } = await uploadFile(file);
-      updateItem(replacingIndex, 'url', file_url);
-      toast.success('Gallery image replaced');
-    } catch (error) {
-      toast.error(error.message || 'Failed to replace gallery image');
-    } finally {
-      setUploading(false);
-      setReplacingIndex(null);
-      event.target.value = '';
-    }
   };
 
   return (
@@ -140,6 +126,10 @@ export default function GalleryEditor({ content, setContent }) {
               <Upload className="w-4 h-4 mr-1" />
               {uploading ? 'Uploading...' : 'Upload gallery photos'}
             </Button>
+            <Button type="button" variant="outline" onClick={() => cameraInputRef.current?.click()} disabled={uploading}>
+              <Camera className="w-4 h-4 mr-1" />
+              Use camera
+            </Button>
             <Button type="button" variant="outline" onClick={addBlankCard}>
               <ImagePlus className="w-4 h-4 mr-1" />
               Add empty photo card
@@ -156,11 +146,12 @@ export default function GalleryEditor({ content, setContent }) {
             disabled={uploading}
           />
           <input
-            ref={replaceInputRef}
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
+            capture="environment"
             className="sr-only"
-            onChange={handleReplaceFile}
+            onChange={handleAddFiles}
             disabled={uploading}
           />
 
@@ -177,18 +168,39 @@ export default function GalleryEditor({ content, setContent }) {
                           className={snapshot.isDragging ? 'ring-2 ring-primary shadow-xl' : ''}
                         >
                           <CardContent className="p-4">
-                            <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                            <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
                               <div className="space-y-3">
-                                <div className="aspect-[4/3] rounded-2xl overflow-hidden border bg-muted flex items-center justify-center">
-                                  {item.url ? (
-                                    <img src={item.url} alt={item.title || `Gallery item ${index + 1}`} className="w-full h-full object-cover" />
-                                  ) : (
-                                    <span className="text-xs text-muted-foreground px-4 text-center">Upload an image or paste a URL below</span>
-                                  )}
-                                </div>
+                                <ImageUploadField
+                                  label={`Gallery image ${index + 1}`}
+                                  value={item.url || ''}
+                                  onChange={(url) => updateItem(index, 'url', url)}
+                                  compact
+                                  allowUrlInput
+                                  buttonLabel="Choose photo"
+                                  cameraFacing="environment"
+                                  editorPreset="landscape"
+                                  helperText="Replace this gallery photo from a phone or desktop, use the camera, crop it, or paste a direct image URL."
+                                />
                                 <div className="flex items-center gap-2">
-                                  <Button type="button" variant="outline" size="sm" onClick={() => openReplacePicker(index)} disabled={uploading}>
-                                    Replace image
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => moveItem(index, -1)}
+                                    disabled={index === 0}
+                                    aria-label={`Move gallery item ${index + 1} up`}
+                                  >
+                                    <ChevronUp className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => moveItem(index, 1)}
+                                    disabled={index === items.length - 1}
+                                    aria-label={`Move gallery item ${index + 1} down`}
+                                  >
+                                    <ChevronDown className="w-4 h-4" />
                                   </Button>
                                   <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(index)} aria-label={`Remove gallery item ${index + 1}`}>
                                     <Trash2 className="w-4 h-4 text-destructive" />
@@ -203,14 +215,6 @@ export default function GalleryEditor({ content, setContent }) {
                                 </div>
                               </div>
                               <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                  <Label>Image URL</Label>
-                                  <Input
-                                    value={item.url || ''}
-                                    onChange={(event) => updateItem(index, 'url', event.target.value)}
-                                    placeholder="https://example.com/balloon-gallery-image.jpg"
-                                  />
-                                </div>
                                 <div className="space-y-1.5">
                                   <Label>Short title</Label>
                                   <Input

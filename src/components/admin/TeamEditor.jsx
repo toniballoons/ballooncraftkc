@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { uploadFile } from '@/lib/uploadFile';
+import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import ImageUploadField from '@/components/admin/ImageUploadField';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Image } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const emptyMember = { name: '', role: '', bio: '', photo: '' };
@@ -16,8 +16,6 @@ export default function TeamEditor({ team = [], onChange }) {
   const [editOpen, setEditOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [form, setForm] = useState(emptyMember);
-  const [uploading, setUploading] = useState(false);
-  const photoInputRef = useRef(null);
 
   const openNew = () => { setForm(emptyMember); setEditIndex(null); setEditOpen(true); };
   const openEdit = (i) => { setForm({ ...emptyMember, ...team[i] }); setEditIndex(i); setEditOpen(true); };
@@ -49,22 +47,6 @@ export default function TeamEditor({ team = [], onChange }) {
     [updated[i], updated[i + 1]] = [updated[i + 1], updated[i]];
     onChange(updated);
   };
-
-  const handlePhoto = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const { file_url } = await uploadFile(file);
-      setForm(prev => ({ ...prev, photo: file_url }));
-      toast.success('Photo uploaded!');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-  const openPhotoPicker = () => photoInputRef.current?.click();
 
   return (
     <div className="space-y-3">
@@ -128,28 +110,15 @@ export default function TeamEditor({ team = [], onChange }) {
               <Textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} rows={3} placeholder="Short bio about this team member..." />
             </div>
             <div className="space-y-1.5">
-              <Label>Photo</Label>
-              <div className="flex items-center gap-3">
-                {form.photo && <img src={form.photo} alt="" className="w-14 h-14 rounded-full object-cover" />}
-                <label
-                  className="cursor-pointer bg-muted hover:bg-muted/80 rounded-lg px-3 py-2 text-sm flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-                  tabIndex={0}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      openPhotoPicker();
-                    }
-                  }}
-                >
-                  <Image className="w-4 h-4" /> {uploading ? 'Uploading...' : 'Upload Photo'}
-                  <input type="file" accept="image/*" className="sr-only" onChange={handlePhoto} disabled={uploading} ref={photoInputRef} />
-                </label>
-              </div>
-              <Input
-                placeholder="Or paste a photo URL..."
+              <ImageUploadField
+                label="Photo"
                 value={form.photo}
-                onChange={e => setForm({ ...form, photo: e.target.value })}
-                className="text-xs"
+                onChange={(photo) => setForm({ ...form, photo })}
+                shape="avatar"
+                editorPreset="avatar"
+                cameraFacing="user"
+                buttonLabel="Choose photo"
+                helperText="This team photo can be uploaded from a phone, captured live with the camera, or replaced with a direct image URL."
               />
             </div>
             <div className="flex justify-end gap-3 pt-2">
