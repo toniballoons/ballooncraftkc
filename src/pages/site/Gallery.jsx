@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Camera } from 'lucide-react';
 
 import { useSiteContent } from '@/lib/useSiteContent';
@@ -14,6 +14,7 @@ const DOMAIN = typeof window !== 'undefined' ? window.location.hostname : 'www.b
 export default function Gallery() {
   const { content } = useSiteContent('gallery');
   const { theme } = useTheme();
+  const [hoveredItem, setHoveredItem] = useState(null);
   const heroBg = theme?.hero?.bg || 'linear-gradient(135deg, #00b894, #74b9ff)';
   const { textColor, mutedTextColor, panelStyle } = getHeroTextStyles(heroBg);
   const items = Array.isArray(content.items) ? content.items.filter((item) => item?.url) : [];
@@ -64,6 +65,45 @@ export default function Gallery() {
 
   return (
     <>
+      <AnimatePresence>
+        {hoveredItem ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="pointer-events-none fixed inset-0 z-40 hidden lg:flex items-center justify-center bg-slate-950/45 backdrop-blur-[2px] px-10 py-10"
+            aria-hidden="true"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.2 }}
+              className="max-w-6xl w-full space-y-4"
+            >
+              <div className="overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 shadow-2xl">
+                <img
+                  src={hoveredItem.url}
+                  alt={hoveredItem.title || 'BalloonCraft KC gallery preview'}
+                  className="w-full max-h-[78vh] object-contain bg-slate-950/70"
+                />
+              </div>
+              <div className="mx-auto max-w-3xl rounded-[1.5rem] border border-white/15 bg-white/10 px-6 py-4 text-center text-white shadow-xl">
+                <p className="text-2xl font-bold leading-tight">
+                  {hoveredItem.title || 'Balloon decor inspiration'}
+                </p>
+                {hoveredItem.description ? (
+                  <p className="mt-2 text-sm leading-relaxed text-white/85">
+                    {hoveredItem.description}
+                  </p>
+                ) : null}
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
       <section className="relative overflow-hidden py-24" style={{ background: heroBg }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <motion.div
@@ -112,11 +152,15 @@ export default function Gallery() {
                   transition={{ duration: 0.55, delay: (index % 3) * 0.08 }}
                   className="group overflow-hidden rounded-[2rem] border border-border/50 bg-white shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                 >
-                  <div className="aspect-[4/3] overflow-hidden bg-muted/30">
+                  <div
+                    className="aspect-[4/3] overflow-hidden bg-muted/30"
+                    onMouseEnter={() => setHoveredItem(item)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
                     <img
                       src={item.url}
                       alt={item.title || `BalloonCraft KC gallery inspiration ${index + 1}`}
-                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                       loading="lazy"
                     />
                   </div>
