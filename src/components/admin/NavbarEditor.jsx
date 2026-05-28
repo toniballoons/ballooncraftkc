@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Megaphone, Plus, Sparkles, TimerReset, Trash2 } from 'lucide-react';
+import ImageUploadField from '@/components/admin/ImageUploadField';
 
 import {
   armFlashSale,
@@ -75,7 +76,20 @@ export default function NavbarEditor({ content, setContent }) {
     <div className="space-y-4">
       <div className="space-y-1.5">
         <Label>Logo / Brand Name</Label>
-        <Input value={content.logo_text || ''} onChange={e => update('logo_text', e.target.value)} placeholder="BalloonCraft" />
+        <Input value={content.logo_text || ''} onChange={e => update('logo_text', e.target.value)} placeholder="BalloonCraft KC" />
+      </div>
+      <div className="space-y-2">
+        <ImageUploadField
+          label="Site Logo Image"
+          value={content.logo_image || ''}
+          onChange={(value) => update('logo_image', value)}
+          aspectRatio="aspect-[3/1]"
+          editorPreset="landscape"
+          shape="rect"
+          buttonLabel="Upload logo"
+          helperText="This logo shows in the public header, admin header, footer, and document center. PNG works best if you want transparency."
+          allowRemove
+        />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">

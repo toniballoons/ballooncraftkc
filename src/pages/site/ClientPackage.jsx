@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useSiteContent } from '@/lib/useSiteContent';
 import {
   buildAgreementHtml,
   formatDate,
@@ -259,6 +260,7 @@ function DocumentSignatureSection({
 export default function ClientPackage() {
   const { accessToken } = useParams();
   const queryClient = useQueryClient();
+  const { content: navContent } = useSiteContent('navbar');
 
   const [signatureForm, setSignatureForm] = useState({
     signedName: '',
@@ -299,6 +301,7 @@ export default function ClientPackage() {
     () => paymentLinkEntries(packageData?.paymentLinks || {}),
     [packageData?.paymentLinks]
   );
+  const logoSrc = navContent.logo_image || '/logo.png';
 
   const uploadedDocuments = useMemo(
     () => normalizeUploadedDocuments(packageData?.uploadedDocuments || []),
@@ -464,7 +467,7 @@ export default function ClientPackage() {
         <div className="rounded-[28px] border bg-white p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <img src="/logo.png" alt="BalloonCraft KC" className="h-16 w-auto object-contain" />
+              <img src={logoSrc} alt={navContent.logo_text || 'BalloonCraft KC'} className="h-16 w-auto object-contain" />
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground font-semibold">BalloonCraft KC Secure Document Center</p>
                 <h1 className="font-display text-3xl mt-2">{packageData.packetTitle}</h1>

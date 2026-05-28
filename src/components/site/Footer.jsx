@@ -17,11 +17,13 @@ const SOCIAL_ICONS = {
 export default function Footer() {
   const { content } = useSiteContent('footer');
   const { content: contact } = useSiteContent('contact');
+  const { content: navContent } = useSiteContent('navbar');
   const { theme } = useTheme();
   const footerBg = theme?.footer?.bg || '#1a0030';
   const footerText = theme?.footer?.textColor || '#fff';
   const footerAccent = theme?.footer?.accent || '#feca57';
   const decorations = theme?.decorations || ['🎈'];
+  const logoSrc = navContent.logo_image || '/logo.png';
 
   return (
     <footer className="relative overflow-hidden" style={{ background: footerBg, color: footerText }}>
@@ -35,7 +37,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <img
-              src="/logo.png"
+              src={logoSrc}
               alt={content.company_name}
               className="h-16 w-auto object-contain mb-4"
             />

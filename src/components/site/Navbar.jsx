@@ -23,6 +23,7 @@ export default function Navbar() {
   const flashSale = normalizeFlashSale(content.flash_sale);
   const flashSaleActive = isFlashSaleActive(flashSale, now);
   const navLinks = ensurePrimaryNavLinks(content.links || []);
+  const logoSrc = content.logo_image || '/logo.png';
 
   useEffect(() => {
     if (!flashSaleActive) return undefined;
@@ -49,7 +50,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/logo.png"
+              src={logoSrc}
               alt={content.logo_text || 'BalloonCraft KC'}
               className="h-14 w-auto object-contain"
             />

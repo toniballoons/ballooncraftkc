@@ -55,6 +55,7 @@ export default function AdminLayout() {
   const safeNavTextColor = ensureAccessibleColor(navTextColor, navBg);
   const flashSale = normalizeFlashSale(navContent.flash_sale);
   const flashSaleActive = isFlashSaleActive(flashSale, now);
+  const logoSrc = navContent.logo_image || '/logo.png';
 
   const visibleNavItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
@@ -120,7 +121,7 @@ export default function AdminLayout() {
             {/* Logo + bubble */}
             <Link to="/" className="flex flex-col items-center gap-1 flex-shrink-0">
               <img
-                src="/logo.png"
+                src={logoSrc}
                 alt={navContent.logo_text || 'BalloonCraft KC'}
                 className="h-14 w-auto object-contain"
                 style={{ maxWidth: '160px' }}

@@ -101,7 +101,7 @@ export const DEFAULT_CONTENT = {
   gallery: {
     title: "Balloon Decor Gallery",
     subtitle: "Browse colorful BalloonCraft KC inspiration for weddings, birthdays, baby showers, school events, grand openings, and polished brand moments across the Kansas City metro.",
-    intro: "This gallery is built to spark ideas fast. Explore curated BalloonCraft KC looks ranging from luxe neutral installs and playful birthday builds to storefront launches, shower backdrops, school photo moments, and corporate event styling. Toni can swap every image, rewrite every caption, and rearrange the order any time from the CMS.",
+    intro: "This gallery is built to spark ideas fast. Explore curated BalloonCraft KC looks ranging from luxe neutral installs and playful birthday builds to storefront launches, shower backdrops, school photo moments, and corporate event styling.",
     items: [
       {
         url: "/gallery/luxury-wedding-backdrop.svg",
@@ -232,7 +232,8 @@ export const DEFAULT_CONTENT = {
 <p>For any legal inquiries, please contact us through the contact form on our website or via the email address provided.</p>`
   },
   navbar: {
-    logo_text: "BalloonCraft",
+    logo_text: "BalloonCraft KC",
+    logo_image: '/logo.png',
     flash_sale: DEFAULT_FLASH_SALE,
     links: DEFAULT_NAV_LINKS,
   },
