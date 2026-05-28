@@ -231,7 +231,7 @@ async function handleTeamPost(req, res, session) {
     colorHex,
     employmentStatus = 'active',
     isAssignable = true,
-    showOnAboutPage = false,
+    showOnAboutPage = true,
     sortOrder = 0,
     createLogin = false,
     loginEmail,

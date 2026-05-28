@@ -29,7 +29,7 @@ const emptyTeamForm = {
   colorHex: '#0f766e',
   employmentStatus: 'active',
   isAssignable: true,
-  showOnAboutPage: false,
+  showOnAboutPage: true,
   sortOrder: 0,
   createLogin: false,
   loginEmail: '',
@@ -338,7 +338,7 @@ export default function AccountAdmin() {
                     <Checkbox checked={teamForm.showOnAboutPage} onCheckedChange={(checked) => setTeamForm({ ...teamForm, showOnAboutPage: checked === true })} />
                     <div>
                       <p className="font-medium">Show on the About page</p>
-                      <p className="text-sm text-muted-foreground">Only employees with this toggle turned on will appear publicly in the About Us team section.</p>
+                      <p className="text-sm text-muted-foreground">Employees show publicly in the About Us team section when this toggle is on. New employees start public unless Toni turns it off.</p>
                     </div>
                   </div>
                 </div>
